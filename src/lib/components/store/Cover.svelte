@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { initials, type Store } from '#lib/library/shelf.ts';
+	import { shell } from '#lib/shell/state.svelte.ts';
 	import StoreLogo from './StoreLogo.svelte';
 
 	let {
@@ -13,9 +14,11 @@
 		size = 'sm'
 	}: { title: string; store: Store; src?: string | null; size?: 'sm' | 'md' | 'lg' } = $props();
 
+	// The setting in Ajustes turns every cover off at once; the initials stay.
+	const url = $derived(shell.showCovers ? src : null);
 	let status = $state<'loading' | 'ok' | 'failed'>('loading');
 	$effect(() => {
-		void src;
+		void url;
 		status = 'loading';
 	});
 </script>
@@ -23,9 +26,9 @@
 <span class="cv {size} {store}" class:shown={status === 'ok'} aria-hidden="true">
 	<span class="headline fb">{initials(title)}</span>
 	{#if size === 'lg'}<span class="logo"><StoreLogo {store} size={18} /></span>{/if}
-	{#if src && status !== 'failed'}
+	{#if url && status !== 'failed'}
 		<img
-			{src}
+			src={url}
 			alt=""
 			loading="lazy"
 			decoding="async"

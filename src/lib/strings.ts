@@ -374,6 +374,10 @@ export const es = {
 		statusError: 'No se pudo leer el estado de la aplicación.',
 		diagnosticsLink: 'Diagnóstico de conexiones (soporte)',
 		cleanup: 'Limpieza de wishlists',
+		appearance: 'Apariencia',
+		showCovers: 'Mostrar las carátulas de los juegos',
+		showCoversHint:
+			'Se cargan desde la web de cada tienda cuando las ves. Si una no carga, o lo desactivas, se muestran las iniciales del juego.',
 		exportTitle: 'Exportar',
 		includeFamily: 'Contar el acceso familiar de Steam como motivo para quitar un deseado',
 		includeFamilyHint:

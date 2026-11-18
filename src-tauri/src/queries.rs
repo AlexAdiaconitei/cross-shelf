@@ -26,6 +26,8 @@ pub struct LibraryEntry {
     pub kind: String,
     pub windows: String,
     pub url: Option<String>,
+    /// Portrait cover on the store CDN; the UI shows initials when it is missing or fails.
+    pub image_url: Option<String>,
     /// One product can carry several rights at once (own copy and family access).
     pub access: Vec<Access>,
 }
@@ -34,7 +36,8 @@ pub struct LibraryEntry {
 pub fn list_library(conn: &Connection) -> Result<Vec<LibraryEntry>, rusqlite::Error> {
     let mut st = conn.prepare(
         "SELECT e.store, e.account_id, e.native_id, p.title, COALESCE(p.kind,'unknown'),
-                COALESCE(p.windows,'unknown'), p.url, e.class, e.owners, e.exclude_reason, e.observed_at
+                COALESCE(p.windows,'unknown'), p.url, e.class, e.owners, e.exclude_reason, e.observed_at,
+                p.image_url
          FROM entitlement e
          JOIN connection c ON c.provider = e.store AND c.account_id = e.account_id
          LEFT JOIN product p ON p.store = e.store AND p.native_id = e.native_id
@@ -53,6 +56,7 @@ pub fn list_library(conn: &Connection) -> Result<Vec<LibraryEntry>, rusqlite::Er
                 r.get::<_, String>(4)?,
                 r.get::<_, String>(5)?,
                 r.get::<_, Option<String>>(6)?,
+                r.get::<_, Option<String>>(11)?,
             ),
             Access {
                 class: r.get(7)?,
@@ -64,7 +68,7 @@ pub fn list_library(conn: &Connection) -> Result<Vec<LibraryEntry>, rusqlite::Er
     })?;
     let mut grouped: BTreeMap<(String, String, String), LibraryEntry> = BTreeMap::new();
     for row in rows {
-        let (key, (title, kind, windows, url), access) = row?;
+        let (key, (title, kind, windows, url, image_url), access) = row?;
         grouped
             .entry(key.clone())
             .or_insert_with(|| LibraryEntry {
@@ -75,6 +79,7 @@ pub fn list_library(conn: &Connection) -> Result<Vec<LibraryEntry>, rusqlite::Er
                 kind,
                 windows,
                 url,
+                image_url,
                 access: vec![],
             })
             .access
@@ -100,6 +105,8 @@ pub struct WishlistEntry {
     pub native_id: String,
     pub title: Option<String>,
     pub url: Option<String>,
+    /// Portrait cover on the store CDN; the UI shows initials when it is missing or fails.
+    pub image_url: Option<String>,
     pub priority: Option<i64>,
     pub added_at: Option<i64>,
     pub confirmed: bool,
@@ -111,7 +118,8 @@ pub fn list_wishlist(conn: &Connection) -> Result<Vec<WishlistEntry>, rusqlite::
     let mut st = conn.prepare(
         "SELECT w.store, w.account_id, w.native_id, p.title, p.url, w.priority, w.added_at, w.confirmed,
                 EXISTS(SELECT 1 FROM entitlement e WHERE e.account_id = w.account_id
-                       AND e.store = w.store AND e.native_id = w.native_id AND e.class = 'owned')
+                       AND e.store = w.store AND e.native_id = w.native_id AND e.class = 'owned'),
+                p.image_url
          FROM wishlist_entry w
          JOIN connection c ON c.provider = w.store AND c.account_id = w.account_id
          LEFT JOIN product p ON p.store = w.store AND p.native_id = w.native_id
@@ -128,6 +136,7 @@ pub fn list_wishlist(conn: &Connection) -> Result<Vec<WishlistEntry>, rusqlite::
             added_at: r.get(6)?,
             confirmed: r.get::<_, i64>(7)? != 0,
             already_held_here: r.get::<_, i64>(8)? != 0,
+            image_url: r.get(9)?,
         })
     })?;
     rows.collect()
@@ -196,6 +205,7 @@ mod tests {
             kind: "game".into(),
             windows: "yes".into(),
             url: None,
+            image: None,
         }
     }
 
@@ -254,6 +264,7 @@ mod tests {
                 kind: "unknown".into(),
                 windows: "unknown".into(),
                 url: None,
+                image: None,
             },
         ];
         let rs = [

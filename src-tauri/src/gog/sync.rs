@@ -49,6 +49,10 @@ pub fn map_products(records: &[Value]) -> (Vec<ProductRow>, Vec<EntitlementRow>)
             kind: kind.into(),
             windows: windows.into(),
             url,
+            image: r
+                .get("image")
+                .and_then(Value::as_str)
+                .and_then(crate::images::gog_cover),
         });
         rights.push(EntitlementRow {
             native_id: id,
@@ -106,6 +110,7 @@ pub fn map_catalog(records: &[Value]) -> Vec<ProductRow> {
                 kind: kind.into(),
                 windows: windows.into(),
                 url,
+                image: None,
             })
         })
         .collect()
@@ -230,5 +235,19 @@ mod tests {
         let rows = map_wishlist(&["1207664663".into()]);
         assert_eq!(rows[0].native_id, "1207664663");
         assert!(rows[0].confirmed);
+    }
+
+    #[test]
+    fn library_image_becomes_the_vertical_cover() {
+        let (p, _) = map_products(&[
+            json!({"id": 1, "title": "Alpha", "isGame": true,
+                   "image": "//images-1.gog-statics.com/abc123"}),
+            json!({"id": 2, "title": "Beta", "isGame": true, "image": "//evil.test/abc"}),
+        ]);
+        assert_eq!(
+            p[0].image.as_deref(),
+            Some("https://images-1.gog-statics.com/abc123_glx_vertical_cover.webp")
+        );
+        assert_eq!(p[1].image, None);
     }
 }

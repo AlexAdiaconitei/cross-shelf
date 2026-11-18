@@ -266,7 +266,11 @@
 							{/if}
 						</div>
 						<div class="half">
-							<Cover title={wantedTitle} store={it.wanted.store as Store} />
+							<Cover
+								title={wantedTitle}
+								store={it.wanted.store as Store}
+								src={it.wanted.image_url}
+							/>
 							<div class="min-w-0">
 								<p class="label">{r.wanted} · {storeName(it.wanted.store)}</p>
 								<p class="tt">{wantedTitle}</p>
@@ -287,7 +291,7 @@
 								<div class="match">
 									<p class="stamp {tone(m.outcome)}">{label(r.outcome, m.outcome)}</p>
 									<div class="half">
-										<Cover title={heldTitle} store={m.held.store as Store} />
+										<Cover title={heldTitle} store={m.held.store as Store} src={m.held.image_url} />
 										<div class="min-w-0">
 											<p class="label">
 												{r.held} · {storeName(m.held.store)} · {kindName(m.held.kind)}

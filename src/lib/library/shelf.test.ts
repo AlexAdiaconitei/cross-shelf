@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { WishlistEntry } from '#lib/bindings/WishlistEntry.ts';
 import type { Entry } from './filter.ts';
-import { buildShelf, firstStore, initials } from './shelf.ts';
+import { buildShelf, coverOf, firstStore, initials } from './shelf.ts';
 
 const access = (cls: string, owners: string[] = []) => ({
 	class: cls,
@@ -19,6 +19,7 @@ const entry = (store: string, id: string, title: string | null, cls = 'owned', k
 		kind,
 		windows: 'yes',
 		url: null,
+		image_url: null,
 		access: [access(cls, cls === 'family_shared' ? ['Marta'] : [])]
 	}) satisfies Entry;
 
@@ -28,6 +29,7 @@ const wish = (store: string, id: string, title: string): WishlistEntry => ({
 	native_id: id,
 	title,
 	url: null,
+	image_url: null,
 	priority: null,
 	added_at: null,
 	confirmed: true,
@@ -91,6 +93,15 @@ describe('helpers', () => {
 	it('initials keep two words and drop symbols', () => {
 		expect(initials('Baldur’s Gate 3')).toBe('BG');
 		expect(initials('Control')).toBe('C');
+	});
+
+	it('cover comes from the first product that has one, then from wishes', () => {
+		const a = { ...entry('steam', '1', 'Hades'), image_url: null };
+		const b = { ...entry('epic', 'h', 'Hades'), image_url: 'https://cdn1.epicgames.com/h' };
+		expect(coverOf(buildShelf([a, b])[0]!)).toBe('https://cdn1.epicgames.com/h');
+		const w = { ...wish('gog', 'g', 'Hades'), image_url: 'https://images-1.gog-statics.com/x' };
+		expect(coverOf(buildShelf([a], [w])[0]!)).toBe('https://images-1.gog-statics.com/x');
+		expect(coverOf(buildShelf([a])[0]!)).toBeNull();
 	});
 
 	it('first store follows Steam, GOG, Epic order', () => {

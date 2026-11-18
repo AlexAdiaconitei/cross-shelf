@@ -12,6 +12,7 @@ function wish(over: Partial<WishlistEntry>): WishlistEntry {
 		native_id: String(n),
 		title: 'Título',
 		url: null,
+		image_url: null,
 		priority: null,
 		added_at: null,
 		confirmed: true,

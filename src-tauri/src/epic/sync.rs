@@ -109,6 +109,7 @@ pub fn map_library(records: &[Value], catalog: &[Value]) -> (Vec<ProductRow>, Ve
             kind: c.map(kind_of).unwrap_or("unknown").into(),
             windows: windows_of(&platforms, c).into(),
             url: None,
+            image: c.and_then(crate::images::epic_cover),
         });
         rights.push(EntitlementRow {
             native_id: id,
@@ -247,5 +248,21 @@ mod tests {
         ]);
         assert_eq!(req["ns1"], ["a", "b"]);
         assert_eq!(req["ns2"], ["c"]);
+    }
+
+    #[test]
+    fn catalog_key_images_give_the_tall_cover() {
+        let records = [json!({"namespace": "ns1", "catalogItemId": "a", "platform": ["Windows"]})];
+        let catalog = [json!({"id": "a", "title": "Alpha", "keyImages": [
+            {"type": "DieselGameBox", "url": "https://cdn1.epicgames.com/wide"},
+            {"type": "DieselGameBoxTall", "url": "https://cdn1.epicgames.com/tall"}
+        ]})];
+        let (p, _) = map_library(&records, &catalog);
+        assert_eq!(
+            p[0].image.as_deref(),
+            Some("https://cdn1.epicgames.com/tall")
+        );
+        let (q, _) = map_library(&records, &[]);
+        assert_eq!(q[0].image, None);
     }
 }

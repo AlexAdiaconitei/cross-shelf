@@ -24,6 +24,7 @@ function entry(over: Partial<Entry> & { classes?: string[] }): Entry {
 		kind: 'game',
 		windows: 'yes',
 		url: null,
+		image_url: null,
 		access: classes.map((class_) => ({
 			class: class_,
 			owners: [],

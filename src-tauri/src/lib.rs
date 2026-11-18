@@ -6,6 +6,7 @@ mod db;
 mod epic;
 mod export;
 mod gog;
+mod images;
 mod matching;
 mod ops;
 mod plans;

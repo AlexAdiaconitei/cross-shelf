@@ -4,4 +4,8 @@ export type Settings = {
 /**
  * Count Steam family access as a separate reason in cleanup. Off by default (spec 6.2).
  */
-include_family_in_cleanup: boolean, };
+include_family_in_cleanup: boolean, 
+/**
+ * Draw store covers from the store CDNs. On by default; off shows initials only.
+ */
+show_covers: boolean, };

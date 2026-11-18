@@ -23,6 +23,7 @@ fn product(id: &str, title: &str, kind: &str) -> ProductRow {
         kind: kind.into(),
         windows: "yes".into(),
         url: None,
+        image: None,
     }
 }
 

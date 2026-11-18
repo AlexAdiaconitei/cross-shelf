@@ -221,6 +221,7 @@ mod tests {
             kind: "game".into(),
             windows: "unknown".into(),
             url: None,
+            image_url: None,
             access: vec![crate::queries::Access {
                 class: "family_shared".into(),
                 owners: vec!["76561198000000002".into()],
@@ -251,6 +252,7 @@ mod tests {
             native_id: "1".into(),
             title: None,
             url: None,
+            image_url: None,
             priority: None,
             added_at: Some(0),
             confirmed: false,

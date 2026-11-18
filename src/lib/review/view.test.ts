@@ -18,7 +18,8 @@ const ref = (store: string, id: string, title: string | null) => ({
 	title,
 	kind: 'game',
 	windows: 'yes',
-	url: null
+	url: null,
+	image_url: null
 });
 
 function match(outcome: string, id = 'g1', title = 'Lumen Drift'): MatchView {

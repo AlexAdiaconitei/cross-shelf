@@ -6,18 +6,25 @@ import type { ReviewItem } from '#lib/bindings/ReviewItem.ts';
 import { ipc } from '#lib/ipc.ts';
 import { needsReview } from '#lib/review/view.ts';
 
-export const shell = $state<{ connections: ConnectionView[]; toReview: number }>({
+export const shell = $state<{
+	connections: ConnectionView[];
+	toReview: number;
+	showCovers: boolean;
+}>({
 	connections: [],
-	toReview: 0
+	toReview: 0,
+	showCovers: true
 });
 
 export async function refreshShell() {
 	try {
-		const [connections, review] = await Promise.all([
+		const [connections, review, settings] = await Promise.all([
 			ipc.connections(),
-			invoke<ReviewItem[]>('review_list')
+			invoke<ReviewItem[]>('review_list'),
+			ipc.settings()
 		]);
 		shell.connections = connections;
+		shell.showCovers = settings.show_covers;
 		shell.toReview = review.filter(needsReview).length;
 	} catch {
 		// The views report their own load errors; the shell just keeps the last values.

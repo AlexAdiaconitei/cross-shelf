@@ -9,6 +9,10 @@ the matching `## [X.Y.Z]` section, and CI refuses a tag without one.
 
 ## [Unreleased]
 
+### Added
+
+- Carátulas de los juegos en la Biblioteca (pequeña en cada fila, grande en la ficha) y en Revisar limpieza. Se cargan desde la web de cada tienda; si una no carga se ven las iniciales del juego, nunca una imagen rota. Se pueden desactivar en Ajustes. Aparecen después de volver a sincronizar cada tienda.
+
 ### Changed
 
 - Diseño nuevo de toda la app: cada tienda tiene su color y su logo (Steam cian, GOG magenta, Epic negro), y el amarillo marca solo el siguiente paso. Titulares en Archivo condensada.

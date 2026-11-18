@@ -42,9 +42,12 @@ pub fn connections_list(
 pub struct Settings {
     /// Count Steam family access as a separate reason in cleanup. Off by default (spec 6.2).
     pub include_family_in_cleanup: bool,
+    /// Draw store covers from the store CDNs. On by default; off shows initials only.
+    pub show_covers: bool,
 }
 
 const KEY_FAMILY: &str = "include_family_in_cleanup";
+const KEY_COVERS: &str = "show_covers";
 
 fn get_bool(c: &Connection, key: &str, default: bool) -> Result<bool, rusqlite::Error> {
     Ok(
@@ -59,6 +62,7 @@ fn get_bool(c: &Connection, key: &str, default: bool) -> Result<bool, rusqlite::
 pub fn read_settings(c: &Connection) -> Result<Settings, rusqlite::Error> {
     Ok(Settings {
         include_family_in_cleanup: get_bool(c, KEY_FAMILY, false)?,
+        show_covers: get_bool(c, KEY_COVERS, true)?,
     })
 }
 
@@ -67,6 +71,11 @@ pub fn write_settings(c: &Connection, s: &Settings) -> Result<(), rusqlite::Erro
         "INSERT INTO setting(key, value) VALUES (?1, ?2)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value",
         params![KEY_FAMILY, s.include_family_in_cleanup.to_string()],
+    )?;
+    c.execute(
+        "INSERT INTO setting(key, value) VALUES (?1, ?2)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        params![KEY_COVERS, s.show_covers.to_string()],
     )?;
     Ok(())
 }
@@ -507,10 +516,28 @@ mod tests {
             &c,
             &Settings {
                 include_family_in_cleanup: true,
+                show_covers: true,
             },
         )
         .unwrap();
         assert!(read_settings(&c).unwrap().include_family_in_cleanup);
+    }
+
+    #[test]
+    fn covers_are_on_until_the_user_turns_them_off() {
+        let c = db();
+        assert!(read_settings(&c).unwrap().show_covers);
+        write_settings(
+            &c,
+            &Settings {
+                include_family_in_cleanup: false,
+                show_covers: false,
+            },
+        )
+        .unwrap();
+        let s = read_settings(&c).unwrap();
+        assert!(!s.show_covers);
+        assert!(!s.include_family_in_cleanup);
     }
 
     #[test]

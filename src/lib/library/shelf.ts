@@ -92,6 +92,12 @@ export function initials(title: string): string {
 		.join('');
 }
 
+/** The first known cover of a row: its products first, then its wishes. */
+export const coverOf = (row: Pick<Shelf, 'products' | 'wished'>): string | null =>
+	row.products.find((p) => p.image_url)?.image_url ??
+	row.wished.find((w) => w.image_url)?.image_url ??
+	null;
+
 /** The store whose colour a game wears: the first one where it appears. */
 export const firstStore = (row: Pick<Shelf, 'slots'>): Store =>
 	stores.find((s) => row.slots[s] !== 'none') ?? 'steam';

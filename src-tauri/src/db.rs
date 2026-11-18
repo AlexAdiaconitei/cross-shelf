@@ -127,6 +127,8 @@ const MIGRATIONS: &[&str] = &[
         finished_at INTEGER
      );
      CREATE INDEX batch_op_batch ON batch_op(batch_id);",
+    // v5: portrait cover on the store CDN, when the store gives one.
+    "ALTER TABLE product ADD COLUMN image_url TEXT;",
 ];
 
 #[cfg(test)]

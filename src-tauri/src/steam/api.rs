@@ -373,7 +373,7 @@ pub async fn store_items_raw(
     let input = serde_json::json!({
         "ids": appids.iter().map(|a| serde_json::json!({ "appid": a })).collect::<Vec<_>>(),
         "context": { "language": "spanish", "country_code": "ES", "steam_realm": 1 },
-        "data_request": { "include_platforms": true }
+        "data_request": { "include_platforms": true, "include_assets": true }
     })
     .to_string();
     let mut url = Url::parse(&format!("{API}/IStoreBrowseService/GetItems/v1/"))

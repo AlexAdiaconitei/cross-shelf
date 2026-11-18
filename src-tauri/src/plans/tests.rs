@@ -209,6 +209,7 @@ fn own(c: &mut Connection, store: &str, acct: &str, ids: &[&str]) {
             kind: "game".into(),
             windows: "yes".into(),
             url: None,
+            image: None,
         })
         .collect();
     let rights: Vec<_> = ids

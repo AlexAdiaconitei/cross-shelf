@@ -24,7 +24,14 @@
 		type Entry,
 		type Scope
 	} from '#lib/library/filter.ts';
-	import { buildShelf, firstStore, stores, type Shelf, type Store } from '#lib/library/shelf.ts';
+	import {
+		buildShelf,
+		coverOf,
+		firstStore,
+		stores,
+		type Shelf,
+		type Store
+	} from '#lib/library/shelf.ts';
 	import { libraryUi } from '#lib/library/state.svelte.ts';
 	import { shell } from '#lib/shell/state.svelte.ts';
 	import { es } from '#lib/strings.ts';
@@ -274,7 +281,7 @@
 										aria-current={selected === r.key ? 'true' : undefined}
 										onclick={() => (selected = selected === r.key ? null : r.key)}
 									>
-										<Cover title={r.title} store={firstStore(r)} />
+										<Cover title={r.title} store={firstStore(r)} src={coverOf(r)} />
 										<span class="t">{r.title}</span>
 										<span class="c-kind muted">{kindName(r.kind)}</span>
 										<span class="c-acc muted"
@@ -313,7 +320,7 @@
 				>
 			</div>
 			<div class="hero">
-				<Cover title={sel.title} store={firstStore(sel)} size="lg" />
+				<Cover title={sel.title} store={firstStore(sel)} src={coverOf(sel)} size="lg" />
 				<div class="hx">
 					<h2 class="headline">{sel.title}</h2>
 					<StoreTabs

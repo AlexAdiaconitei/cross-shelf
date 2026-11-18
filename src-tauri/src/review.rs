@@ -70,6 +70,8 @@ pub struct ProductRef {
     pub kind: String,
     pub windows: String,
     pub url: Option<String>,
+    /// Portrait cover on the store CDN; the UI shows initials when it is missing or fails.
+    pub image_url: Option<String>,
 }
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq, TS)]
@@ -118,6 +120,7 @@ fn product_ref(
     id: &str,
     r: &rusqlite::Row,
     base: usize,
+    image: usize,
 ) -> rusqlite::Result<ProductRef> {
     Ok(ProductRef {
         store: store.to_owned(),
@@ -126,6 +129,7 @@ fn product_ref(
         kind: r.get(base + 1)?,
         windows: r.get(base + 2)?,
         url: r.get(base + 3)?,
+        image_url: r.get(image)?,
     })
 }
 
@@ -145,7 +149,7 @@ fn to_product(p: &ProductRef) -> Option<Product> {
 fn load_holdings(c: &Connection) -> rusqlite::Result<Vec<Held>> {
     let mut st = c.prepare(
         "SELECT e.store, e.native_id, p.title, COALESCE(p.kind,'unknown'), COALESCE(p.windows,'unknown'),
-                p.url, e.class, e.owners
+                p.url, e.class, e.owners, p.image_url
          FROM entitlement e
          JOIN connection cn ON cn.provider = e.store AND cn.account_id = e.account_id
          LEFT JOIN product p ON p.store = e.store AND p.native_id = e.native_id",
@@ -153,7 +157,7 @@ fn load_holdings(c: &Connection) -> rusqlite::Result<Vec<Held>> {
     let rows = st.query_map([], |r| {
         let store: String = r.get(0)?;
         let id: String = r.get(1)?;
-        let reference = product_ref(&store, &id, r, 2)?;
+        let reference = product_ref(&store, &id, r, 2, 8)?;
         let owners: String = r.get(7)?;
         Ok((reference, r.get::<_, String>(6)?, owners))
     })?;
@@ -264,7 +268,7 @@ pub fn build(c: &Connection, include_family: bool) -> rusqlite::Result<Vec<Revie
     let mut st = c.prepare(
         "SELECT w.account_id, w.store, w.native_id, p.title, COALESCE(p.kind,'unknown'),
                 COALESCE(p.windows,'unknown'), p.url, w.priority, w.added_at, w.observed_at,
-                k.native_id IS NOT NULL, k.reason
+                k.native_id IS NOT NULL, k.reason, p.image_url
          FROM wishlist_entry w
          JOIN connection cn ON cn.provider = w.store AND cn.account_id = w.account_id
          LEFT JOIN product p ON p.store = w.store AND p.native_id = w.native_id
@@ -278,7 +282,7 @@ pub fn build(c: &Connection, include_family: bool) -> rusqlite::Result<Vec<Revie
             let id: String = r.get(2)?;
             Ok(ReviewItem {
                 account_id: r.get(0)?,
-                wanted: product_ref(&store, &id, r, 3)?,
+                wanted: product_ref(&store, &id, r, 3, 12)?,
                 priority: r.get(7)?,
                 added_at: r.get(8)?,
                 observed_at: r.get(9)?,
@@ -397,6 +401,7 @@ fn out_ref(p: &Product) -> ProductRef {
         kind: "unknown".into(),
         windows: "unknown".into(),
         url: None,
+        image_url: None,
     }
 }
 

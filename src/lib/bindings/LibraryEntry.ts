@@ -3,6 +3,10 @@ import type { Access } from "./Access.ts";
 
 export type LibraryEntry = { store: string, account_id: string, native_id: string, title: string | null, kind: string, windows: string, url: string | null, 
 /**
+ * Portrait cover on the store CDN; the UI shows initials when it is missing or fails.
+ */
+image_url: string | null, 
+/**
  * One product can carry several rights at once (own copy and family access).
  */
 access: Array<Access>, };

@@ -50,6 +50,7 @@ pub fn map_owned(games: &[Value]) -> (Vec<ProductRow>, Vec<EntitlementRow>) {
             kind: "unknown".into(),
             windows: "unknown".into(),
             url: Some(app_url(&id)),
+            image: crate::images::steam_guess(&id),
         });
         rights.push(EntitlementRow {
             native_id: id,
@@ -91,6 +92,11 @@ pub fn map_family(apps: &[Value], me: &str) -> (Vec<ProductRow>, Vec<Entitlement
             kind: kind.into(),
             windows: "unknown".into(),
             url: Some(app_url(&id)),
+            image: a
+                .get("capsule_filename")
+                .and_then(Value::as_str)
+                .and_then(|f| crate::images::steam_capsule(&id, f))
+                .or_else(|| crate::images::steam_guess(&id)),
         });
         if others.is_empty() {
             continue;
@@ -152,6 +158,7 @@ pub fn map_store_items(items: &[Value]) -> Vec<ProductRow> {
                     .into(),
                 windows: windows.into(),
                 url: Some(app_url(&id)),
+                image: i.get("assets").and_then(crate::images::steam_assets),
                 native_id: id,
             })
         })
@@ -314,5 +321,48 @@ mod tests {
             ("5", Some(3), Some(1700000000))
         );
         assert_eq!(rows[1].priority, None, "0 is an unranked entry");
+    }
+
+    #[test]
+    fn covers_guess_from_appid_and_take_the_exact_store_asset() {
+        let (p, _) = map_owned(&[json!({"appid": 10, "name": "Alpha"})]);
+        assert!(
+            p[0].image
+                .as_deref()
+                .unwrap()
+                .ends_with("/steam/apps/10/library_600x900.jpg")
+        );
+        let rows = map_store_items(&[json!({
+            "id": 20, "success": 1, "name": "Beta", "type": 0,
+            "assets": {
+                "asset_url_format": "steam/apps/20/${FILENAME}?t=1",
+                "library_capsule": "abc/library_capsule.jpg"
+            }
+        })]);
+        assert_eq!(
+            rows[0].image.as_deref(),
+            Some(
+                "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/20/abc/library_capsule.jpg?t=1"
+            )
+        );
+        let none = map_store_items(&[json!({"id": 30, "success": 1, "name": "Gamma"})]);
+        assert_eq!(none[0].image, None);
+    }
+
+    #[test]
+    fn family_cover_uses_its_capsule_file() {
+        let (p, _) = map_family(
+            &[
+                json!({"appid": 40, "name": "Delta", "owner_steamids": ["2"],
+                     "capsule_filename": "library_600x900.jpg"}),
+            ],
+            ME,
+        );
+        assert!(
+            p[0].image
+                .as_deref()
+                .unwrap()
+                .ends_with("/steam/apps/40/library_600x900.jpg")
+        );
     }
 }

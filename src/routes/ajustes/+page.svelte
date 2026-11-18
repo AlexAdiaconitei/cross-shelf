@@ -8,6 +8,7 @@
 	import Updates from '#lib/components/Updates.svelte';
 	import { Button, Dialog } from '#lib/components/ui/index.ts';
 	import { ipc } from '#lib/ipc.ts';
+	import { shell } from '#lib/shell/state.svelte.ts';
 	import { es } from '#lib/strings.ts';
 
 	type AppStatus = { version: string; schema_version: number; updater: boolean };
@@ -23,6 +24,17 @@
 		if (!settings) return;
 		try {
 			settings = await ipc.saveSettings({ ...settings, include_family_in_cleanup: value });
+			settingsNote = es.settings.saved;
+		} catch {
+			settingsNote = es.settings.failed;
+		}
+	}
+
+	async function setCovers(value: boolean) {
+		if (!settings) return;
+		try {
+			settings = await ipc.saveSettings({ ...settings, show_covers: value });
+			shell.showCovers = settings.show_covers;
 			settingsNote = es.settings.saved;
 		} catch {
 			settingsNote = es.settings.failed;
@@ -70,6 +82,24 @@
 				</label>
 			{/if}
 			<p class="text-sm text-muted" role="status">{settingsNote}</p>
+		</section>
+
+		<section aria-labelledby="appearance" class="grid gap-2">
+			<h2 id="appearance" class="font-medium">{es.settings.appearance}</h2>
+			{#if settings}
+				<label class="flex items-start gap-3">
+					<input
+						type="checkbox"
+						class="mt-1 size-4 accent-accent"
+						checked={settings.show_covers}
+						onchange={(e) => setCovers(e.currentTarget.checked)}
+					/>
+					<span>
+						{es.settings.showCovers}
+						<span class="mt-1 block text-sm text-muted">{es.settings.showCoversHint}</span>
+					</span>
+				</label>
+			{/if}
 		</section>
 
 		<section aria-labelledby="export" class="grid gap-3">

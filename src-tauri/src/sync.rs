@@ -50,6 +50,8 @@ pub struct ProductRow {
     pub kind: String,
     pub windows: String,
     pub url: Option<String>,
+    /// Portrait cover on the store CDN, already checked by `images::checked`.
+    pub image: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -111,13 +113,14 @@ fn upsert_products(
     now: i64,
 ) -> Result<(), SyncError> {
     let mut st = tx.prepare_cached(
-        "INSERT INTO product(store, native_id, title, kind, windows, url, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+        "INSERT INTO product(store, native_id, title, kind, windows, url, image_url, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
          ON CONFLICT(store, native_id) DO UPDATE SET
            title = COALESCE(excluded.title, product.title),
            kind = CASE WHEN excluded.kind = 'unknown' THEN product.kind ELSE excluded.kind END,
            windows = CASE WHEN excluded.windows = 'unknown' THEN product.windows ELSE excluded.windows END,
            url = COALESCE(excluded.url, product.url),
+           image_url = COALESCE(excluded.image_url, product.image_url),
            updated_at = excluded.updated_at",
     )?;
     for p in products {
@@ -128,6 +131,7 @@ fn upsert_products(
             p.kind,
             p.windows,
             p.url,
+            p.image,
             now
         ])?;
     }
@@ -380,6 +384,7 @@ mod tests {
             kind: "game".into(),
             windows: "unknown".into(),
             url: None,
+            image: None,
         }
     }
 
@@ -603,6 +608,7 @@ mod tests {
             kind: "unknown".into(),
             windows: "unknown".into(),
             url: None,
+            image: None,
         };
         commit_entitlements(
             &mut c,
@@ -711,5 +717,22 @@ mod tests {
             (acct.as_str(), id.as_str()),
             ("76561198000000001", "9007199254740993")
         );
+    }
+
+    #[test]
+    fn a_later_read_without_cover_keeps_the_known_one() {
+        let mut conn = db();
+        let mut with = product("1", "Alpha");
+        with.image = Some("https://cdn1.epicgames.com/a".into());
+        update_products(&mut conn, "epic", &[with], 1).unwrap();
+        update_products(&mut conn, "epic", &[product("1", "Alpha")], 2).unwrap();
+        let kept: Option<String> = conn
+            .query_row(
+                "SELECT image_url FROM product WHERE native_id = '1'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(kept.as_deref(), Some("https://cdn1.epicgames.com/a"));
     }
 }
