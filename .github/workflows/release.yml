@@ -40,7 +40,7 @@ jobs:
           persist-credentials: false
       # package.json, src-tauri/tauri.conf.json and src-tauri/Cargo.toml must agree with the tag.
       - id: release
-        uses: AlexAdiaconitei/actions/verify-release@v1.0.0
+        uses: ./.github/actions/verify-release
         with:
           ref: ${{ inputs.ref || '' }}
       - id: notes
@@ -64,7 +64,7 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.ref }}
           persist-credentials: false
-      - uses: AlexAdiaconitei/actions/setup-node-pnpm@v1.0.0
+      - uses: ./.github/actions/setup-node-pnpm
         with:
           cache: 'false'
       - uses: dtolnay/rust-toolchain@stable # pin by SHA: pinact run

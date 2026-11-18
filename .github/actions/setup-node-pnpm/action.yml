@@ -1,0 +1,22 @@
+name: Setup Node and pnpm
+description: >
+  pnpm from package.json#packageManager, Node from .node-version and a frozen install. Copied from
+  devkit/actions (setup-node-pnpm) because this repository is public and that one is private;
+  without the private package registry, which this project does not use.
+
+inputs:
+  cache:
+    description: Use the pnpm store cache. Keep it off in jobs that publish.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version-file: .node-version
+        cache: ${{ inputs.cache == 'true' && 'pnpm' || '' }}
+    - shell: bash
+      run: pnpm install --frozen-lockfile

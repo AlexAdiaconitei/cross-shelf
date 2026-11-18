@@ -1,7 +1,8 @@
 name: CI (Rust)
 
-# Rust workspace: fmt, clippy, tests against PostgreSQL and cargo-deny. The job lives in
-# AlexAdiaconitei/actions (edited in devkit/actions).
+# Tauri backend: fmt, clippy and tests. Inlined from devkit/actions (ci-rust) because this
+# repository is public and the shared workflows are private. Runs on Windows: the backend links
+# the `windows` crate (DPAPI for secrets) and only builds there. No PostgreSQL: the app uses SQLite.
 
 on:
   push:
@@ -15,19 +16,34 @@ concurrency:
   group: ci-rust-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
 jobs:
   rust:
-    uses: AlexAdiaconitei/actions/.github/workflows/ci-rust.yml@v1.0.0
-    with:
-      working-directory: src-tauri
-
-  # The TypeScript types of the IPC contract are generated from Rust (ts-rs, on cargo test).
-  # A Rust change that is not followed by the regenerated files fails here.
-  bindings:
     runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: src-tauri
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@stable # pin by SHA: pinact run
-      - run: cargo test --locked export_bindings
-        working-directory: src-tauri
-      - run: git diff --exit-code -- src/lib/bindings
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2 # pin by SHA: pinact run
+        with:
+          workspaces: src-tauri
+      # tauri::generate_context! embeds the built frontend, so the build folder must exist.
+      - uses: ./.github/actions/setup-node-pnpm
+      - run: pnpm build
+        working-directory: .
+      - run: cargo fmt --all --check
+      - run: cargo clippy --all-targets --locked
+      - run: cargo test --locked
+      # The TypeScript types of the IPC contract are generated from Rust (ts-rs, on cargo test).
+      # A Rust change that is not followed by the regenerated files fails here.
+      - run: git diff --exit-code -- ../src/lib/bindings

@@ -1,8 +1,8 @@
 name: CI
 
-# Node + pnpm: format, lint, types, tests and a production build, with integration tests against
-# PostgreSQL when the project has `test:integration`. The jobs live in AlexAdiaconitei/actions
-# (edited in devkit/actions); `devkit drift` proposes the new tag.
+# Node + pnpm: format, lint, types, tests and a production build, exactly what a commit must pass
+# locally. Inlined from devkit/actions (ci-node) because this repository is public and the shared
+# workflows are private; keep it in step with that file by hand.
 
 on:
   push:
@@ -17,11 +17,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  node:
-    permissions:
-      contents: read
-      packages: read # @alexadiaconitei/* from GitHub Packages
-    uses: AlexAdiaconitei/actions/.github/workflows/ci-node.yml@v1.0.0
-    with:
-      integration: false
-    secrets: inherit
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Pinned by commit SHA, not tag: a tag can be moved to other code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node-pnpm
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm build
