@@ -28,6 +28,7 @@ function entry(over: Partial<Entry> & { classes?: string[] }): Entry {
 		access: classes.map((class_) => ({
 			class: class_,
 			owners: [],
+			owner_names: [],
 			exclude_reason: null,
 			observed_at: 1
 		})),

@@ -153,6 +153,36 @@ pub fn update_products(
     Ok(())
 }
 
+/// Most family members whose names are looked up in one sync. Steam families have at most six.
+pub const FAMILY_NAMES_MAX: usize = 12;
+
+/// Distinct owners of the family rights, in first-seen order, for the name lookup.
+pub fn family_owner_ids(rows: &[EntitlementRow]) -> Vec<String> {
+    let mut seen = std::collections::BTreeSet::new();
+    rows.iter()
+        .flat_map(|r| r.owners.iter())
+        .filter(|o| seen.insert(o.as_str().to_owned()))
+        .take(FAMILY_NAMES_MAX)
+        .cloned()
+        .collect()
+}
+
+/// Keeps the public names found for family members. Names not found leave the last known one.
+pub fn remember_family_names(
+    conn: &Connection,
+    names: &[(String, String)],
+    now: i64,
+) -> Result<(), SyncError> {
+    let mut st = conn.prepare_cached(
+        "INSERT INTO steam_family_member(steamid, name, updated_at) VALUES (?1, ?2, ?3)
+         ON CONFLICT(steamid) DO UPDATE SET name = excluded.name, updated_at = excluded.updated_at",
+    )?;
+    for (id, name) in names {
+        st.execute(params![id, name, now])?;
+    }
+    Ok(())
+}
+
 /// Stores an entitlement read (library or family) for one account.
 ///
 /// `confirmed_empty` is true only when the provider answered validly with zero items.
@@ -734,5 +764,37 @@ mod tests {
             )
             .unwrap();
         assert_eq!(kept.as_deref(), Some("https://cdn1.epicgames.com/a"));
+    }
+
+    #[test]
+    fn family_owner_ids_are_distinct_and_bounded() {
+        let row = |owners: &[&str]| EntitlementRow {
+            native_id: "x".into(),
+            class: "family_shared".into(),
+            owners: owners.iter().map(|o| o.to_string()).collect(),
+            exclude_reason: None,
+        };
+        assert_eq!(
+            family_owner_ids(&[row(&["a", "b"]), row(&["b", "c"])]),
+            ["a", "b", "c"]
+        );
+        let many: Vec<String> = (0..30).map(|i| i.to_string()).collect();
+        let refs: Vec<&str> = many.iter().map(String::as_str).collect();
+        assert_eq!(family_owner_ids(&[row(&refs)]).len(), FAMILY_NAMES_MAX);
+    }
+
+    #[test]
+    fn a_family_name_is_updated_not_duplicated() {
+        let conn = db();
+        remember_family_names(&conn, &[("a".into(), "Ana".into())], 1).unwrap();
+        remember_family_names(&conn, &[("a".into(), "Ana B".into())], 2).unwrap();
+        let (n, name): (i64, String) = conn
+            .query_row(
+                "SELECT COUNT(*), MAX(name) FROM steam_family_member",
+                [],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .unwrap();
+        assert_eq!((n, name.as_str()), (1, "Ana B"));
     }
 }

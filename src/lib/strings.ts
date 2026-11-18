@@ -14,6 +14,7 @@ export const es = {
 		openSidebar: 'Abrir la barra lateral',
 		foldSidebar: 'Plegar la barra lateral',
 		stores: 'Tiendas',
+		wishes: 'deseados',
 		storeFilter: 'Filtrar la biblioteca por tienda',
 		syncFailed: 'falló la última sincronización',
 		toReview: (n: number) => (n === 1 ? '1 deseado por revisar' : `${n} deseados por revisar`)
@@ -34,11 +35,18 @@ export const es = {
 		games: 'juegos',
 		family: 'familia',
 		wishedElsewhere: 'deseado en otra tienda',
-		onlyFamily: (n: number) =>
-			n === 0 ? 'Familia' : n === 1 ? 'Familia · de 1 persona' : `Familia · de ${n} personas`,
+		onlyFamily: (names: string[], n: number) =>
+			names.length
+				? `Familia · de ${names.join(', ')}`
+				: n === 0
+					? 'Familia'
+					: n === 1
+						? 'Familia · de 1 persona'
+						: `Familia · de ${n} personas`,
 		title: 'Título',
 		access: 'Acceso',
 		stores: 'Tiendas',
+		wishes: 'deseados',
 		detail: 'Ficha técnica',
 		closeDetail: 'Cerrar la ficha',
 		detailOf: (title: string) => `Ficha de ${title}`,
@@ -46,6 +54,14 @@ export const es = {
 		open: 'Abrir',
 		openIn: (store: string) => `Abrir en ${store}`,
 		reviewThis: 'Revisar este deseado',
+		sharedWith: (names: string[], n: number) =>
+			names.length
+				? `Compartido por ${names.join(', ')}`
+				: n === 1
+					? 'Compartido por 1 persona'
+					: `Compartido por ${n} personas`,
+		dataInfo: 'De cuándo son estos datos',
+		groupInfo: 'Cómo se agrupan',
 		familyNote: (n: number) =>
 			`Lo comparte ${n === 1 ? '1 persona' : `${n} personas`} de tu familia de Steam. No cuenta como tuyo en la limpieza salvo que lo actives en Ajustes.`,
 		inWishlist: 'en tu wishlist',
@@ -117,6 +133,7 @@ export const es = {
 		priority: (p: number) => `Prioridad ${p}`,
 		added: (d: string) => `Añadido el ${d}`,
 		openStore: 'Abrir en la tienda',
+		openEpic: 'Abrir tu wishlist de Epic en su web',
 		epicUnavailable:
 			'La wishlist de Epic no está disponible en esta versión: la tienda no deja leerla de forma fiable. Puedes verla en su web.',
 		writeNotValidated: (stores: string) =>
@@ -234,7 +251,9 @@ export const es = {
 		evidence: (store: string, why: string) => `Ya lo tienes en ${store}: ${why}`,
 		selected: (n: number) => (n === 1 ? '1 deseado seleccionado' : `${n} deseados seleccionados`),
 		reviewBatch: 'Revisar y quitar',
-		hint: 'Marca los deseados que quieras quitar. Solo se pueden marcar los que tienen evidencia firme; nada se quita hasta que confirmes.',
+		hint: 'Marca los deseados que quieras quitar.',
+		hintMore:
+			'Solo se pueden marcar los que tienen evidencia firme. Nada se quita hasta que confirmes el lote.',
 		clearSelection: 'Quitar selección',
 		summary: (parts: string) => `Quitar ${parts}`,
 		part: (n: number, store: string) => `${n} ${n === 1 ? 'deseado' : 'deseados'} de ${store}`,

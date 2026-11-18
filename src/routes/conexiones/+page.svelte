@@ -4,8 +4,8 @@
 	import type { ConnectionView } from '#lib/bindings/ConnectionView.ts';
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import StoreLogo from '#lib/components/store/StoreLogo.svelte';
-	import { Button, Dialog } from '#lib/components/ui/index.ts';
-	import { capabilityLine, errorText, storeName, when } from '#lib/format.ts';
+	import { Button, Dialog, InfoTip } from '#lib/components/ui/index.ts';
+	import { capabilityLine, errorText, storeName } from '#lib/format.ts';
 	import { asCommandError, ipc, type Provider } from '#lib/ipc.ts';
 	import { es } from '#lib/strings.ts';
 
@@ -85,8 +85,9 @@
 	onMount(load);
 </script>
 
-<PageHeader title={es.nav.conexiones} />
-<p class="intro">{es.connections.intro}</p>
+<PageHeader title={es.nav.conexiones}>
+	{#snippet info()}<InfoTip label={es.nav.conexiones} lines={[es.connections.intro]} />{/snippet}
+</PageHeader>
 
 {#if loadFailed}
 	<p role="alert" class="intro text-danger">{es.library.loadError}</p>
@@ -110,10 +111,11 @@
 						? es.connections.account(c.display_name)
 						: es.connections.accountId(c.account_id)}
 				{/if}
+				{#if c.other_account_data}<InfoTip
+						label={storeName(p)}
+						lines={[es.connections.otherAccountData]}
+					/>{/if}
 			</p>
-			{#if c.last_sync_at}<p class="muted small">
-					{es.connections.lastSync(when(c.last_sync_at))}
-				</p>{/if}
 
 			<ul class="caps" aria-label={es.connections.capabilitiesLabel(storeName(p))}>
 				{#each c.capabilities as cap (cap.capability)}
@@ -134,10 +136,6 @@
 					</li>
 				{/each}
 			</ul>
-
-			{#if c.other_account_data}
-				<p class="muted small">{es.connections.otherAccountData}</p>
-			{/if}
 
 			<div class="acts">
 				{#if !isConnected || needsReauth(c)}

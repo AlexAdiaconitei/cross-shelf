@@ -41,6 +41,13 @@ Claro y oscuro siguen al sistema; `[data-theme]` fuerza uno. En oscuro, Epic pas
 - **Botones**: caja recta con borde de 2 px. `primary` en tinta, `next` en amarillo, `quiet`,
   `ghost`, `danger`. Sin radios.
 - **Chips** de filtro: borde fino; pulsado en tinta.
+- **Controles de barra** (`.control` en `app.css`): búsqueda, chips, selects, conmutadores y filtros
+  de tienda comparten alto (34 px) y borde. Los select tienen un ancho máximo.
+- **InfoTip**: la información secundaria (origen de los datos, explicaciones, ayudas) va detrás
+  de un icono con tooltip; en ámbar cuando avisa de algo. En pantalla solo queda lo que se usa.
+- **Ficha lateral** (`DetailPanel`): la misma en Biblioteca y Wishlists.
+- **Logo**: kit de marca en `src/lib/assets/brand/`; `small-on-dark` en el raíl plegado y
+  `horizontal-on-dark` abierto. Iconos de la app desde `cross-shelf-tauri/` del kit.
 - Iconos: Tabler, trazo 1,75.
 
 ## Layout

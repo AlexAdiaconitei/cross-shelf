@@ -1,15 +1,28 @@
 <script lang="ts">
-	import PageHeader from '#lib/components/PageHeader.svelte';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { openUrl } from '@tauri-apps/plugin-opener';
+	import {
+		IconAlertTriangle,
+		IconArrowRight,
+		IconExternalLink,
+		IconFilterOff,
+		IconSearch
+	} from '@tabler/icons-svelte';
 	import type { SyncStatus } from '#lib/bindings/SyncStatus.ts';
 	import type { WishlistEntry } from '#lib/bindings/WishlistEntry.ts';
 	import ExportButtons from '#lib/components/ExportButtons.svelte';
-	import { Button } from '#lib/components/ui/index.ts';
-	import { day, productUrl, storeName, storeWishlistUrl, when } from '#lib/format.ts';
+	import PageHeader from '#lib/components/PageHeader.svelte';
+	import Cover from '#lib/components/store/Cover.svelte';
+	import DetailPanel from '#lib/components/store/DetailPanel.svelte';
+	import StoreLogo from '#lib/components/store/StoreLogo.svelte';
+	import StoreTabs from '#lib/components/store/StoreTabs.svelte';
+	import { InfoTip, button } from '#lib/components/ui/index.ts';
+	import { day, storeName, storeWishlistUrl, when } from '#lib/format.ts';
 	import { ipc } from '#lib/ipc.ts';
-	import { visibleRange } from '#lib/library/filter.ts';
+	import { visibleRange, type Entry } from '#lib/library/filter.ts';
+	import { buildShelf, shelfKey, type Shelf, type Slot, type Store } from '#lib/library/shelf.ts';
+	import { shell } from '#lib/shell/state.svelte.ts';
 	import { es } from '#lib/strings.ts';
 	import {
 		applyWishFilters,
@@ -21,34 +34,69 @@
 	} from '#lib/wishlist/filter.ts';
 	import { wishlistUi } from '#lib/wishlist/state.svelte.ts';
 
-	const ROW = 72;
-	const stores = ['steam', 'gog'] as const;
+	const ROW = 56;
+	const COLS = '30px minmax(0, 1fr) 110px 130px 28px 230px';
+	const w$ = es.wishlist;
+	const wishStores = ['steam', 'gog'] as const;
 	const statuses: [WishFilter, string][] = [
-		['all', es.wishlist.statusAll],
-		['held_here', es.wishlist.statusHeldHere],
-		['unconfirmed', es.wishlist.statusUnconfirmed],
-		['untitled', es.wishlist.statusUntitled]
+		['all', w$.statusAll],
+		['held_here', w$.statusHeldHere],
+		['unconfirmed', w$.statusUnconfirmed],
+		['untitled', w$.statusUntitled]
 	];
 	const sorts: [WishSort, string][] = [
-		['priority', es.wishlist.sortPriority],
-		['added', es.wishlist.sortAdded],
-		['title', es.wishlist.sortTitle]
+		['priority', w$.sortPriority],
+		['added', w$.sortAdded],
+		['title', w$.sortTitle]
 	];
 
 	let entries = $state<WishlistEntry[]>([]);
+	let library = $state<Entry[]>([]);
 	let status = $state<SyncStatus[]>([]);
 	let loaded = $state(false);
 	let loadFailed = $state(false);
 	let scrollTop = $state(0);
 	let viewport = $state(480);
+	let selected = $state<string | null>(null);
+	/** Stores whose wishlist writing is validated, from each connection's real capability. */
+	let writeState = $state<Record<string, string>>({});
 
+	const keyOf = (w: WishlistEntry) => `${w.store}:${w.account_id}:${w.native_id}`;
 	const shown = $derived(applyWishFilters(entries, wishlistUi.filters));
 	const view = $derived(wishView(entries, shown, status));
 	const range = $derived(visibleRange(scrollTop, viewport, ROW, shown.length));
 	const slice = $derived(shown.slice(range.start, range.end));
+	const sel = $derived(entries.find((w) => keyOf(w) === selected) ?? null);
 	const perStore = $derived(
-		stores.map((s) => [s, entries.filter((w) => w.store === s).length] as const)
+		wishStores.map((s) => [s, entries.filter((w) => w.store === s).length] as const)
 	);
+	const unvalidated = $derived(wishStores.filter((s) => writeState[s] !== 'validated'));
+
+	/** The library row of the same game, to show where you already have it. */
+	const held = $derived(new Map(buildShelf(library, entries).map((r) => [r.key, r])));
+	const rowOf = (w: WishlistEntry): Shelf | undefined =>
+		held.get(shelfKey('game', w.title, w.native_id));
+
+	function slotsOf(w: WishlistEntry): Record<Store, Slot> {
+		const base = rowOf(w)?.slots ?? { steam: 'none', gog: 'none', epic: 'none' };
+		const slots = { ...base };
+		const s = w.store as Store;
+		// In Wishlists the wished store always reads as a wish; the others show what you hold.
+		slots[s] = 'wish';
+		return slots;
+	}
+	const ownedElsewhere = (w: WishlistEntry) => {
+		const r = rowOf(w);
+		return (
+			!!r &&
+			(Object.entries(r.slots) as [Store, Slot][]).some(([s, v]) => s !== w.store && v === 'own')
+		);
+	};
+	const titleOf = (w: WishlistEntry) => w.title ?? es.library.untitled(w.native_id);
+	const flags = (w: WishlistEntry) => [
+		...(w.already_held_here ? [w$.heldHere] : []),
+		...(!w.confirmed ? [w$.unconfirmed] : [])
+	];
 
 	const notices = $derived(
 		status
@@ -62,19 +110,34 @@
 				return { warn: false, text: es.library.dataFrom(name, when(s.last_complete_at)) };
 			})
 	);
+	const about = $derived([
+		...(unvalidated.length < wishStores.length ? [w$.writeValidated] : []),
+		...(unvalidated.length > 0
+			? [w$.writeNotValidated(unvalidated.map((s) => storeName(s)).join(' y '))]
+			: []),
+		w$.epicUnavailable
+	]);
 
-	/** Stores whose wishlist writing is validated, from each connection's real capability. */
-	let writeState = $state<Record<string, string>>({});
-	const unvalidated = $derived(stores.filter((s) => writeState[s] !== 'validated'));
+	function detailProducts(w: WishlistEntry) {
+		const r = rowOf(w);
+		const own = (r?.products ?? []).map((p) => ({
+			...p,
+			note: p.access
+				.map((a) => es.review.access[a.class as keyof typeof es.review.access] ?? a.class)
+				.join(', ')
+		}));
+		return [{ ...w, note: es.shelf.inWishlist }, ...own];
+	}
 
 	async function load() {
 		try {
-			const [w, st, conns] = await Promise.all([
+			const [w, st, conns, lib] = await Promise.all([
 				ipc.wishlist(),
 				ipc.syncStatus(),
-				ipc.connections()
+				ipc.connections(),
+				ipc.library().catch(() => [])
 			]);
-			[entries, status] = [w, st];
+			[entries, status, library] = [w, st, lib];
 			writeState = Object.fromEntries(
 				conns.map((c) => [
 					c.provider,
@@ -88,160 +151,269 @@
 		}
 	}
 
-	const open = (url: string) => openUrl(url).catch(() => {});
-
 	onMount(load);
 </script>
 
-<PageHeader title={es.nav.wishlists} />
-<div class="page-body">
-	<aside class="mb-4 grid max-w-prose gap-2 text-sm text-muted">
-		{#if loaded && unvalidated.length < stores.length}
-			<p>
-				{es.wishlist.writeValidated}
-				<a class="text-accent underline underline-offset-2" href={resolve('/limpieza')}
-					>{es.nav.limpieza}</a
-				>
-			</p>
-		{/if}
-		{#if loaded && unvalidated.length > 0}
-			<p>{es.wishlist.writeNotValidated(unvalidated.map((s) => storeName(s)).join(' y '))}</p>
-		{/if}
-		<p>
-			{es.wishlist.epicUnavailable}
-			<button
-				type="button"
-				class="cursor-pointer text-accent underline underline-offset-2"
-				onclick={() => open(storeWishlistUrl.epic)}>{es.wishlist.openStore} (Epic)</button
-			>
-		</p>
-	</aside>
+<div class="page" class:withDetail={sel}>
+	<section class="main">
+		<PageHeader title={es.nav.wishlists}>
+			{#snippet info()}
+				<InfoTip label={es.nav.wishlists} lines={about} />
+			{/snippet}
+			{#snippet figures()}
+				<div>
+					<dt>{es.shell.wishes}</dt>
+					<dd>{entries.length.toLocaleString('es')}</dd>
+				</div>
+				{#each perStore as [x, n] (x)}
+					<div>
+						<dt><StoreLogo store={x} size={12} /> {storeName(x)}</dt>
+						<dd>{n.toLocaleString('es')}</dd>
+					</div>
+				{/each}
+			{/snippet}
+			{#snippet action()}
+				{#if shell.toReview > 0}
+					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}
+						>{es.shell.toReview(shell.toReview)} <IconArrowRight size={16} /></a
+					>
+				{/if}
+			{/snippet}
+		</PageHeader>
 
-	{#if loadFailed}
-		<p role="alert" class="text-danger">{es.library.loadError}</p>
-	{:else if loaded}
-		<form
-			class="mb-3 flex flex-wrap items-end gap-3"
-			role="search"
-			onsubmit={(e) => e.preventDefault()}
-		>
-			<label class="grid gap-1 text-sm">
-				<span class="text-muted">{es.wishlist.search}</span>
-				<input
-					type="search"
-					class="rounded-control border border-border bg-panel px-3 py-2"
-					bind:value={wishlistUi.filters.text}
-				/>
-			</label>
-			<label class="grid gap-1 text-sm">
-				<span class="text-muted">{es.library.store}</span>
-				<select
-					class="rounded-control border border-border bg-panel px-3 py-2"
-					bind:value={wishlistUi.filters.store}
-				>
-					<option value="">{es.library.allStores}</option>
-					{#each stores as s (s)}<option value={s}>{storeName(s)}</option>{/each}
+		{#if loadFailed}
+			<p role="alert" class="page-body text-danger">{es.library.loadError}</p>
+		{:else if loaded}
+			<form class="toolbar" role="search" onsubmit={(e) => e.preventDefault()}>
+				<label class="control control-search">
+					<IconSearch size={16} />
+					<span class="sr-only">{w$.search}</span>
+					<input type="search" placeholder="{w$.search}…" bind:value={wishlistUi.filters.text} />
+				</label>
+				<select class="control" aria-label={w$.status} bind:value={wishlistUi.filters.status}>
+					{#each statuses as [value, label] (value)}<option {value}>{w$.status}: {label}</option
+						>{/each}
 				</select>
-			</label>
-			<label class="grid gap-1 text-sm">
-				<span class="text-muted">{es.wishlist.status}</span>
-				<select
-					class="rounded-control border border-border bg-panel px-3 py-2"
-					bind:value={wishlistUi.filters.status}
-				>
-					{#each statuses as [value, label] (value)}<option {value}>{label}</option>{/each}
+				<select class="control" aria-label={w$.sort} bind:value={wishlistUi.filters.sort}>
+					{#each sorts as [value, label] (value)}<option {value}>{w$.sort}: {label}</option>{/each}
 				</select>
-			</label>
-			<label class="grid gap-1 text-sm">
-				<span class="text-muted">{es.wishlist.sort}</span>
-				<select
-					class="rounded-control border border-border bg-panel px-3 py-2"
-					bind:value={wishlistUi.filters.sort}
-				>
-					{#each sorts as [value, label] (value)}<option {value}>{label}</option>{/each}
-				</select>
-			</label>
-			{#if isWishFiltering(wishlistUi.filters)}
-				<Button
+				<button
+					type="button"
+					class="control icon"
+					disabled={!isWishFiltering(wishlistUi.filters)}
+					aria-label={es.library.clear}
+					title={es.library.clear}
 					onclick={() => (wishlistUi.filters = { ...noWishFilters, sort: wishlistUi.filters.sort })}
-					>{es.library.clear}</Button
+					><IconFilterOff size={16} /></button
 				>
-			{/if}
-		</form>
-
-		<p class="mb-1 text-sm text-muted" aria-live="polite">
-			{es.library.showing(shown.length, entries.length)} ·
-			{perStore
-				.filter(([, n]) => n > 0)
-				.map(([s, n]) => es.library.perStore(storeName(s), n))
-				.join(' · ')}
-		</p>
-		<ul class="mb-3 grid gap-0.5 text-xs text-muted">
-			{#each notices as n (n.text)}
-				<li class={n.warn ? 'text-warning' : ''}>{n.text}</li>
-			{/each}
-		</ul>
-
-		{#if view === 'no_data'}
-			<div class="rounded-panel border border-border p-6">
-				<p class="font-medium">{es.wishlist.noData}</p>
-				<p class="text-muted">{es.wishlist.noDataBody}</p>
-			</div>
-		{:else if view === 'sync_failed'}
-			<div class="rounded-panel border border-border p-6" role="alert">
-				<p class="font-medium text-warning">{es.wishlist.syncFailed}</p>
-				<p class="text-muted">{es.wishlist.syncFailedBody}</p>
-			</div>
-		{:else if view === 'confirmed_empty'}
-			<div class="rounded-panel border border-border p-6">
-				<p class="font-medium">{es.wishlist.confirmedEmpty}</p>
-				<p class="text-muted">{es.wishlist.confirmedEmptyBody}</p>
-			</div>
-		{:else if view === 'no_match'}
-			<div class="rounded-panel border border-border p-6">
-				<p class="font-medium">{es.wishlist.noMatch}</p>
-			</div>
-		{:else}
-			<!-- A scrollable region must be reachable with the keyboard (WCAG 2.1.1), hence the tabindex. -->
-			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-			<div
-				class="h-[60vh] overflow-y-auto rounded-panel border border-border"
-				tabindex="0"
-				role="region"
-				aria-label={es.nav.wishlists}
-				bind:clientHeight={viewport}
-				onscroll={(e) => (scrollTop = e.currentTarget.scrollTop)}
-			>
-				<ul
-					style="padding-top: {range.start * ROW}px; padding-bottom: {(shown.length - range.end) *
-						ROW}px"
-				>
-					{#each slice as w (`${w.store}:${w.account_id}:${w.native_id}`)}
-						<li class="flex h-18 items-center justify-between gap-4 border-b border-border px-4">
-							<div class="min-w-0">
-								<p class="truncate font-medium">{w.title ?? es.library.untitled(w.native_id)}</p>
-								<p class="truncate text-sm text-muted">
-									{storeName(w.store)}
-									{#if w.priority !== null}· {es.wishlist.priority(w.priority)}{/if}
-									{#if w.added_at !== null}· {es.wishlist.added(day(w.added_at))}{/if}
-								</p>
-								{#if w.already_held_here || !w.confirmed}
-									<p class="truncate text-xs text-warning">
-										{w.already_held_here ? es.wishlist.heldHere : ''}
-										{w.already_held_here && !w.confirmed ? ' · ' : ''}
-										{!w.confirmed ? es.wishlist.unconfirmed : ''}
-									</p>
-								{/if}
-							</div>
-							<Button size="sm" onclick={() => open(productUrl(w.store, w.native_id, w.url))}
-								>{es.wishlist.openStore}</Button
-							>
-						</li>
+				<div class="push segmented" role="group" aria-label={es.library.store}>
+					{#each wishStores as x (x)}
+						<button
+							type="button"
+							class="control store {x}"
+							aria-pressed={wishlistUi.filters.store === x}
+							onclick={() => (wishlistUi.filters.store = wishlistUi.filters.store === x ? '' : x)}
+							title={storeName(x)}
+							><StoreLogo store={x} size={14} /><span class="store-label">{storeName(x)}</span
+							></button
+						>
 					{/each}
-				</ul>
-			</div>
-		{/if}
+				</div>
+				<button
+					type="button"
+					class="control"
+					onclick={() => openUrl(storeWishlistUrl.epic).catch(() => {})}
+					title={w$.openEpic}
+					aria-label={w$.openEpic}
+					><StoreLogo store="epic" size={14} /><IconExternalLink size={14} /></button
+				>
+			</form>
 
-		<div class="mt-4"><ExportButtons what="wishlist" label={es.wishlist.export} /></div>
+			<div class="shelf-status">
+				<p aria-live="polite">{es.library.showing(shown.length, entries.length)}</p>
+				<span class="push"></span>
+				<InfoTip
+					label={es.shelf.dataInfo}
+					lines={notices.map((n) => n.text)}
+					warn={notices.some((n) => n.warn)}
+				/>
+			</div>
+
+			{#if view === 'no_data'}
+				<div class="empty">
+					<p class="headline">{w$.noData}</p>
+					<p>{w$.noDataBody}</p>
+					<a href={resolve('/conexiones')} class={button({ tone: 'primary' })}
+						>{es.nav.conexiones}</a
+					>
+				</div>
+			{:else if view === 'sync_failed'}
+				<div class="empty" role="alert">
+					<p class="headline">{w$.syncFailed}</p>
+					<p>{w$.syncFailedBody}</p>
+				</div>
+			{:else if view === 'confirmed_empty'}
+				<div class="empty">
+					<p class="headline">{w$.confirmedEmpty}</p>
+					<p>{w$.confirmedEmptyBody}</p>
+				</div>
+			{:else if view === 'no_match'}
+				<div class="empty">
+					<p class="headline">{w$.noMatch}</p>
+				</div>
+			{:else}
+				<div class="shelf" style="--cols: {COLS}">
+					<div class="shelf-head" aria-hidden="true">
+						<span></span><span>{es.shelf.title}</span><span class="wide-only"
+							>{w$.sortPriority}</span
+						><span class="wide-only">{w$.sortAdded}</span><span></span><span class="text-right"
+							>{es.shelf.stores}</span
+						>
+					</div>
+					<!-- A scrollable region must be reachable with the keyboard (WCAG 2.1.1). -->
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<div
+						class="shelf-scroll"
+						tabindex="0"
+						role="region"
+						aria-label={es.nav.wishlists}
+						bind:clientHeight={viewport}
+						onscroll={(e) => (scrollTop = e.currentTarget.scrollTop)}
+					>
+						<ul
+							style="padding-top: {range.start * ROW}px; padding-bottom: {(shown.length -
+								range.end) *
+								ROW}px"
+						>
+							{#each slice as w (keyOf(w))}
+								{@const t = titleOf(w)}
+								{@const repe = ownedElsewhere(w)}
+								<li>
+									<button
+										type="button"
+										class="shelf-row"
+										class:repe
+										aria-current={selected === keyOf(w) ? 'true' : undefined}
+										onclick={() => (selected = selected === keyOf(w) ? null : keyOf(w))}
+									>
+										<Cover title={t} store={w.store as Store} src={w.image_url} />
+										<span class="shelf-title">{t}</span>
+										<span class="shelf-muted wide-only"
+											>{w.priority === null ? '—' : w$.priority(w.priority)}</span
+										>
+										<span class="shelf-muted wide-only"
+											>{w.added_at === null ? '—' : day(w.added_at)}</span
+										>
+										<span>
+											{#if flags(w).length}<span class="flag" title={flags(w).join('. ')}
+													><IconAlertTriangle size={16} /><span class="sr-only"
+														>{flags(w).join('. ')}</span
+													></span
+												>{/if}
+										</span>
+										<StoreTabs slots={slotsOf(w)} title={t} wishedElsewhere={repe} />
+									</button>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				</div>
+			{/if}
+			<div class="foot"><ExportButtons what="wishlist" label={w$.export} /></div>
+		{/if}
+	</section>
+
+	{#if sel}
+		{@const t = titleOf(sel)}
+		<DetailPanel
+			title={t}
+			store={sel.store as Store}
+			cover={sel.image_url}
+			slots={slotsOf(sel)}
+			wishedElsewhere={ownedElsewhere(sel)}
+			products={detailProducts(sel)}
+			onclose={() => (selected = null)}
+		>
+			{#snippet spec()}
+				<dt>{es.library.store}</dt>
+				<dd>{storeName(sel.store)}</dd>
+				{#if sel.priority !== null}<dt>{w$.sortPriority}</dt>
+					<dd>{sel.priority}</dd>{/if}
+				{#if sel.added_at !== null}<dt>{w$.sortAdded}</dt>
+					<dd>{day(sel.added_at)}</dd>{/if}
+				{#if flags(sel).length}<dt>{w$.status}</dt>
+					<dd>{flags(sel).join('. ')}</dd>{/if}
+			{/snippet}
+			{#snippet actions()}
+				{#if ownedElsewhere(sel)}
+					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}>{es.shelf.reviewThis}</a>
+				{/if}
+			{/snippet}
+		</DetailPanel>
 	{/if}
 </div>
+
+<style>
+	.page {
+		flex: 1;
+		min-height: 0;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.page {
+		position: relative;
+	}
+	.page.withDetail {
+		grid-template-columns: minmax(0, 1fr) 440px;
+	}
+	/* Not wide enough for list and sheet side by side: the sheet lies over the list. */
+	@media (max-width: 1279px) {
+		.page.withDetail {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.page.withDetail > :global(.detail) {
+			position: absolute;
+			inset: 0 0 0 auto;
+			width: min(440px, 90%);
+			box-shadow: -16px 0 40px rgb(0 0 0 / 0.35);
+		}
+	}
+	.main {
+		min-width: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		container-type: inline-size;
+	}
+	@container (max-width: 860px) {
+		.shelf :global(.shelf-head),
+		.shelf :global(.shelf-row) {
+			grid-template-columns: 30px minmax(0, 1fr) 28px auto;
+		}
+	}
+	.flag {
+		display: inline-grid;
+		color: var(--color-warning);
+	}
+	.shelf-status p {
+		margin: 0;
+	}
+	.empty {
+		display: grid;
+		justify-items: start;
+		gap: 10px;
+		padding: 40px 32px;
+		max-width: 70ch;
+	}
+	.empty .headline {
+		font-size: 30px;
+		margin: 0;
+	}
+	.empty p {
+		margin: 0;
+	}
+	.foot {
+		padding: 12px 32px;
+		border-top: 1px solid var(--color-border);
+	}
+</style>

@@ -312,6 +312,17 @@ async fn summaries_name(http: &reqwest::Client, s: &Session) -> Option<String> {
     parse_persona_name(&v, &s.steamid)
 }
 
+/// Public name of another account (a family member) from its community profile XML. A private
+/// profile or any failure gives `None`; the UI then counts people instead of naming them.
+pub async fn public_name(http: &reqwest::Client, steamid: &str) -> Option<String> {
+    if steamid.is_empty() || !steamid.chars().all(|c| c.is_ascii_digit()) {
+        return None;
+    }
+    let url = format!("https://steamcommunity.com/profiles/{steamid}/?xml=1");
+    let body = http.get(url).send().await.ok()?.text().await.ok()?;
+    parse_profile_xml_name(&body)
+}
+
 /// `<steamID><![CDATA[name]]></steamID>` from the community profile XML.
 pub fn parse_profile_xml_name(body: &str) -> Option<String> {
     let start = body.find("<steamID><![CDATA[")? + "<steamID><![CDATA[".len();

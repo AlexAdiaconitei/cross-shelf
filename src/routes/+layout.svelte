@@ -18,6 +18,8 @@
 		saveSidebarOpen,
 		shell
 	} from '#lib/shell/state.svelte.ts';
+	import logoSmall from '#lib/assets/brand/cross-shelf-small-on-dark.svg';
+	import logoWide from '#lib/assets/brand/cross-shelf-horizontal-on-dark.svg';
 	import { es } from '#lib/strings.ts';
 
 	let { children } = $props();
@@ -25,6 +27,20 @@
 
 	onMount(() => {
 		open = readSidebarOpen();
+		// No browser menu on right click: it offers reload and print, not app actions. Text fields
+		// keep it for copy and paste, and dev builds keep it for the inspector.
+		const noMenu = (e: MouseEvent) => {
+			const t = e.target as HTMLElement | null;
+			if (import.meta.env.DEV || t?.closest('input, textarea, [contenteditable]')) return;
+			e.preventDefault();
+		};
+		document.addEventListener('contextmenu', noMenu);
+		// The static splash of app.html: fade it out now that the app is on screen.
+		const splash = document.getElementById('splash');
+		if (splash) {
+			splash.classList.add('out');
+			setTimeout(() => splash.remove(), 250);
+		}
 	});
 	afterNavigate(refreshShell);
 
@@ -56,7 +72,11 @@
 <div class="shell" class:open>
 	<nav class="side" aria-label={es.appName}>
 		<div class="brand">
-			<p class="headline mark">Cross<b>Shelf</b></p>
+			{#if open}
+				<img class="mark wide" src={logoWide} alt={es.appName} />
+			{:else}
+				<img class="mark small" src={logoSmall} alt={es.appName} />
+			{/if}
 			<button
 				type="button"
 				class="fold"
@@ -135,6 +155,8 @@
 		min-width: 0;
 		min-height: 0;
 		overflow-y: auto;
+		/* Never a horizontal scroll: views fit their width; anything that still overflows is clipped. */
+		overflow-x: clip;
 		display: flex;
 		flex-direction: column;
 	}
@@ -161,35 +183,31 @@
 		justify-content: space-between;
 		padding: 0 6px;
 	}
+	/* Brand kit: small mark on the folded rail, horizontal lockup when open (both on-dark). */
 	.mark {
-		margin: 0;
-		color: var(--color-z0);
-		font-size: 21px;
-		text-align: center;
-	}
-	.mark b {
 		display: block;
-		color: var(--color-next);
-		font-weight: inherit;
 	}
-	.open .mark {
-		font-size: 28px;
+	.mark.small {
+		width: 36px;
+		height: 36px;
 	}
-	.open .mark b {
-		display: inline;
+	.mark.wide {
+		height: 30px;
+		width: auto;
 	}
 	.fold {
 		display: grid;
 		place-items: center;
 		width: 34px;
 		height: 30px;
-		border: 1px solid var(--color-z8);
+		border: 0;
 		background: none;
 		color: inherit;
+		transition: background-color 150ms ease-out;
 	}
 	.fold:hover {
 		color: var(--color-z0);
-		border-color: var(--color-z5);
+		background: var(--color-rail-raised);
 	}
 	.grp {
 		margin: 14px 8px 4px;

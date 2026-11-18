@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { openUrl } from '@tauri-apps/plugin-opener';
-	import { IconArrowRight, IconExternalLink, IconSearch, IconX } from '@tabler/icons-svelte';
+	import { IconArrowRight, IconFilterOff, IconSearch } from '@tabler/icons-svelte';
 	import type { SyncStatus } from '#lib/bindings/SyncStatus.ts';
 	import type { WishlistEntry } from '#lib/bindings/WishlistEntry.ts';
 	import ExportButtons from '#lib/components/ExportButtons.svelte';
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import Cover from '#lib/components/store/Cover.svelte';
+	import DetailPanel from '#lib/components/store/DetailPanel.svelte';
 	import StoreLogo from '#lib/components/store/StoreLogo.svelte';
 	import StoreTabs from '#lib/components/store/StoreTabs.svelte';
-	import { button, chip, input } from '#lib/components/ui/index.ts';
-	import { kindName, productUrl, storeName, when } from '#lib/format.ts';
+	import { InfoTip, button, chip } from '#lib/components/ui/index.ts';
+	import { kindName, storeName, when } from '#lib/format.ts';
 	import { ipc } from '#lib/ipc.ts';
 	import {
 		applyFilters,
@@ -38,6 +38,7 @@
 
 	const ROW = 56;
 	const s = es.shelf;
+	const COLS = '30px minmax(0, 1fr) 130px 240px 230px';
 
 	let entries = $state<Entry[]>([]);
 	let wishlist = $state<WishlistEntry[]>([]);
@@ -76,7 +77,7 @@
 		['family_only', es.library.scopeFamilyOnly]
 	];
 
-	// One line per store and resource that tells where the shown data really comes from.
+	// Where the shown data really comes from, one line per store and resource, behind an icon.
 	const notices = $derived(
 		status
 			.filter((x) => x.resource !== 'wishlist')
@@ -96,13 +97,18 @@
 		const held = stores.filter((x) => r.slots[x] !== 'none' && r.slots[x] !== 'wish');
 		const first = held[0];
 		if (!first) return '';
-		if (r.slots[first] === 'family') return s.onlyFamily(r.familyOwners.length);
+		if (r.slots[first] === 'family') return s.onlyFamily(r.familyNames, r.familyOwners.length);
 		return es.library[
 			r.slots[first] === 'own' ? 'owned' : r.slots[first] === 'temp' ? 'temporary' : 'unknownAccess'
 		];
 	}
 
 	const accessName = (cls: string) => es.review.access[cls as keyof typeof es.review.access] ?? cls;
+
+	const detailProducts = (r: Shelf) => [
+		...r.products.map((p) => ({ ...p, note: p.access.map((a) => accessName(a.class)).join(', ') })),
+		...r.wished.map((w) => ({ ...w, note: s.inWishlist }))
+	];
 
 	function toggleStore(x: Store) {
 		libraryUi.filters.store = libraryUi.filters.store === x ? '' : x;
@@ -124,8 +130,6 @@
 
 	onMount(load);
 </script>
-
-<svelte:window onkeydown={(e) => e.key === 'Escape' && (selected = null)} />
 
 <div class="page" class:withDetail={sel}>
 	<section class="main">
@@ -156,20 +160,19 @@
 		</PageHeader>
 
 		{#if loadFailed}
-			<p role="alert" class="pad text-danger">{es.library.loadError}</p>
+			<p role="alert" class="page-body text-danger">{es.library.loadError}</p>
 		{:else if loaded}
-			<form class="bar" role="search" onsubmit={(e) => e.preventDefault()}>
-				<label class="search">
+			<form class="toolbar" role="search" onsubmit={(e) => e.preventDefault()}>
+				<label class="control control-search">
 					<IconSearch size={16} />
 					<span class="sr-only">{es.library.search}</span>
 					<input
 						type="search"
-						class={input({ class: 'border-0 px-0' })}
 						placeholder="{es.library.search}…"
 						bind:value={libraryUi.filters.text}
 					/>
 				</label>
-				<div class="group" role="group" aria-label={es.library.scope}>
+				<div class="chips when-roomy" role="group" aria-label={es.library.scope}>
 					{#each scopes as [k, label] (k)}
 						<button
 							type="button"
@@ -179,52 +182,63 @@
 						>
 					{/each}
 				</div>
-				<label class="kind">
-					<span class="sr-only">{es.library.kind}</span>
-					<select bind:value={libraryUi.filters.kind}>
-						<option value="">{es.library.allKinds}</option>
-						{#each kinds as k (k)}<option value={k}>{kindName(k)}</option>{/each}
-					</select>
-				</label>
-				{#if isFiltering(libraryUi.filters)}
-					<button
-						type="button"
-						class={button({ tone: 'ghost', size: 'sm' })}
-						onclick={() => (libraryUi.filters = { ...noFilters })}>{es.library.clear}</button
-					>
-				{/if}
-				<div class="push sf" role="group" aria-label={es.library.store}>
+				<select
+					class="control when-tight"
+					aria-label={es.library.scope}
+					bind:value={libraryUi.filters.scope}
+				>
+					{#each scopes as [k, label] (k)}<option value={k}>{es.library.scope}: {label}</option
+						>{/each}
+				</select>
+				<select class="control" aria-label={es.library.kind} bind:value={libraryUi.filters.kind}>
+					<option value="">{es.library.allKinds}</option>
+					{#each kinds as k (k)}<option value={k}>{kindName(k)}</option>{/each}
+				</select>
+				<button
+					type="button"
+					class="control icon"
+					disabled={!isFiltering(libraryUi.filters)}
+					aria-label={es.library.clear}
+					title={es.library.clear}
+					onclick={() => (libraryUi.filters = { ...noFilters })}><IconFilterOff size={16} /></button
+				>
+				<div class="push segmented" role="group" aria-label={es.library.store}>
 					{#each stores as x (x)}
 						<button
 							type="button"
-							class="sft {x}"
+							class="control store {x}"
 							aria-pressed={libraryUi.filters.store === x}
 							onclick={() => toggleStore(x)}
 							title={storeName(x)}
 						>
-							<StoreLogo store={x} size={14} /><span class="sfl">{storeName(x)}</span>
+							<StoreLogo store={x} size={14} /><span class="store-label">{storeName(x)}</span>
 						</button>
 					{/each}
 				</div>
 			</form>
 
-			<div class="note">
-				<ul aria-label={es.library.tabsLabel}>
-					{#each notices as n (n.text)}<li class:warn={n.warn}>{n.text}</li>{/each}
-				</ul>
-				<div class="seg" role="group" aria-label={s.groupingLabel}>
+			<div class="shelf-status">
+				<div class="segmented" role="group" aria-label={s.groupingLabel}>
 					<button
 						type="button"
+						class="control"
 						aria-pressed={libraryUi.grouped}
 						onclick={() => (libraryUi.grouped = true)}>{s.grouped}</button
 					>
 					<button
 						type="button"
+						class="control"
 						aria-pressed={!libraryUi.grouped}
 						onclick={() => (libraryUi.grouped = false)}>{s.separate}</button
 					>
 				</div>
-				<p aria-live="polite">{es.library.showing(count.shown, count.total)}</p>
+				<InfoTip label={s.groupInfo} lines={[s.groupNote]} />
+				<p class="push" aria-live="polite">{es.library.showing(count.shown, count.total)}</p>
+				<InfoTip
+					label={s.dataInfo}
+					lines={notices.map((n) => n.text)}
+					warn={notices.some((n) => n.warn)}
+				/>
 			</div>
 
 			{#if view === 'sync_failed'}
@@ -251,16 +265,16 @@
 					>
 				</div>
 			{:else}
-				<div class="tbl">
-					<div class="hd" aria-hidden="true">
-						<span class="span2">{s.title}</span><span class="c-kind">{es.library.kind}</span><span
-							class="c-acc">{s.access}</span
-						><span class="r">{s.stores}</span>
+				<div class="shelf" style="--cols: {COLS}">
+					<div class="shelf-head" aria-hidden="true">
+						<span></span><span>{s.title}</span><span class="wide-only">{es.library.kind}</span><span
+							class="wide-only">{s.access}</span
+						><span class="text-right">{s.stores}</span>
 					</div>
 					<!-- A scrollable region must be reachable with the keyboard (WCAG 2.1.1). -->
 					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 					<div
-						class="scroll"
+						class="shelf-scroll"
 						tabindex="0"
 						role="region"
 						aria-label={es.nav.biblioteca}
@@ -276,16 +290,16 @@
 								<li>
 									<button
 										type="button"
-										class="row"
+										class="shelf-row"
 										class:repe={r.wishedElsewhere}
 										aria-current={selected === r.key ? 'true' : undefined}
 										onclick={() => (selected = selected === r.key ? null : r.key)}
 									>
 										<Cover title={r.title} store={firstStore(r)} src={coverOf(r)} />
-										<span class="t">{r.title}</span>
-										<span class="c-kind muted">{kindName(r.kind)}</span>
-										<span class="c-acc muted"
-											>{accessLine(r)}{#if r.wishedElsewhere}<b>
+										<span class="shelf-title">{r.title}</span>
+										<span class="shelf-muted wide-only">{kindName(r.kind)}</span>
+										<span class="shelf-muted wide-only"
+											>{accessLine(r)}{#if r.wishedElsewhere}<b class="text-text">
 													· {s.wishedElsewhere}</b
 												>{/if}</span
 										>
@@ -301,91 +315,34 @@
 					</div>
 				</div>
 			{/if}
-			<div class="pad foot">
-				<ExportButtons what="library" label={es.library.export} />
-				{#if libraryUi.grouped}<p class="muted">{s.groupNote}</p>{/if}
-			</div>
+			<div class="foot"><ExportButtons what="library" label={es.library.export} /></div>
 		{/if}
 	</section>
 
 	{#if sel}
-		<aside class="detail" aria-label={s.detailOf(sel.title)}>
-			<div class="dh">
-				<p class="label">{s.detail}</p>
-				<button
-					type="button"
-					class={button({ size: 'icon' })}
-					onclick={() => (selected = null)}
-					aria-label={s.closeDetail}><IconX size={18} /></button
-				>
-			</div>
-			<div class="hero">
-				<Cover title={sel.title} store={firstStore(sel)} src={coverOf(sel)} size="lg" />
-				<div class="hx">
-					<h2 class="headline">{sel.title}</h2>
-					<StoreTabs
-						slots={sel.slots}
-						title={sel.title}
-						wishedElsewhere={sel.wishedElsewhere}
-						size="lg"
-					/>
-				</div>
-			</div>
-			<dl class="spec">
+		<DetailPanel
+			title={sel.title}
+			store={firstStore(sel)}
+			cover={coverOf(sel)}
+			slots={sel.slots}
+			wishedElsewhere={sel.wishedElsewhere}
+			products={detailProducts(sel)}
+			onclose={() => (selected = null)}
+		>
+			{#snippet spec()}
 				<dt>{es.library.kind}</dt>
 				<dd>{kindName(sel.kind)}</dd>
-				<dt>{s.access}</dt>
-				<dd>
-					{stores
-						.filter((x) => sel.slots[x] !== 'none')
-						.map((x) => `${storeName(x)}: ${s.slot[sel.slots[x]]}`)
-						.join(' · ')}
-				</dd>
 				{#if sel.familyOwners.length}
 					<dt>{s.family}</dt>
-					<dd>{s.familyNote(sel.familyOwners.length)}</dd>
+					<dd>{s.sharedWith(sel.familyNames, sel.familyOwners.length)}</dd>
 				{/if}
-			</dl>
-			<p class="label">{s.products}</p>
-			<ul class="prods">
-				{#each sel.products as p (p.store + p.native_id)}
-					<li class={p.store}>
-						<span class="pt"><StoreLogo store={p.store} size={14} /></span>
-						<div>
-							<b>{p.title ?? es.library.untitled(p.native_id)}</b>
-							<small>{p.access.map((a) => accessName(a.class)).join(', ')}</small>
-						</div>
-						<button
-							type="button"
-							class={button({ size: 'sm' })}
-							aria-label={s.openIn(storeName(p.store))}
-							onclick={() => openUrl(productUrl(p.store, p.native_id, p.url)).catch(() => {})}
-							>{s.open} <IconExternalLink size={14} /></button
-						>
-					</li>
-				{/each}
-				{#each sel.wished as w (w.store + w.native_id)}
-					<li class={w.store}>
-						<span class="pt"><StoreLogo store={w.store} size={14} /></span>
-						<div>
-							<b>{w.title ?? es.library.untitled(w.native_id)}</b><small>{s.inWishlist}</small>
-						</div>
-						<button
-							type="button"
-							class={button({ size: 'sm' })}
-							aria-label={s.openIn(storeName(w.store))}
-							onclick={() => openUrl(productUrl(w.store, w.native_id, w.url)).catch(() => {})}
-							>{s.open} <IconExternalLink size={14} /></button
-						>
-					</li>
-				{/each}
-			</ul>
-			{#if sel.wishedElsewhere}
-				<a href={resolve('/limpieza')} class={button({ tone: 'next', class: 'self-start' })}
-					>{s.reviewThis}</a
-				>
-			{/if}
-		</aside>
+			{/snippet}
+			{#snippet actions()}
+				{#if sel.wishedElsewhere}
+					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}>{s.reviewThis}</a>
+				{/if}
+			{/snippet}
+		</DetailPanel>
 	{/if}
 </div>
 
@@ -396,8 +353,23 @@
 		display: grid;
 		grid-template-columns: minmax(0, 1fr);
 	}
+	.page {
+		position: relative;
+	}
 	.page.withDetail {
 		grid-template-columns: minmax(0, 1fr) 440px;
+	}
+	/* Not wide enough for list and sheet side by side: the sheet lies over the list. */
+	@media (max-width: 1279px) {
+		.page.withDetail {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.page.withDetail > :global(.detail) {
+			position: absolute;
+			inset: 0 0 0 auto;
+			width: min(440px, 90%);
+			box-shadow: -16px 0 40px rgb(0 0 0 / 0.35);
+		}
 	}
 	.main {
 		min-width: 0;
@@ -406,195 +378,18 @@
 		flex-direction: column;
 		container-type: inline-size;
 	}
-	.pad {
-		padding: 16px 32px;
-	}
-	.bar {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		align-items: center;
-		padding: 12px 32px;
-		border-bottom: 1px solid var(--color-border);
-	}
-	.search {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		width: 300px;
-		padding: 0 10px;
-		border: 2px solid var(--color-text);
-	}
-	.search input {
-		min-height: 32px;
-		outline: none;
-	}
-	.group {
-		display: flex;
-		flex-wrap: wrap;
+	/* display comes from .when-roomy in app.css, so the toolbar can swap chips for a select. */
+	.chips {
 		gap: 6px;
-	}
-	.kind select {
-		height: 32px;
-		border: 1px solid var(--color-z5);
-		background: var(--color-page);
-		padding: 0 6px;
-	}
-	.push {
-		margin-left: auto;
-	}
-	.sf {
-		display: flex;
-		gap: 3px;
-	}
-	.sft {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		height: 30px;
-		padding: 0 10px;
-		border: 0;
-		background: var(--color-raised);
-		color: var(--color-muted);
-		font-size: 12px;
-		font-weight: 800;
-		text-transform: uppercase;
-	}
-	.sft.steam[aria-pressed='true'] {
-		background: var(--color-steam);
-		color: var(--color-on-store);
-	}
-	.sft.gog[aria-pressed='true'] {
-		background: var(--color-gog);
-		color: var(--color-on-store);
-	}
-	.sft.epic[aria-pressed='true'] {
-		background: var(--color-epic);
-		color: var(--color-on-epic);
-	}
-	.note {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 8px 18px;
-		padding: 8px 32px;
-		font-size: 12px;
-		color: var(--color-muted);
-		background: var(--color-panel);
-	}
-	.note ul {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 2px 18px;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		flex: 1;
-	}
-	.note .warn {
-		color: var(--color-warning);
-		font-weight: 700;
-	}
-	.note p {
-		margin: 0;
-	}
-	.seg {
-		display: flex;
-		border: 1.5px solid var(--color-text);
-	}
-	.seg button {
-		border: 0;
-		background: none;
-		padding: 3px 10px;
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--color-text);
-	}
-	.seg button[aria-pressed='true'] {
-		background: var(--color-text);
-		color: var(--color-page);
-	}
-	.tbl {
-		flex: 1;
-		min-height: 260px;
-		display: flex;
-		flex-direction: column;
-		padding: 0 32px;
-	}
-	.hd,
-	.row {
-		display: grid;
-		grid-template-columns: 30px minmax(0, 1fr) 130px 240px 230px;
-		gap: 14px;
-		align-items: center;
-	}
-	.span2 {
-		grid-column: span 2;
-	}
-	.hd {
-		height: 34px;
-		font-size: 11px;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		color: var(--color-muted);
-		border-bottom: 2px solid var(--color-border-strong);
-	}
-	.r {
-		text-align: right;
-	}
-	.scroll {
-		flex: 1;
-		min-height: 0;
-		overflow-y: auto;
-	}
-	.scroll ul {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-	.row {
-		width: 100%;
-		height: 56px;
-		border: 0;
-		border-bottom: 1px solid var(--color-border);
-		background: none;
-		color: inherit;
-		text-align: left;
-		font: inherit;
-		transition: background-color 120ms ease-out;
-	}
-	.row:hover {
-		background: var(--color-panel);
-	}
-	.row.repe {
-		background: var(--color-next-wash);
-	}
-	.row[aria-current='true'] {
-		background: var(--color-panel);
-		box-shadow: inset 0 0 0 2px var(--color-border-strong);
-	}
-	.t {
-		font-weight: 700;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.muted {
-		color: var(--color-muted);
-	}
-	.c-acc b {
-		color: var(--color-text);
 	}
 	@container (max-width: 860px) {
-		.hd,
-		.row {
-			grid-template-columns: 30px minmax(0, 1fr) 210px;
+		.shelf :global(.shelf-head),
+		.shelf :global(.shelf-row) {
+			grid-template-columns: 30px minmax(0, 1fr) auto;
 		}
-		.c-kind,
-		.c-acc,
-		.sfl {
-			display: none;
-		}
+	}
+	.shelf-status p {
+		margin: 0;
 	}
 	.empty {
 		display: grid;
@@ -611,108 +406,7 @@
 		margin: 0;
 	}
 	.foot {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px 24px;
-		align-items: center;
+		padding: 12px 32px;
 		border-top: 1px solid var(--color-border);
-	}
-	.foot p {
-		margin: 0;
-		font-size: 12px;
-	}
-	.detail {
-		min-height: 0;
-		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-		padding: 18px 24px 40px;
-		border-left: 3px solid var(--color-border-strong);
-	}
-	.dh {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	.dh .label,
-	.detail > .label {
-		margin: 0;
-	}
-	.hero {
-		display: grid;
-		grid-template-columns: 180px 1fr;
-		gap: 18px;
-		align-items: end;
-	}
-	.hx {
-		display: grid;
-		gap: 12px;
-		justify-items: start;
-	}
-	.hx :global(.tabs) {
-		justify-content: flex-start;
-	}
-	.hx h2 {
-		margin: 0;
-		font-size: 38px;
-		overflow-wrap: anywhere;
-	}
-	.spec {
-		display: grid;
-		grid-template-columns: 90px 1fr;
-		margin: 0;
-		border-top: 2px solid var(--color-border-strong);
-	}
-	.spec dt,
-	.spec dd {
-		margin: 0;
-		padding: 9px 0;
-		border-bottom: 1px solid var(--color-border);
-	}
-	.spec dt {
-		font-size: 12px;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--color-muted);
-	}
-	.prods {
-		display: grid;
-		gap: 6px;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-	.prods li {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 8px;
-		background: var(--color-panel);
-	}
-	.prods div {
-		flex: 1;
-		min-width: 0;
-		display: grid;
-	}
-	.prods small {
-		color: var(--color-muted);
-	}
-	.pt {
-		display: grid;
-		place-items: center;
-		flex: none;
-		width: 32px;
-		height: 32px;
-		background: var(--color-steam);
-		color: var(--color-on-store);
-	}
-	.gog .pt {
-		background: var(--color-gog);
-	}
-	.epic .pt {
-		background: var(--color-epic);
-		color: var(--color-on-epic);
 	}
 </style>

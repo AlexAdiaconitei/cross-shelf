@@ -12,6 +12,8 @@ pub struct Access {
     /// `owned`, `family_shared`, `temporary` or `unknown`. Never reworded as "bought".
     pub class: String,
     pub owners: Vec<String>,
+    /// Public names of those owners, when known, in the same order; unknown ones are left out.
+    pub owner_names: Vec<String>,
     pub exclude_reason: Option<String>,
     pub observed_at: i64,
 }
@@ -34,6 +36,10 @@ pub struct LibraryEntry {
 
 /// Every product with at least one right, grouped, ordered by title then id.
 pub fn list_library(conn: &Connection) -> Result<Vec<LibraryEntry>, rusqlite::Error> {
+    let names: BTreeMap<String, String> = conn
+        .prepare("SELECT steamid, name FROM steam_family_member")?
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?
+        .collect::<Result<_, _>>()?;
     let mut st = conn.prepare(
         "SELECT e.store, e.account_id, e.native_id, p.title, COALESCE(p.kind,'unknown'),
                 COALESCE(p.windows,'unknown'), p.url, e.class, e.owners, e.exclude_reason, e.observed_at,
@@ -60,6 +66,11 @@ pub fn list_library(conn: &Connection) -> Result<Vec<LibraryEntry>, rusqlite::Er
             ),
             Access {
                 class: r.get(7)?,
+                owner_names: serde_json::from_str::<Vec<String>>(&owners)
+                    .unwrap_or_default()
+                    .iter()
+                    .filter_map(|o| names.get(o).cloned())
+                    .collect(),
                 owners: serde_json::from_str(&owners).unwrap_or_default(),
                 exclude_reason: r.get(9)?,
                 observed_at: r.get(10)?,
@@ -413,5 +424,26 @@ mod tests {
         assert!(list_library(&c).unwrap().is_empty());
         assert!(list_wishlist(&c).unwrap().is_empty());
         assert!(sync_status(&c).unwrap().is_empty());
+    }
+
+    #[test]
+    fn family_access_names_its_owners_when_their_names_are_known() {
+        let mut c = db();
+        commit_entitlements(
+            &mut c,
+            "steam",
+            "me",
+            Resource::Family,
+            &[product("1", "Celeste")],
+            &[right("1", "family_shared", &["a", "b"])],
+            &ReadOutcome::Complete,
+            false,
+            1,
+        )
+        .unwrap();
+        crate::sync::remember_family_names(&c, &[("b".into(), "Marta".into())], 1).unwrap();
+        let list = list_library(&c).unwrap();
+        assert_eq!(list[0].access[0].owners, ["a", "b"]);
+        assert_eq!(list[0].access[0].owner_names, ["Marta"]);
     }
 }

@@ -6,6 +6,7 @@ import { buildShelf, coverOf, firstStore, initials } from './shelf.ts';
 const access = (cls: string, owners: string[] = []) => ({
 	class: cls,
 	owners,
+	owner_names: owners.length ? ['Marta'] : [],
 	exclude_reason: null,
 	observed_at: 0
 });
@@ -68,6 +69,7 @@ describe('buildShelf', () => {
 		]);
 		expect(rows[0]!.slots.steam).toBe('own');
 		expect(rows[0]!.familyOwners).toEqual(['Marta']);
+		expect(rows[0]!.familyNames).toEqual(['Marta']);
 	});
 
 	it('marks a game wished in one store while owned in another', () => {

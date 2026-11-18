@@ -11,7 +11,7 @@
 	import { IconSearch } from '@tabler/icons-svelte';
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import Cover from '#lib/components/store/Cover.svelte';
-	import { Button, Dialog, chip } from '#lib/components/ui/index.ts';
+	import { Button, Dialog, InfoTip, chip } from '#lib/components/ui/index.ts';
 	import type { Store } from '#lib/library/shelf.ts';
 	import { asCommandError, ipc } from '#lib/ipc.ts';
 	import { day, kindName, storeName } from '#lib/format.ts';
@@ -198,22 +198,43 @@
 		if (o === 'candidate' || o === 'unresolved') return 'maybe';
 		return 'no';
 	}
+	/** Secondary facts of a wish, shown behind an icon instead of under the title. */
+	function wantedNotes(it: ReviewItem): string[] {
+		return [
+			r.dataFrom(day(it.observed_at)),
+			...(it.repeated_in.length > 0
+				? [r.repeatedIn(it.repeated_in.map((x) => storeName(x.store)).join(', '))]
+				: []),
+			...(!it.kept && !removable(it) && it.matches.some((m) => m.outcome === 'candidate')
+				? [b.notCovered]
+				: [])
+		];
+	}
+
+	function matchNotes(m: MatchView): string[] {
+		return [
+			...(m.edition_superior ? [r.editionSuperior] : []),
+			...(m.platform_unknown ? [r.platformUnknown] : []),
+			...(m.outcome === 'candidate' || m.outcome === 'exact' ? [r.check] : [])
+		];
+	}
+
 	// Inline separator kept as data: the formatter trims the space before a literal «·».
 	const sep = ' · ';
 
 	onMount(load);
 </script>
 
-<PageHeader title={es.nav.limpieza} />
+<PageHeader title={es.nav.limpieza}>
+	{#snippet info()}<InfoTip label={es.nav.limpieza} lines={[r.intro]} />{/snippet}
+</PageHeader>
 
 <div class="wrap">
-	<p class="intro">{r.intro}</p>
-
 	{#if loadFailed}
 		<p role="alert" class="text-danger">{es.library.loadError}</p>
 	{:else if loaded}
-		<div class="bar">
-			<div class="chips" role="group" aria-label={r.filtersLabel}>
+		<div class="toolbar">
+			<div class="chips when-roomy" role="group" aria-label={r.filtersLabel}>
 				{#each filters as f (f)}
 					<button
 						type="button"
@@ -223,14 +244,19 @@
 					>
 				{/each}
 			</div>
-			<label class="search">
+			<select class="control when-tight" aria-label={r.filtersLabel} bind:value={filter}>
+				{#each filters as f (f)}<option value={f}
+						>{es.wishlist.status}: {r.filters[f]} · {counts[f]}</option
+					>{/each}
+			</select>
+			<label class="control control-search">
 				<IconSearch size={16} />
 				<span class="sr-only">{r.search}</span>
 				<input type="search" placeholder="{r.search}…" bind:value={text} />
 			</label>
 			{#if removableItems.length > 0 && selectedCount === 0}
-				<Button size="sm" class="ml-auto" onclick={selectAllExact}
-					>{b.selectExact(removableItems.length)}</Button
+				<button type="button" class="control push" onclick={selectAllExact}
+					>{b.selectExact(removableItems.length)}</button
 				>
 			{/if}
 		</div>
@@ -273,16 +299,10 @@
 							/>
 							<div class="min-w-0">
 								<p class="label">{r.wanted} · {storeName(it.wanted.store)}</p>
-								<p class="tt">{wantedTitle}</p>
-								<p class="muted xs">{r.dataFrom(day(it.observed_at))}</p>
-								{#if it.repeated_in.length > 0}
-									<p class="muted xs">
-										{r.repeatedIn(it.repeated_in.map((x) => storeName(x.store)).join(', '))}
-									</p>
-								{/if}
-								{#if !it.kept && !removable(it) && it.matches.some((m) => m.outcome === 'candidate')}
-									<p class="muted xs">{b.notCovered}</p>
-								{/if}
+								<p class="tt">
+									{wantedTitle}
+									<InfoTip label={wantedTitle} lines={wantedNotes(it)} />
+								</p>
 							</div>
 						</div>
 						<div class="matches">
@@ -296,7 +316,10 @@
 											<p class="label">
 												{r.held} · {storeName(m.held.store)} · {kindName(m.held.kind)}
 											</p>
-											<p class="tt">{heldTitle}</p>
+											<p class="tt">
+												{heldTitle}
+												<InfoTip label={heldTitle} lines={matchNotes(m)} />
+											</p>
 											<p class="muted xs">
 												{label(r.access, m.access)}{#if m.family_owners > 0}
 													({r.familyOwners(m.family_owners)}){/if}{#if m.evidence}{sep}{label(
@@ -307,11 +330,6 @@
 														m.reason
 													)}{/if}
 											</p>
-											{#if m.edition_superior}<p class="muted xs">{r.editionSuperior}</p>{/if}
-											{#if m.platform_unknown}<p class="muted xs">{r.platformUnknown}</p>{/if}
-											{#if m.outcome === 'candidate' || m.outcome === 'exact'}
-												<p class="muted xs">{r.check}</p>
-											{/if}
 										</div>
 									</div>
 									{#if m.outcome !== 'family_excluded'}
@@ -369,7 +387,8 @@
 {#if loaded && !loadFailed}
 	<footer class="lote" class:on={selectedCount > 0}>
 		<p>
-			{#if selectedCount > 0}<b>{b.selected(selectedCount)}: {summary}</b>{:else}{b.hint}{/if}
+			{#if selectedCount > 0}<b>{b.selected(selectedCount)}: {summary}</b>{:else}{b.hint}
+				<InfoTip label={b.hint} lines={[b.hintMore]} />{/if}
 		</p>
 		{#if selectedCount > 0}
 			<Button tone="ghost" size="sm" onclick={() => selected.clear()}>{b.clearSelection}</Button>
@@ -427,39 +446,15 @@
 		flex: 1;
 		padding: 0 32px 24px;
 	}
-	.intro {
-		max-width: 70ch;
-		margin: 14px 0 0;
-		color: var(--color-muted);
+	.toolbar {
+		margin: 0 -32px;
 	}
-	.bar {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 8px;
-		margin: 14px -32px 0;
-		padding: 12px 32px;
-		border-block: 1px solid var(--color-border);
-	}
+	/* display comes from .when-roomy in app.css, so the toolbar can swap chips for a select. */
 	.chips {
-		display: flex;
-		flex-wrap: wrap;
 		gap: 6px;
 	}
-	.search {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		width: 260px;
-		padding: 0 10px;
-		border: 2px solid var(--color-text);
-	}
-	.search input {
-		width: 100%;
-		min-height: 32px;
-		border: 0;
-		outline: none;
-		background: transparent;
+	.tt :global(.tip-trigger) {
+		margin-left: 2px;
 	}
 	.empty {
 		display: grid;

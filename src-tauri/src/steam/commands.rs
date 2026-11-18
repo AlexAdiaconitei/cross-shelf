@@ -519,8 +519,26 @@ pub async fn steam_sync(
             .map(|apps| super::sync::map_family(&apps, &me)),
         Err(e) => Err(e),
     };
+    let owner_ids = family_read
+        .as_ref()
+        .map(|(_, rows)| sync::family_owner_ids(rows))
+        .unwrap_or_default();
     let (family, family_shared_apps) =
         store_rights(&db, &me, Resource::Family, family_read, &mut errors, now)?;
+
+    // Who shares each game, by public profile name. Best effort: a private profile stays unnamed.
+    let mut names = Vec::new();
+    for id in &owner_ids {
+        if let Some(n) = api::public_name(&state.http, id).await {
+            names.push((id.clone(), n));
+        }
+    }
+    if !names.is_empty() {
+        let conn =
+            db.0.lock()
+                .map_err(|_| DiagError::internal("database lock poisoned"))?;
+        sync::remember_family_names(&conn, &names, now).map_err(DiagError::internal)?;
+    }
 
     let wish = api::wishlist_raw(&state.http, &session).await;
     if let Ok(items) = &wish {

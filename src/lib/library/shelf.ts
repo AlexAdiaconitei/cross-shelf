@@ -29,6 +29,8 @@ export type Shelf = {
 	/** Wished in a store while you own it in another one: worth a cleanup review. */
 	wishedElsewhere: boolean;
 	familyOwners: string[];
+	/** Public names of those owners when Steam gives them. */
+	familyNames: string[];
 };
 
 export const shelfKey = (kind: string, title: string | null, nativeId: string) =>
@@ -50,7 +52,8 @@ export function buildShelf(entries: Entry[], wishlist: WishlistEntry[] = []): Sh
 				products: [],
 				wished: [],
 				wishedElsewhere: false,
-				familyOwners: []
+				familyOwners: [],
+				familyNames: []
 			};
 			rows.set(key, row);
 		}
@@ -59,7 +62,10 @@ export function buildShelf(entries: Entry[], wishlist: WishlistEntry[] = []): Sh
 		if (!(s in row.slots)) continue;
 		for (const a of e.access) {
 			row.slots[s] = stronger(row.slots[s], fromAccess[a.class] ?? 'unknown');
-			if (a.class === 'family_shared') row.familyOwners.push(...a.owners);
+			if (a.class === 'family_shared') {
+				row.familyOwners.push(...a.owners);
+				row.familyNames.push(...a.owner_names);
+			}
 		}
 		if (e.access.length === 0) row.slots[s] = stronger(row.slots[s], 'unknown');
 	}
@@ -73,6 +79,7 @@ export function buildShelf(entries: Entry[], wishlist: WishlistEntry[] = []): Sh
 	}
 	for (const row of rows.values()) {
 		row.familyOwners = [...new Set(row.familyOwners)];
+		row.familyNames = [...new Set(row.familyNames)];
 		const owned = stores.some((s) => row.slots[s] === 'own');
 		row.wishedElsewhere = owned && stores.some((s) => row.slots[s] === 'wish');
 	}

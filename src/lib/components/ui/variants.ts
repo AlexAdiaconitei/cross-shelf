@@ -33,11 +33,7 @@ export const input = tv({
 	]
 });
 
-export const chip = tv({
-	base: [
-		'inline-flex min-h-7.5 cursor-pointer items-center gap-1.5 border border-z5 px-2.5 text-[13px]',
-		'aria-pressed:border-text aria-pressed:bg-text aria-pressed:text-page'
-	]
-});
+/** A filter chip: the shared toolbar control (see `.control` in app.css). */
+export const chip = tv({ base: 'control' });
 
 export const panel = 'min-w-0 overflow-hidden border-2 border-border-strong bg-page';

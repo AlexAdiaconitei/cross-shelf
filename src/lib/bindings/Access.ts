@@ -4,4 +4,8 @@ export type Access = {
 /**
  * `owned`, `family_shared`, `temporary` or `unknown`. Never reworded as "bought".
  */
-class: string, owners: Array<string>, exclude_reason: string | null, observed_at: number, };
+class: string, owners: Array<string>, 
+/**
+ * Public names of those owners, when known, in the same order; unknown ones are left out.
+ */
+owner_names: Array<string>, exclude_reason: string | null, observed_at: number, };

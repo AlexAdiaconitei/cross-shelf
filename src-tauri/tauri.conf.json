@@ -16,8 +16,9 @@
 				"title": "CrossShelf",
 				"width": 1100,
 				"height": 740,
-				"minWidth": 800,
-				"minHeight": 560
+				"minWidth": 1024,
+				"minHeight": 640,
+				"backgroundColor": "#100F0D"
 			}
 		],
 		"security": {

@@ -127,7 +127,7 @@
 				{#if busy}<p class="text-muted" role="status">{es.diag.running}</p>{/if}
 				{#if outputs[p.id]}
 					<pre
-						class="overflow-x-auto rounded-panel border border-border bg-panel p-3 font-mono text-sm">{outputs[
+						class="rounded-panel border border-border bg-panel p-3 font-mono text-sm break-all whitespace-pre-wrap">{outputs[
 							p.id
 						]}</pre>
 				{/if}

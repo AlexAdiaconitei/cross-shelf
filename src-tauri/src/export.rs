@@ -225,6 +225,7 @@ mod tests {
             access: vec![crate::queries::Access {
                 class: "family_shared".into(),
                 owners: vec!["76561198000000002".into()],
+                owner_names: vec!["Marta".into()],
                 exclude_reason: Some("3".into()),
                 observed_at: 0,
             }],

@@ -129,6 +129,12 @@ const MIGRATIONS: &[&str] = &[
      CREATE INDEX batch_op_batch ON batch_op(batch_id);",
     // v5: portrait cover on the store CDN, when the store gives one.
     "ALTER TABLE product ADD COLUMN image_url TEXT;",
+    // v6: public names of the Steam family members who share games, to say who shares what.
+    "CREATE TABLE steam_family_member (
+        steamid TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+     );",
 ];
 
 #[cfg(test)]

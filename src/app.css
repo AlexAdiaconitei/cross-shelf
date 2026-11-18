@@ -112,8 +112,8 @@
 		line-height: 1.4;
 		font-variant-numeric: tabular-nums;
 		-webkit-tap-highlight-color: transparent;
-		scrollbar-color: var(--color-z5) transparent;
-		scrollbar-width: thin;
+		/* An app, not a document: text is not selectable unless a part opts in (.selectable). */
+		user-select: none;
 	}
 
 	button,
@@ -124,6 +124,36 @@
 	:focus-visible {
 		outline: 2px solid var(--color-text);
 		outline-offset: 2px;
+	}
+
+	input,
+	textarea,
+	[contenteditable],
+	pre,
+	.selectable,
+	.selectable * {
+		user-select: text;
+	}
+
+	/* Scrollbars in the world: thin, square, from the neutral ramp, no arrow buttons. */
+	::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	::-webkit-scrollbar-track,
+	::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		background: var(--color-z5);
+		border: 3px solid transparent;
+		background-clip: padding-box;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background-color: var(--color-z6);
+	}
+	::-webkit-scrollbar-button {
+		display: none;
 	}
 
 	::selection {
@@ -142,6 +172,223 @@
 }
 
 @layer components {
+	/* Every toolbar control shares one height and one border, so a row of them lines up. */
+	.control {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 34px;
+		padding: 0 12px;
+		border: 1.5px solid var(--color-z5);
+		background: var(--color-page);
+		color: var(--color-text);
+		font-size: 13px;
+		font-weight: 600;
+		white-space: nowrap;
+		cursor: pointer;
+	}
+	.control:hover {
+		border-color: var(--color-text);
+	}
+	.control[aria-pressed='true'] {
+		border-color: var(--color-text);
+		background: var(--color-text);
+		color: var(--color-page);
+	}
+	select.control {
+		max-width: 210px;
+		padding-right: 8px;
+		text-overflow: ellipsis;
+	}
+	.control-search {
+		width: 260px;
+		padding: 0 10px;
+		border-color: var(--color-text);
+		cursor: text;
+	}
+	.control-search input {
+		flex: 1;
+		min-width: 0;
+		height: 100%;
+		border: 0;
+		outline: none;
+		background: transparent;
+		color: inherit;
+		font-weight: 400;
+	}
+	.control-search:focus-within {
+		outline: 2px solid var(--color-text);
+		outline-offset: 2px;
+	}
+	.segmented {
+		display: inline-flex;
+	}
+	.segmented > .control + .control {
+		margin-left: -1.5px;
+	}
+	/* Store filter: grey until pressed, then the store's own colour. */
+	.control.store {
+		border-color: transparent;
+		background: var(--color-raised);
+		color: var(--color-muted);
+		font-weight: 800;
+		text-transform: uppercase;
+		font-size: 12px;
+	}
+	.control.store.steam[aria-pressed='true'] {
+		background: var(--color-steam);
+		color: var(--color-on-store);
+	}
+	.control.store.gog[aria-pressed='true'] {
+		background: var(--color-gog);
+		color: var(--color-on-store);
+	}
+	.control.store.epic[aria-pressed='true'] {
+		background: var(--color-epic);
+		color: var(--color-on-epic);
+	}
+	/* Dense, virtualised list of games: Library and Wishlists. Columns come from --cols. */
+	.shelf {
+		container-type: inline-size;
+		flex: 1;
+		min-height: 260px;
+		display: flex;
+		flex-direction: column;
+		padding: 0 32px;
+	}
+	.shelf-head,
+	.shelf-row {
+		display: grid;
+		grid-template-columns: var(--cols);
+		gap: 14px;
+		align-items: center;
+	}
+	.shelf-head {
+		height: 34px;
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--color-muted);
+		border-bottom: 2px solid var(--color-border-strong);
+	}
+	.shelf-scroll {
+		flex: 1;
+		min-height: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+	.shelf-scroll > ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.shelf-row {
+		width: 100%;
+		height: 56px;
+		border: 0;
+		border-bottom: 1px solid var(--color-border);
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
+		transition: background-color 120ms ease-out;
+	}
+	.shelf-row:hover {
+		background: var(--color-panel);
+	}
+	.shelf-row.repe {
+		background: var(--color-next-wash);
+	}
+	.shelf-row[aria-current='true'] {
+		background: var(--color-panel);
+		box-shadow: inset 0 0 0 2px var(--color-border-strong);
+	}
+	.shelf-title {
+		overflow: hidden;
+		font-weight: 700;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.shelf-muted {
+		overflow: hidden;
+		color: var(--color-muted);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.shelf-status {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 6px 32px;
+		font-size: 12px;
+		color: var(--color-muted);
+	}
+	.shelf-status .push {
+		margin-left: auto;
+	}
+	@container (max-width: 860px) {
+		.wide-only {
+			display: none !important;
+		}
+	}
+
+	/* One row always: parts give way by width (see the container rules below), never wrap. */
+	.toolbar {
+		container-type: inline-size;
+		display: flex;
+		flex-wrap: nowrap;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 32px;
+		border-bottom: 1px solid var(--color-border);
+	}
+	.toolbar .push {
+		margin-left: auto;
+	}
+	.toolbar > * {
+		flex: none;
+	}
+	.toolbar > .control-search {
+		flex: 0 1 260px;
+		min-width: 150px;
+	}
+	/* Scope chips only when the whole set fits; a select stands in for them otherwise. */
+	.toolbar .when-roomy {
+		display: flex;
+	}
+	.toolbar .when-tight {
+		display: none;
+	}
+	@container (max-width: 1240px) {
+		.toolbar .when-roomy {
+			display: none;
+		}
+		.toolbar .when-tight {
+			display: inline-flex;
+		}
+	}
+	@container (max-width: 1100px) {
+		.toolbar .store-label {
+			display: none;
+		}
+	}
+	@container (max-width: 720px) {
+		.toolbar select.control {
+			max-width: 150px;
+		}
+	}
+	/* Clearing filters: an icon that keeps its place, so nothing moves when filters change. */
+	.control.icon {
+		width: 34px;
+		padding: 0;
+		justify-content: center;
+	}
+	.control:disabled {
+		opacity: 0.35;
+		cursor: default;
+		border-color: var(--color-z5);
+	}
 	/* Body of a page under its header. */
 	.page-body {
 		padding: 20px 32px 40px;

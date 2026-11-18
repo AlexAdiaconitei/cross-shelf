@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import type { BatchView } from '#lib/bindings/BatchView.ts';
-	import { Button } from '#lib/components/ui/index.ts';
+	import { Button, InfoTip } from '#lib/components/ui/index.ts';
 	import { errorText, productUrl, storeName, when } from '#lib/format.ts';
 	import { asCommandError, ipc } from '#lib/ipc.ts';
 	import { es } from '#lib/strings.ts';
@@ -99,10 +99,10 @@
 	onMount(load);
 </script>
 
-<PageHeader title={es.nav.resultados} />
+<PageHeader title={es.nav.resultados}>
+	{#snippet info()}<InfoTip label={es.nav.resultados} lines={[r.intro]} />{/snippet}
+</PageHeader>
 <div class="page-body">
-	<p class="mb-6 max-w-prose text-muted">{r.intro}</p>
-
 	{#if loadFailed}
 		<p role="alert" class="text-danger">{es.library.loadError}</p>
 	{:else if loaded && batches.length === 0}
@@ -153,14 +153,14 @@
 							<Button tone="ghost" disabled={busy !== null} onclick={() => cancel(bv)}>
 								{r.cancel}
 							</Button>
-							<span class="text-sm text-muted">{r.sendHint}</span>
+							<InfoTip label={r.sendHint} lines={[r.sendHint]} />
 						{:else if retryable(bv)}
 							<Button disabled={busy !== null} onclick={() => retry(bv)}>{r.retry}</Button>
 						{:else if bv.state === 'confirmed'}
 							<Button tone="primary" disabled={busy !== null} onclick={() => reread(bv)}>
 								{r.reread}
 							</Button>
-							<span class="text-sm text-muted">{r.rereadHint}</span>
+							<InfoTip label={r.rereadHint} lines={[r.rereadHint]} />
 						{/if}
 						{#if bv.state === 'draft' || bv.state === 'invalidated'}
 							<Button tone="ghost" disabled={busy !== null} onclick={() => discard(bv)}>

@@ -6,7 +6,7 @@
 	import type { Settings } from '#lib/bindings/Settings.ts';
 	import ExportButtons from '#lib/components/ExportButtons.svelte';
 	import Updates from '#lib/components/Updates.svelte';
-	import { Button, Dialog } from '#lib/components/ui/index.ts';
+	import { Button, Dialog, InfoTip } from '#lib/components/ui/index.ts';
 	import { ipc } from '#lib/ipc.ts';
 	import { shell } from '#lib/shell/state.svelte.ts';
 	import { es } from '#lib/strings.ts';
@@ -68,18 +68,18 @@
 		<section aria-labelledby="cleanup" class="grid gap-2">
 			<h2 id="cleanup" class="font-medium">{es.settings.cleanup}</h2>
 			{#if settings}
-				<label class="flex items-start gap-3">
-					<input
-						type="checkbox"
-						class="mt-1 size-4 accent-accent"
-						checked={settings.include_family_in_cleanup}
-						onchange={(e) => setFamily(e.currentTarget.checked)}
-					/>
-					<span>
-						{es.settings.includeFamily}
-						<span class="mt-1 block text-sm text-muted">{es.settings.includeFamilyHint}</span>
-					</span>
-				</label>
+				<div class="flex items-center gap-1">
+					<label class="flex items-center gap-3">
+						<input
+							type="checkbox"
+							class="size-4 accent-accent"
+							checked={settings.include_family_in_cleanup}
+							onchange={(e) => setFamily(e.currentTarget.checked)}
+						/>
+						<span>{es.settings.includeFamily}</span>
+					</label>
+					<InfoTip label={es.settings.includeFamily} lines={[es.settings.includeFamilyHint]} />
+				</div>
 			{/if}
 			<p class="text-sm text-muted" role="status">{settingsNote}</p>
 		</section>
@@ -87,18 +87,18 @@
 		<section aria-labelledby="appearance" class="grid gap-2">
 			<h2 id="appearance" class="font-medium">{es.settings.appearance}</h2>
 			{#if settings}
-				<label class="flex items-start gap-3">
-					<input
-						type="checkbox"
-						class="mt-1 size-4 accent-accent"
-						checked={settings.show_covers}
-						onchange={(e) => setCovers(e.currentTarget.checked)}
-					/>
-					<span>
-						{es.settings.showCovers}
-						<span class="mt-1 block text-sm text-muted">{es.settings.showCoversHint}</span>
-					</span>
-				</label>
+				<div class="flex items-center gap-1">
+					<label class="flex items-center gap-3">
+						<input
+							type="checkbox"
+							class="size-4 accent-accent"
+							checked={settings.show_covers}
+							onchange={(e) => setCovers(e.currentTarget.checked)}
+						/>
+						<span>{es.settings.showCovers}</span>
+					</label>
+					<InfoTip label={es.settings.showCovers} lines={[es.settings.showCoversHint]} />
+				</div>
 			{/if}
 		</section>
 
@@ -109,8 +109,10 @@
 		</section>
 
 		<section aria-labelledby="data" class="grid gap-3">
-			<h2 id="data" class="font-medium">{es.settings.data}</h2>
-			<p class="text-sm text-muted">{es.settings.dataHint}</p>
+			<h2 id="data" class="font-medium">
+				{es.settings.data}
+				<InfoTip label={es.settings.data} lines={[es.settings.dataHint]} />
+			</h2>
 			<div class="flex flex-wrap gap-2">
 				<Button
 					onclick={() =>
