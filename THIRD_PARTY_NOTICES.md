@@ -319,7 +319,7 @@ Generado con `node scripts/third-party-notices.mjs`; no se edita a mano.
 | @floating-ui/core | 1.8.0 | MIT | https://floating-ui.com |
 | @floating-ui/dom | 1.8.0 | MIT | https://floating-ui.com |
 | @floating-ui/utils | 0.2.12 | MIT | https://floating-ui.com |
-| @fontsource-variable/geist | 5.3.0 | OFL-1.1 | https://fontsource.org/fonts/geist |
+| @fontsource-variable/archivo | 5.3.0 | OFL-1.1 | https://fontsource.org/fonts/archivo |
 | @fontsource-variable/geist-mono | 5.3.0 | OFL-1.1 | https://fontsource.org/fonts/geist-mono |
 | @internationalized/date | 3.12.4 | Apache-2.0 | https://github.com/adobe/react-spectrum/tree/main#readme |
 | @internationalized/number | 3.6.9 | Apache-2.0 | https://github.com/adobe/react-spectrum#readme |

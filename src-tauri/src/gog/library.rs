@@ -97,9 +97,11 @@ pub async fn fetch_catalog(
     if !resp.status().is_success() {
         return Err(ReadError::Http(resp.status().as_u16()));
     }
-    let v: serde_json::Value = serde_json::from_str(&resp.text().await?)
-        .map_err(|_| ReadError::Shape("catalog json"))?;
-    v.as_array().cloned().ok_or(ReadError::Shape("catalog array"))
+    let v: serde_json::Value =
+        serde_json::from_str(&resp.text().await?).map_err(|_| ReadError::Shape("catalog json"))?;
+    v.as_array()
+        .cloned()
+        .ok_or(ReadError::Shape("catalog array"))
 }
 
 /// The wishlist map as GOG sends it, id with its value, for the local raw copy.

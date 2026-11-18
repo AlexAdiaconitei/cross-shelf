@@ -8,7 +8,11 @@
 	import type { Decision } from '#lib/bindings/Decision.ts';
 	import type { MatchView } from '#lib/bindings/MatchView.ts';
 	import type { ReviewItem } from '#lib/bindings/ReviewItem.ts';
-	import { Button, Dialog } from '#lib/components/ui/index.ts';
+	import { IconSearch } from '@tabler/icons-svelte';
+	import PageHeader from '#lib/components/PageHeader.svelte';
+	import Cover from '#lib/components/store/Cover.svelte';
+	import { Button, Dialog, chip } from '#lib/components/ui/index.ts';
+	import type { Store } from '#lib/library/shelf.ts';
 	import { asCommandError, ipc } from '#lib/ipc.ts';
 	import { day, kindName, storeName } from '#lib/format.ts';
 	import {
@@ -188,98 +192,155 @@
 		}
 	}
 
-	function outcomeClass(o: string): string {
-		if (o === 'exact' || o === 'candidate') return 'text-success';
-		if (o === 'unresolved') return 'text-warning';
-		return 'text-muted';
+	/** Verdict stamp colour: firm evidence, worth a look, or not covering it. */
+	function tone(o: string): 'ok' | 'maybe' | 'no' {
+		if (o === 'exact') return 'ok';
+		if (o === 'candidate' || o === 'unresolved') return 'maybe';
+		return 'no';
 	}
+	// Inline separator kept as data: the formatter trims the space before a literal «·».
+	const sep = ' · ';
 
 	onMount(load);
 </script>
 
-<h1 class="mb-2 text-xl font-semibold">{es.nav.limpieza}</h1>
-<p class="mb-5 max-w-prose text-muted">{r.intro}</p>
+<PageHeader title={es.nav.limpieza} />
 
-{#if loadFailed}
-	<p role="alert" class="text-danger">{es.library.loadError}</p>
-{:else if loaded}
-	<div class="mb-3 flex flex-wrap gap-1" role="group" aria-label={r.filtersLabel}>
-		{#each filters as f (f)}
-			<button
-				type="button"
-				aria-pressed={filter === f}
-				class="cursor-pointer rounded-control px-3 py-1.5 text-sm text-muted hover:bg-raised hover:text-text aria-pressed:bg-raised aria-pressed:text-text"
-				onclick={() => (filter = f)}
-			>
-				{r.filters[f]} <span class="tabular-nums">({counts[f]})</span>
-			</button>
-		{/each}
-	</div>
+<div class="wrap">
+	<p class="intro">{r.intro}</p>
 
-	<label class="mb-4 grid max-w-sm gap-1 text-sm">
-		<span class="text-muted">{r.search}</span>
-		<input
-			type="search"
-			class="rounded-control border border-border bg-panel px-3 py-2"
-			bind:value={text}
-		/>
-	</label>
-
-	<p class="mb-2 text-sm text-warning" role="status">{note} {batchNote}</p>
-
-	{#if selectedCount > 0}
-		<div
-			class="sticky top-0 z-10 mb-3 flex flex-wrap items-center gap-3 rounded-panel border border-border bg-panel p-3"
-		>
-			<p class="text-sm">{b.selected(selectedCount)}: {summary}</p>
-			<Button tone="primary" size="sm" onclick={openBatch}>{b.reviewBatch}</Button>
-			<Button tone="ghost" size="sm" onclick={() => selected.clear()}>{b.clearSelection}</Button>
+	{#if loadFailed}
+		<p role="alert" class="text-danger">{es.library.loadError}</p>
+	{:else if loaded}
+		<div class="bar">
+			<div class="chips" role="group" aria-label={r.filtersLabel}>
+				{#each filters as f (f)}
+					<button
+						type="button"
+						class={chip()}
+						aria-pressed={filter === f}
+						onclick={() => (filter = f)}>{r.filters[f]} · {counts[f]}</button
+					>
+				{/each}
+			</div>
+			<label class="search">
+				<IconSearch size={16} />
+				<span class="sr-only">{r.search}</span>
+				<input type="search" placeholder="{r.search}…" bind:value={text} />
+			</label>
+			{#if removableItems.length > 0 && selectedCount === 0}
+				<Button size="sm" class="ml-auto" onclick={selectAllExact}
+					>{b.selectExact(removableItems.length)}</Button
+				>
+			{/if}
 		</div>
-	{:else if removableItems.length > 0}
-		<div class="mb-3">
-			<Button size="sm" onclick={selectAllExact}>{b.selectExact(removableItems.length)}</Button>
-		</div>
-	{/if}
 
-	{#if items.length === 0}
-		<div class="rounded-panel border border-border p-6">
-			<p class="font-medium">{r.noWishes}</p>
-			<p class="text-muted">{es.wishlist.noDataBody}</p>
-		</div>
-	{:else if shown.length === 0}
-		<div class="rounded-panel border border-border p-6">
-			<p class="font-medium">{r.empty}</p>
-			<p class="text-muted">{r.emptyBody}</p>
-		</div>
-	{:else}
-		<ul class="grid max-w-5xl divide-y divide-border border-y border-border">
-			{#each shown as it (`${it.account_id}:${it.wanted.store}:${it.wanted.native_id}`)}
-				{@const wantedTitle = it.wanted.title ?? es.library.untitled(it.wanted.native_id)}
-				<li class="grid gap-3 py-4">
-					<div class="flex flex-wrap items-start justify-between gap-3">
-						<div class="min-w-0">
-							<p class="text-xs text-muted">{r.wanted} · {storeName(it.wanted.store)}</p>
-							<p class="font-medium">{wantedTitle}</p>
-							<p class="text-xs text-muted">{r.dataFrom(day(it.observed_at))}</p>
-						</div>
-						<div class="flex flex-wrap items-center gap-3">
+		{#if note || batchNote}<p class="text-warning" role="status">{note} {batchNote}</p>{/if}
+
+		{#if items.length === 0}
+			<div class="empty">
+				<p class="headline">{r.noWishes}</p>
+				<p>{es.wishlist.noDataBody}</p>
+			</div>
+		{:else if shown.length === 0}
+			<div class="empty">
+				<p class="headline">{r.empty}</p>
+				<p>{r.emptyBody}</p>
+			</div>
+		{:else}
+			<ul class="cmp">
+				{#each shown as it (`${it.account_id}:${it.wanted.store}:${it.wanted.native_id}`)}
+					{@const wantedTitle = it.wanted.title ?? es.library.untitled(it.wanted.native_id)}
+					<li class="item" class:picked={selected.has(itemKey(it))}>
+						<div class="pick">
 							{#if removable(it)}
-								<label class="flex items-center gap-2 text-sm">
-									<input
-										type="checkbox"
-										class="size-4 accent-accent"
-										aria-label={b.selectLabel(wantedTitle)}
-										checked={selected.has(itemKey(it))}
-										onchange={(e) =>
-											e.currentTarget.checked
-												? selected.add(itemKey(it))
-												: selected.delete(itemKey(it))}
-									/>
-									<span aria-hidden="true">{b.select}</span>
-								</label>
+								<input
+									type="checkbox"
+									aria-label={b.selectLabel(wantedTitle)}
+									checked={selected.has(itemKey(it))}
+									onchange={(e) =>
+										e.currentTarget.checked
+											? selected.add(itemKey(it))
+											: selected.delete(itemKey(it))}
+								/>
 							{/if}
+						</div>
+						<div class="half">
+							<Cover title={wantedTitle} store={it.wanted.store as Store} />
+							<div class="min-w-0">
+								<p class="label">{r.wanted} · {storeName(it.wanted.store)}</p>
+								<p class="tt">{wantedTitle}</p>
+								<p class="muted xs">{r.dataFrom(day(it.observed_at))}</p>
+								{#if it.repeated_in.length > 0}
+									<p class="muted xs">
+										{r.repeatedIn(it.repeated_in.map((x) => storeName(x.store)).join(', '))}
+									</p>
+								{/if}
+								{#if !it.kept && !removable(it) && it.matches.some((m) => m.outcome === 'candidate')}
+									<p class="muted xs">{b.notCovered}</p>
+								{/if}
+							</div>
+						</div>
+						<div class="matches">
+							{#each sortMatches(it.matches) as m (`${m.held.store}:${m.held.native_id}:${m.access}`)}
+								{@const heldTitle = m.held.title ?? es.library.untitled(m.held.native_id)}
+								<div class="match">
+									<p class="stamp {tone(m.outcome)}">{label(r.outcome, m.outcome)}</p>
+									<div class="half">
+										<Cover title={heldTitle} store={m.held.store as Store} />
+										<div class="min-w-0">
+											<p class="label">
+												{r.held} · {storeName(m.held.store)} · {kindName(m.held.kind)}
+											</p>
+											<p class="tt">{heldTitle}</p>
+											<p class="muted xs">
+												{label(r.access, m.access)}{#if m.family_owners > 0}
+													({r.familyOwners(m.family_owners)}){/if}{#if m.evidence}{sep}{label(
+														r.evidence,
+														m.evidence
+													)}{/if}{#if m.reason && m.outcome !== 'family_excluded'}{sep}{label(
+														r.reasons,
+														m.reason
+													)}{/if}
+											</p>
+											{#if m.edition_superior}<p class="muted xs">{r.editionSuperior}</p>{/if}
+											{#if m.platform_unknown}<p class="muted xs">{r.platformUnknown}</p>{/if}
+											{#if m.outcome === 'candidate' || m.outcome === 'exact'}
+												<p class="muted xs">{r.check}</p>
+											{/if}
+										</div>
+									</div>
+									{#if m.outcome !== 'family_excluded'}
+										<div class="acts">
+											{#if m.manual}
+												<Button
+													size="sm"
+													tone="ghost"
+													aria-label={`${r.undo}: ${wantedTitle} y ${heldTitle}`}
+													onclick={() => decide(it, m, 'clear')}>{r.undo}</Button
+												>
+											{:else}
+												<Button
+													size="sm"
+													aria-label={`${r.same}: ${wantedTitle} y ${heldTitle}`}
+													onclick={() => decide(it, m, 'same')}>{r.same}</Button
+												>
+												<Button
+													size="sm"
+													aria-label={`${r.different}: ${wantedTitle} y ${heldTitle}`}
+													onclick={() => decide(it, m, 'different')}>{r.different}</Button
+												>
+											{/if}
+										</div>
+									{/if}
+								</div>
+							{:else}
+								<p class="stamp no">{r.filters.no_match}</p>
+							{/each}
+						</div>
+						<div class="keep">
 							{#if it.kept}
-								<span class="text-sm text-muted">{r.kept}</span>
+								<span class="muted xs">{r.kept}</span>
 								<Button
 									size="sm"
 									tone="ghost"
@@ -294,83 +355,25 @@
 								>
 							{/if}
 						</div>
-					</div>
-					{#if !it.kept && !removable(it) && it.matches.some((m) => m.outcome === 'candidate')}
-						<p class="text-sm text-muted">{b.notCovered}</p>
-					{/if}
-
-					{#if it.repeated_in.length > 0}
-						<p class="text-sm text-muted">
-							{r.repeatedIn(it.repeated_in.map((p) => storeName(p.store)).join(', '))}
-						</p>
-					{/if}
-
-					{#if it.matches.length > 0}
-						<ul class="grid gap-2">
-							{#each sortMatches(it.matches) as m (`${m.held.store}:${m.held.native_id}:${m.access}`)}
-								<li class="grid gap-2 rounded-panel bg-panel p-3 sm:grid-cols-[1fr_auto]">
-									<div class="min-w-0 text-sm">
-										<p class="text-xs text-muted">
-											{r.held} · {storeName(m.held.store)} · {kindName(m.held.kind)} · {label(
-												r.access,
-												m.access
-											)}
-											{#if m.family_owners > 0}({r.familyOwners(m.family_owners)}){/if}
-										</p>
-										<p class="font-medium">
-											{m.held.title ?? es.library.untitled(m.held.native_id)}
-										</p>
-										<p class={outcomeClass(m.outcome)}>
-											{label(r.outcome, m.outcome)}{#if m.evidence}: {label(
-													r.evidence,
-													m.evidence
-												)}{/if}{#if m.reason && m.outcome !== 'family_excluded'}. {label(
-													r.reasons,
-													m.reason
-												)}{/if}
-										</p>
-										{#if m.edition_superior}<p class="text-muted">{r.editionSuperior}</p>{/if}
-										{#if m.platform_unknown}<p class="text-muted">{r.platformUnknown}</p>{/if}
-										{#if m.outcome === 'candidate' || m.outcome === 'exact'}
-											<p class="text-muted">{r.check}</p>
-										{/if}
-									</div>
-									{#if m.outcome !== 'family_excluded'}
-										{@const heldTitle = m.held.title ?? es.library.untitled(m.held.native_id)}
-										<div class="flex flex-wrap items-start gap-2">
-											{#if m.manual}
-												<Button
-													size="sm"
-													tone="ghost"
-													aria-label={`${r.undo}: ${wantedTitle} y ${heldTitle}`}
-													onclick={() => decide(it, m, 'clear')}
-												>
-													{r.undo}
-												</Button>
-											{:else}
-												<Button
-													size="sm"
-													aria-label={`${r.same}: ${wantedTitle} y ${heldTitle}`}
-													onclick={() => decide(it, m, 'same')}>{r.same}</Button
-												>
-												<Button
-													size="sm"
-													aria-label={`${r.different}: ${wantedTitle} y ${heldTitle}`}
-													onclick={() => decide(it, m, 'different')}
-												>
-													{r.different}
-												</Button>
-											{/if}
-										</div>
-									{/if}
-								</li>
-							{/each}
-						</ul>
-					{/if}
-				</li>
-			{/each}
-		</ul>
+					</li>
+				{/each}
+			</ul>
+		{/if}
 	{/if}
+</div>
+
+{#if loaded && !loadFailed}
+	<footer class="lote" class:on={selectedCount > 0}>
+		<p>
+			{#if selectedCount > 0}<b>{b.selected(selectedCount)}: {summary}</b>{:else}{b.hint}{/if}
+		</p>
+		{#if selectedCount > 0}
+			<Button tone="ghost" size="sm" onclick={() => selected.clear()}>{b.clearSelection}</Button>
+		{/if}
+		<Button tone="primary" disabled={selectedCount === 0} onclick={openBatch}
+			>{b.reviewBatch}</Button
+		>
+	</footer>
 {/if}
 
 <Dialog
@@ -414,3 +417,158 @@
 		>
 	{/snippet}
 </Dialog>
+
+<style>
+	.wrap {
+		flex: 1;
+		padding: 0 32px 24px;
+	}
+	.intro {
+		max-width: 70ch;
+		margin: 14px 0 0;
+		color: var(--color-muted);
+	}
+	.bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		margin: 14px -32px 0;
+		padding: 12px 32px;
+		border-block: 1px solid var(--color-border);
+	}
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.search {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 260px;
+		padding: 0 10px;
+		border: 2px solid var(--color-text);
+	}
+	.search input {
+		width: 100%;
+		min-height: 32px;
+		border: 0;
+		outline: none;
+		background: transparent;
+	}
+	.empty {
+		display: grid;
+		gap: 8px;
+		padding: 32px 0;
+	}
+	.empty .headline {
+		margin: 0;
+		font-size: 30px;
+	}
+	.empty p {
+		margin: 0;
+	}
+	.cmp {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.item {
+		display: grid;
+		grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.6fr) auto;
+		gap: 18px;
+		align-items: start;
+		padding: 16px 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+	.item.picked {
+		background: var(--color-next-wash);
+		box-shadow:
+			-32px 0 0 var(--color-next-wash),
+			32px 0 0 var(--color-next-wash);
+	}
+	.pick input {
+		width: 18px;
+		height: 18px;
+		margin-top: 4px;
+		accent-color: var(--color-text);
+	}
+	.half {
+		display: flex;
+		gap: 12px;
+		align-items: flex-start;
+	}
+	.half p {
+		margin: 0;
+	}
+	.tt {
+		font-size: 16px;
+		font-weight: 700;
+	}
+	.muted {
+		color: var(--color-muted);
+	}
+	.xs {
+		font-size: 12px;
+	}
+	.matches {
+		display: grid;
+		gap: 12px;
+	}
+	.match {
+		display: grid;
+		grid-template-columns: 150px minmax(0, 1fr);
+		gap: 8px 16px;
+		align-items: start;
+	}
+	.match .acts {
+		grid-column: 2;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.stamp {
+		margin: 0;
+		padding: 5px 8px;
+		border: 2px solid currentColor;
+		text-align: center;
+		font-size: 13px;
+		font-weight: 800;
+		font-variation-settings: 'wdth' 70;
+		text-transform: uppercase;
+	}
+	.stamp.ok {
+		color: var(--color-success);
+	}
+	.stamp.maybe {
+		color: var(--color-warning);
+	}
+	.stamp.no {
+		width: 150px;
+		color: var(--color-muted);
+		border-style: dashed;
+	}
+	.keep {
+		display: grid;
+		justify-items: end;
+		gap: 4px;
+	}
+	.lote {
+		position: sticky;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 12px 32px;
+		background: var(--color-page);
+		border-top: 3px solid var(--color-border-strong);
+	}
+	.lote.on {
+		background: var(--color-next-wash);
+	}
+	.lote p {
+		flex: 1;
+		margin: 0;
+	}
+</style>

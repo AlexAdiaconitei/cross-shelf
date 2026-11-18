@@ -198,7 +198,13 @@ mod tests {
             json!({"namespace": "ns4"}),
         ];
         let catalog = [
-            cat("a", "Alpha", &["applications", "games"], false, &["Windows"]),
+            cat(
+                "a",
+                "Alpha",
+                &["applications", "games"],
+                false,
+                &["Windows"],
+            ),
             cat("b", "Beta", &["applications", "games"], false, &["Mac"]),
         ];
         let (p, r) = map_library(&records, &catalog);

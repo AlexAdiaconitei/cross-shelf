@@ -9,6 +9,49 @@ export const es = {
 		resultados: 'Resultados',
 		ajustes: 'Ajustes'
 	},
+	shell: {
+		sections: { coleccion: 'Colección', limpieza: 'Limpieza', cuenta: 'Cuenta' },
+		openSidebar: 'Abrir la barra lateral',
+		foldSidebar: 'Plegar la barra lateral',
+		stores: 'Tiendas',
+		storeFilter: 'Filtrar la biblioteca por tienda',
+		syncFailed: 'falló la última sincronización',
+		toReview: (n: number) => (n === 1 ? '1 deseado por revisar' : `${n} deseados por revisar`)
+	},
+	shelf: {
+		storesOf: (title: string) => `Tiendas de ${title}`,
+		slot: {
+			own: 'tuyo',
+			temp: 'acceso temporal',
+			family: 'acceso familiar',
+			unknown: 'acceso sin clasificar',
+			wish: 'en tu wishlist',
+			none: 'no está'
+		},
+		grouped: 'Por juego',
+		separate: 'Por tienda',
+		groupingLabel: 'Cómo agrupar la biblioteca',
+		games: 'juegos',
+		family: 'familia',
+		wishedElsewhere: 'deseado en otra tienda',
+		onlyFamily: (n: number) =>
+			n === 0 ? 'Familia' : n === 1 ? 'Familia · de 1 persona' : `Familia · de ${n} personas`,
+		title: 'Título',
+		access: 'Acceso',
+		stores: 'Tiendas',
+		detail: 'Ficha técnica',
+		closeDetail: 'Cerrar la ficha',
+		detailOf: (title: string) => `Ficha de ${title}`,
+		products: 'Productos por tienda',
+		open: 'Abrir',
+		openIn: (store: string) => `Abrir en ${store}`,
+		reviewThis: 'Revisar este deseado',
+		familyNote: (n: number) =>
+			`Lo comparte ${n === 1 ? '1 persona' : `${n} personas`} de tu familia de Steam. No cuenta como tuyo en la limpieza salvo que lo actives en Ajustes.`,
+		inWishlist: 'en tu wishlist',
+		groupNote:
+			'Se agrupan por título solo para verlo junto. No es una decisión de equivalencia: eso se revisa en Limpieza.'
+	},
 	library: {
 		search: 'Buscar por título',
 		store: 'Tienda',
@@ -191,6 +234,7 @@ export const es = {
 		evidence: (store: string, why: string) => `Ya lo tienes en ${store}: ${why}`,
 		selected: (n: number) => (n === 1 ? '1 deseado seleccionado' : `${n} deseados seleccionados`),
 		reviewBatch: 'Revisar y quitar',
+		hint: 'Marca los deseados que quieras quitar. Solo se pueden marcar los que tienen evidencia firme; nada se quita hasta que confirmes.',
 		clearSelection: 'Quitar selección',
 		summary: (parts: string) => `Quitar ${parts}`,
 		part: (n: number, store: string) => `${n} ${n === 1 ? 'deseado' : 'deseados'} de ${store}`,
@@ -276,6 +320,13 @@ export const es = {
 		wishlist: 'Wishlist',
 		wishlist_write: 'Quitar y añadir deseados'
 	},
+	capabilityCard: {
+		complete: 'Al día',
+		partial: 'Lectura incompleta',
+		failed: (why: string) => `Falló: ${why}`,
+		dataFrom: (d: string) => `datos del ${d}`,
+		units: { library: 'juegos', family: 'compartidos', wishlist: 'deseados' }
+	},
 	capabilityState: {
 		not_synced: 'Sin sincronizar',
 		complete: (n: number, d: string) =>
@@ -342,7 +393,7 @@ export const es = {
 	},
 	updates: {
 		unsigned:
-			'Esta copia no se actualiza sola: es una versión de desarrollo. Las versiones publicadas buscan actualizaciones firmadas.',
+			'Esta copia no se actualiza sola: se construyó sin la firma de actualizaciones. Las versiones publicadas buscan actualizaciones firmadas.',
 		check: 'Buscar actualizaciones',
 		checking: 'Buscando…',
 		none: 'Tienes la última versión.',

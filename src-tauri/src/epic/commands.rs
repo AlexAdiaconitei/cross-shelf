@@ -382,18 +382,10 @@ pub async fn epic_sync(
     let mut catalog = Vec::new();
     if let Ok(recs) = &records {
         keep_raw("library", recs);
-        'outer: for (ns, ids) in super::sync::catalog_requests(recs) {
-            for chunk in ids.chunks(api::CATALOG_CHUNK) {
-                let refs: Vec<&str> = chunk.iter().map(String::as_str).collect();
-                match api::catalog_bulk_raw(&state.http, &t.access_token, &ns, &refs).await {
-                    Ok(mut v) => catalog.append(&mut v),
-                    Err(e) => {
-                        error = Some(format!("catalog: {e}"));
-                        break 'outer;
-                    }
-                }
-            }
-        }
+        let requests = super::sync::catalog_requests(recs);
+        let (items, _, first_error) = fetch_catalog(&state.http, &t.access_token, requests).await;
+        catalog = items;
+        error = first_error.map(|e| format!("catalog: {e}"));
         keep_raw("catalog", &catalog);
     }
 
@@ -480,6 +472,51 @@ pub struct EpicCatalogShape {
     pub catalog: Result<crate::shape::ShapeReport, String>,
 }
 
+/// Catalog requests in flight at once. Epic answers one namespace per request and a library has
+/// hundreds of them: in series the whole lookup took two minutes on a real 571-item library.
+const CATALOG_PARALLEL: usize = 6;
+
+/// Every catalog entry for the given namespaces, a few requests at a time. A failed chunk only
+/// leaves its items without catalog data; the count of failed chunks and the first error come back.
+async fn fetch_catalog(
+    http: &reqwest::Client,
+    bearer: &str,
+    requests: std::collections::BTreeMap<String, Vec<String>>,
+) -> (Vec<serde_json::Value>, usize, Option<String>) {
+    let mut jobs = requests.into_iter().flat_map(|(ns, ids)| {
+        ids.chunks(api::CATALOG_CHUNK)
+            .map(|c| (ns.clone(), c.to_vec()))
+            .collect::<Vec<_>>()
+    });
+    let mut running = tokio::task::JoinSet::new();
+    let (mut items, mut failed, mut first_error) = (Vec::new(), 0, None);
+    loop {
+        while running.len() < CATALOG_PARALLEL {
+            let Some((ns, ids)) = jobs.next() else { break };
+            let (http, bearer) = (http.clone(), bearer.to_owned());
+            running.spawn(async move {
+                let refs: Vec<&str> = ids.iter().map(String::as_str).collect();
+                api::catalog_bulk_raw(&http, &bearer, &ns, &refs).await
+            });
+        }
+        let Some(done) = running.join_next().await else {
+            break;
+        };
+        match done {
+            Ok(Ok(mut v)) => items.append(&mut v),
+            Ok(Err(e)) => {
+                failed += 1;
+                first_error.get_or_insert_with(|| e.to_string());
+            }
+            Err(e) => {
+                failed += 1;
+                first_error.get_or_insert_with(|| e.to_string());
+            }
+        }
+    }
+    (items, failed, first_error)
+}
+
 /// Looks up catalog data for the whole library and reports its shape. Both answers are kept in
 /// the local raw folder (like every sync) so the mapping can be built from what Epic really sends.
 #[tauri::command]
@@ -498,17 +535,7 @@ pub async fn epic_diag_catalog(
     }
     let by_ns = super::sync::catalog_requests(&records);
     let sampled = by_ns.values().map(Vec::len).sum();
-    let mut items = Vec::new();
-    let mut failed = 0;
-    for (ns, ids) in &by_ns {
-        for chunk in ids.chunks(api::CATALOG_CHUNK) {
-            let refs: Vec<&str> = chunk.iter().map(String::as_str).collect();
-            match api::catalog_bulk_raw(&state.http, &t.access_token, ns, &refs).await {
-                Ok(mut v) => items.append(&mut v),
-                Err(_) => failed += 1,
-            }
-        }
-    }
+    let (items, failed, _) = fetch_catalog(&state.http, &t.access_token, by_ns).await;
     if let Some(d) = &data_dir {
         crate::raw::save(d, "epic", "catalog", now, &items);
     }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PageHeader from '#lib/components/PageHeader.svelte';
 	import { invoke } from '@tauri-apps/api/core';
 	import WriteTest from '#lib/components/WriteTest.svelte';
 	import { es } from '#lib/strings.ts';
@@ -74,63 +75,65 @@
 	});
 </script>
 
-<h1 class="mb-2 text-xl font-semibold">{es.diag.title}</h1>
-<p class="mb-6 max-w-prose text-muted">{es.diag.intro}</p>
+<PageHeader title={es.diag.title} />
+<div class="page-body">
+	<p class="mb-6 max-w-prose text-muted">{es.diag.intro}</p>
 
-<div class="grid max-w-2xl gap-8">
-	{#each providers as p (p.id)}
-		<section aria-labelledby={p.id} class="grid gap-3">
-			<h2 id={p.id} class="font-medium">
-				{p.name}
-				<span class="ml-2 text-sm text-muted">
-					{connected[p.id] ? es.diag.connected : es.diag.notConnected}
-				</span>
-			</h2>
-			<div class="flex flex-wrap gap-2">
-				<button
-					class="rounded-control bg-accent px-3 py-2 text-on-accent disabled:opacity-50"
-					disabled={busy}
-					onclick={() => connect(p.id)}>{es.diag.connect}</button
-				>
-				<button
-					class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
-					disabled={busy || !connected[p.id]}
-					onclick={() => call(p.id, `${p.id}_diag_run`)}>{es.diag.run}</button
-				>
-				{#if p.expire}
+	<div class="grid max-w-2xl gap-8">
+		{#each providers as p (p.id)}
+			<section aria-labelledby={p.id} class="grid gap-3">
+				<h2 id={p.id} class="font-medium">
+					{p.name}
+					<span class="ml-2 text-sm text-muted">
+						{connected[p.id] ? es.diag.connected : es.diag.notConnected}
+					</span>
+				</h2>
+				<div class="flex flex-wrap gap-2">
+					<button
+						class="rounded-control bg-accent px-3 py-2 text-on-accent disabled:opacity-50"
+						disabled={busy}
+						onclick={() => connect(p.id)}>{es.diag.connect}</button
+					>
 					<button
 						class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
 						disabled={busy || !connected[p.id]}
-						onclick={() => call(p.id, `${p.id}_diag_expire`)}>{es.diag.expire}</button
+						onclick={() => call(p.id, `${p.id}_diag_run`)}>{es.diag.run}</button
 					>
+					{#if p.expire}
+						<button
+							class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
+							disabled={busy || !connected[p.id]}
+							onclick={() => call(p.id, `${p.id}_diag_expire`)}>{es.diag.expire}</button
+						>
+					{/if}
+					<button
+						class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
+						disabled={busy || !connected[p.id]}
+						onclick={() => call(p.id, `${p.id}_diag_shape`)}>{es.diag.shape}</button
+					>
+					{#each p.extras ?? [] as x (x.command)}
+						<button
+							class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
+							disabled={busy || !connected[p.id]}
+							onclick={() => call(p.id, x.command)}>{x.label}</button
+						>
+					{/each}
+					<button
+						class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
+						disabled={busy}
+						onclick={() => disconnect(p.id)}>{es.diag.disconnect}</button
+					>
+				</div>
+				{#if busy}<p class="text-muted" role="status">{es.diag.running}</p>{/if}
+				{#if outputs[p.id]}
+					<pre
+						class="overflow-x-auto rounded-panel border border-border bg-panel p-3 font-mono text-sm">{outputs[
+							p.id
+						]}</pre>
 				{/if}
-				<button
-					class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
-					disabled={busy || !connected[p.id]}
-					onclick={() => call(p.id, `${p.id}_diag_shape`)}>{es.diag.shape}</button
-				>
-				{#each p.extras ?? [] as x (x.command)}
-					<button
-						class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
-						disabled={busy || !connected[p.id]}
-						onclick={() => call(p.id, x.command)}>{x.label}</button
-					>
-				{/each}
-				<button
-					class="rounded-control bg-raised px-3 py-2 disabled:opacity-50"
-					disabled={busy}
-					onclick={() => disconnect(p.id)}>{es.diag.disconnect}</button
-				>
-			</div>
-			{#if busy}<p class="text-muted" role="status">{es.diag.running}</p>{/if}
-			{#if outputs[p.id]}
-				<pre
-					class="overflow-x-auto rounded-panel border border-border bg-panel p-3 font-mono text-sm">{outputs[
-						p.id
-					]}</pre>
-			{/if}
-		</section>
-	{/each}
-</div>
+			</section>
+		{/each}
+	</div>
 
-<div class="mt-10"><WriteTest /></div>
+	<div class="mt-10"><WriteTest /></div>
+</div>

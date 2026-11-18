@@ -142,7 +142,8 @@ Tauri instalada.
 ### 4.1 Stack y arranque [DECISIÓN]
 
 - Stack `desktop-tauri` de devkit: Tauri 2 + SvelteKit estático (`ssr = false`, adapter-static) +
-  Svelte 5 con runas + TypeScript estricto + Tailwind 4 + Ark UI + Tabler + Geist. Es la decisión
+  Svelte 5 con runas + TypeScript estricto + Tailwind 4 + Ark UI + Tabler + Archivo (antes Geist; cambio pedido por el usuario con el
+  rediseño de `DESIGN.md`). Es la decisión
   D7 de devkit y el precedente de Quick Media Organizer y GolanPlayer.
 - Nombre de repo `cross-shelf`, nombre visible «CrossShelf», identificador
   `com.alexadiaconitei.cross-shelf`. **El identificador no puede cambiar después sin perder datos

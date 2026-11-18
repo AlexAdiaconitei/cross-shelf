@@ -1,63 +1,106 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/geist';
+@import '@fontsource-variable/archivo/wdth.css';
 @import '@fontsource-variable/geist-mono';
 
 /*
- * Design tokens. Everything the components use is a semantic name (surface, text, accent),
- * never a raw palette colour, so a theme or a client brand is a change of these variables only.
- * Dark is the default; light applies with prefers-color-scheme or [data-theme='light'].
+ * Design tokens, world «Ficha de revista de quiosco» (DESIGN.md). Components use semantic names
+ * only. Neutrals come from one 11-step ramp; each store owns a colour (Steam cyan, GOG magenta,
+ * Epic ink) and yellow marks the next step and nothing else.
+ * Light and dark follow the system; [data-theme] forces one.
  */
 @theme {
-	--font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-sans: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'Geist Mono Variable', ui-monospace, monospace;
 
-	--color-page: oklch(0.18 0.012 240);
-	--color-panel: oklch(0.22 0.014 240);
-	--color-raised: oklch(0.27 0.016 240);
-	--color-border: oklch(0.34 0.016 240);
-	--color-text: oklch(0.94 0.008 240);
-	--color-muted: oklch(0.74 0.02 240);
-	--color-accent: oklch(0.78 0.1 210);
-	--color-on-accent: oklch(0.22 0.04 210);
-	--color-danger: oklch(0.8 0.1 25);
-	--color-success: oklch(0.82 0.09 150);
-	--color-warning: oklch(0.85 0.11 85);
+	--color-z0: oklch(0.995 0.003 95);
+	--color-z1: oklch(0.975 0.004 95);
+	--color-z2: oklch(0.94 0.005 95);
+	--color-z3: oklch(0.88 0.006 95);
+	--color-z4: oklch(0.8 0.006 95);
+	--color-z5: oklch(0.68 0.006 95);
+	--color-z6: oklch(0.56 0.006 95);
+	--color-z7: oklch(0.45 0.006 95);
+	--color-z8: oklch(0.34 0.006 95);
+	--color-z9: oklch(0.24 0.006 95);
+	--color-z10: oklch(0.17 0.005 95);
 
-	--radius-control: 0.375rem;
-	--radius-panel: 0.5rem;
-	--radius-dialog: 0.75rem;
+	--color-page: var(--color-z0);
+	--color-panel: var(--color-z1);
+	--color-raised: var(--color-z2);
+	--color-border: var(--color-z3);
+	--color-border-strong: var(--color-z10);
+	--color-text: var(--color-z10);
+	--color-muted: var(--color-z7);
+	--color-accent: var(--color-z10);
+	--color-on-accent: var(--color-z0);
 
-	--shadow-overlay: 0 20px 80px rgb(0 0 0 / 0.35);
+	--color-rail: var(--color-z10);
+	--color-rail-text: var(--color-z2);
+	--color-rail-muted: var(--color-z5);
+	--color-rail-raised: oklch(0.21 0.005 95);
+
+	--color-steam: oklch(0.6 0.13 235);
+	--color-gog: oklch(0.58 0.22 350);
+	--color-epic: var(--color-z10);
+	--color-on-store: oklch(0.99 0 0);
+	--color-on-epic: var(--color-z0);
+	--color-next: oklch(0.88 0.17 95);
+	--color-on-next: var(--color-z10);
+	--color-next-wash: oklch(0.97 0.05 98);
+
+	--color-danger: oklch(0.52 0.19 28);
+	--color-success: oklch(0.5 0.12 150);
+	--color-warning: oklch(0.52 0.13 60);
+
+	--radius-control: 0;
+	--radius-panel: 0;
+	--radius-dialog: 0;
+
+	--shadow-overlay: 0 20px 60px rgb(0 0 0 / 0.3);
 }
 
 @layer base {
-	:root[data-theme='light'] {
-		--color-page: oklch(0.97 0.004 240);
-		--color-panel: oklch(0.995 0.002 240);
-		--color-raised: oklch(0.94 0.006 240);
-		--color-border: oklch(0.86 0.01 240);
-		--color-text: oklch(0.24 0.02 240);
-		--color-muted: oklch(0.45 0.02 240);
-		--color-accent: oklch(0.48 0.09 210);
-		--color-on-accent: oklch(0.98 0.01 210);
-		--color-danger: oklch(0.5 0.17 25);
-		--color-success: oklch(0.48 0.11 150);
-		--color-warning: oklch(0.55 0.12 70);
+	:root[data-theme='dark'] {
+		--color-page: var(--color-z10);
+		--color-panel: oklch(0.2 0.005 95);
+		--color-raised: oklch(0.24 0.006 95);
+		--color-border: var(--color-z8);
+		--color-border-strong: var(--color-z2);
+		--color-text: var(--color-z1);
+		--color-muted: var(--color-z5);
+		--color-accent: var(--color-z1);
+		--color-on-accent: var(--color-z10);
+		--color-rail: oklch(0.12 0.004 95);
+		--color-steam: oklch(0.62 0.13 235);
+		--color-gog: oklch(0.62 0.2 350);
+		--color-epic: var(--color-z1);
+		--color-on-epic: var(--color-z10);
+		--color-next-wash: oklch(0.28 0.05 95);
+		--color-danger: oklch(0.72 0.15 28);
+		--color-success: oklch(0.75 0.12 150);
+		--color-warning: oklch(0.8 0.13 75);
 	}
 
-	@media (prefers-color-scheme: light) {
-		:root:not([data-theme='dark']) {
-			--color-page: oklch(0.97 0.004 240);
-			--color-panel: oklch(0.995 0.002 240);
-			--color-raised: oklch(0.94 0.006 240);
-			--color-border: oklch(0.86 0.01 240);
-			--color-text: oklch(0.24 0.02 240);
-			--color-muted: oklch(0.45 0.02 240);
-			--color-accent: oklch(0.48 0.09 210);
-			--color-on-accent: oklch(0.98 0.01 210);
-			--color-danger: oklch(0.5 0.17 25);
-			--color-success: oklch(0.48 0.11 150);
-			--color-warning: oklch(0.55 0.12 70);
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme='light']) {
+			--color-page: var(--color-z10);
+			--color-panel: oklch(0.2 0.005 95);
+			--color-raised: oklch(0.24 0.006 95);
+			--color-border: var(--color-z8);
+			--color-border-strong: var(--color-z2);
+			--color-text: var(--color-z1);
+			--color-muted: var(--color-z5);
+			--color-accent: var(--color-z1);
+			--color-on-accent: var(--color-z10);
+			--color-rail: oklch(0.12 0.004 95);
+			--color-steam: oklch(0.62 0.13 235);
+			--color-gog: oklch(0.62 0.2 350);
+			--color-epic: var(--color-z1);
+			--color-on-epic: var(--color-z10);
+			--color-next-wash: oklch(0.28 0.05 95);
+			--color-danger: oklch(0.72 0.15 28);
+			--color-success: oklch(0.75 0.12 150);
+			--color-warning: oklch(0.8 0.13 75);
 		}
 	}
 
@@ -65,17 +108,27 @@
 		background: var(--color-page);
 		color: var(--color-text);
 		font-family: var(--font-sans);
+		font-size: 14px;
+		line-height: 1.4;
+		font-variant-numeric: tabular-nums;
 		-webkit-tap-highlight-color: transparent;
+		scrollbar-color: var(--color-z5) transparent;
+		scrollbar-width: thin;
+	}
+
+	button,
+	select {
+		cursor: pointer;
 	}
 
 	:focus-visible {
-		outline: 2px solid var(--color-accent);
-		outline-offset: 3px;
+		outline: 2px solid var(--color-text);
+		outline-offset: 2px;
 	}
 
 	::selection {
-		background: var(--color-accent);
-		color: var(--color-on-accent);
+		background: var(--color-next);
+		color: var(--color-on-next);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
@@ -85,5 +138,36 @@
 			animation: none !important;
 			transition: none !important;
 		}
+	}
+}
+
+@layer components {
+	/* Body of a page under its header. */
+	.page-body {
+		padding: 20px 32px 40px;
+	}
+	/* Condensed grotesque: headings and labels only, never row data. */
+	.headline {
+		font-variation-settings: 'wdth' 62;
+		font-weight: 900;
+		text-transform: uppercase;
+		letter-spacing: -0.01em;
+		line-height: 0.88;
+	}
+	.figure {
+		font-variation-settings: 'wdth' 72;
+		font-weight: 800;
+		line-height: 1;
+	}
+	.label {
+		font-size: 11px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--color-muted);
+	}
+	/* A store tab: the corner cut of a magazine platform tab. */
+	.store-cut {
+		clip-path: polygon(0 0, 100% 0, 100% 100%, 9px 100%, 0 calc(100% - 9px));
 	}
 }

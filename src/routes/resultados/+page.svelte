@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PageHeader from '#lib/components/PageHeader.svelte';
 	import { onMount } from 'svelte';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import type { BatchView } from '#lib/bindings/BatchView.ts';
@@ -98,78 +99,80 @@
 	onMount(load);
 </script>
 
-<h1 class="mb-2 text-xl font-semibold">{es.nav.resultados}</h1>
-<p class="mb-6 max-w-prose text-muted">{r.intro}</p>
+<PageHeader title={es.nav.resultados} />
+<div class="page-body">
+	<p class="mb-6 max-w-prose text-muted">{r.intro}</p>
 
-{#if loadFailed}
-	<p role="alert" class="text-danger">{es.library.loadError}</p>
-{:else if loaded && batches.length === 0}
-	<div class="rounded-panel border border-border p-6">
-		<p class="font-medium">{r.empty}</p>
-		<p class="text-muted">{r.emptyBody}</p>
-	</div>
-{:else}
-	<div class="grid max-w-4xl divide-y divide-border border-y border-border">
-		{#each batches as bv (bv.id)}
-			<section aria-labelledby="batch-{bv.id}" class="grid gap-3 py-5">
-				<header class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-					<h2 id="batch-{bv.id}" class="font-semibold">
-						{es.batch.summary(es.batch.part(bv.ops.length, storeName(bv.store)))}
-					</h2>
-					<p class="text-sm text-muted">
-						{label(r.state, bv.state)} · {r.created(when(bv.created_at))}
+	{#if loadFailed}
+		<p role="alert" class="text-danger">{es.library.loadError}</p>
+	{:else if loaded && batches.length === 0}
+		<div class="rounded-panel border border-border p-6">
+			<p class="font-medium">{r.empty}</p>
+			<p class="text-muted">{r.emptyBody}</p>
+		</div>
+	{:else}
+		<div class="grid max-w-4xl divide-y divide-border border-y border-border">
+			{#each batches as bv (bv.id)}
+				<section aria-labelledby="batch-{bv.id}" class="grid gap-3 py-5">
+					<header class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+						<h2 id="batch-{bv.id}" class="font-semibold">
+							{es.batch.summary(es.batch.part(bv.ops.length, storeName(bv.store)))}
+						</h2>
+						<p class="text-sm text-muted">
+							{label(r.state, bv.state)} · {r.created(when(bv.created_at))}
+						</p>
+					</header>
+
+					<ul class="grid gap-1.5 text-sm">
+						{#each bv.ops as o (o.op_id)}
+							<li class="flex flex-wrap items-center justify-between gap-2">
+								<div class="min-w-0">
+									<p class="truncate">{o.title ?? es.library.untitled(o.native_id)}</p>
+									<p class={statusClass(o.status)}>
+										{o.status === 'pending' && bv.write_validated
+											? r.op.pendingSend
+											: label(r.op, o.status)}
+									</p>
+								</div>
+								{#if bv.state === 'confirmed' && o.status === 'pending' && !bv.write_validated}
+									<Button
+										size="sm"
+										onclick={() => openUrl(productUrl(bv.store, o.native_id, null)).catch(() => {})}
+										>{r.openStore}</Button
+									>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+
+					<div class="flex flex-wrap items-center gap-2">
+						{#if bv.state === 'confirmed' && bv.write_validated}
+							<Button tone="danger" disabled={busy !== null} onclick={() => send(bv)}>
+								{r.resume}
+							</Button>
+							<Button tone="ghost" disabled={busy !== null} onclick={() => cancel(bv)}>
+								{r.cancel}
+							</Button>
+							<span class="text-sm text-muted">{r.sendHint}</span>
+						{:else if retryable(bv)}
+							<Button disabled={busy !== null} onclick={() => retry(bv)}>{r.retry}</Button>
+						{:else if bv.state === 'confirmed'}
+							<Button tone="primary" disabled={busy !== null} onclick={() => reread(bv)}>
+								{r.reread}
+							</Button>
+							<span class="text-sm text-muted">{r.rereadHint}</span>
+						{/if}
+						{#if bv.state === 'draft' || bv.state === 'invalidated'}
+							<Button tone="ghost" disabled={busy !== null} onclick={() => discard(bv)}>
+								{r.discard}
+							</Button>
+						{/if}
+					</div>
+					<p class="text-sm text-warning" role="status">
+						{busy === bv.id ? es.connections.working : (notes[bv.id] ?? '')}
 					</p>
-				</header>
-
-				<ul class="grid gap-1.5 text-sm">
-					{#each bv.ops as o (o.op_id)}
-						<li class="flex flex-wrap items-center justify-between gap-2">
-							<div class="min-w-0">
-								<p class="truncate">{o.title ?? es.library.untitled(o.native_id)}</p>
-								<p class={statusClass(o.status)}>
-									{o.status === 'pending' && bv.write_validated
-										? r.op.pendingSend
-										: label(r.op, o.status)}
-								</p>
-							</div>
-							{#if bv.state === 'confirmed' && o.status === 'pending' && !bv.write_validated}
-								<Button
-									size="sm"
-									onclick={() => openUrl(productUrl(bv.store, o.native_id, null)).catch(() => {})}
-									>{r.openStore}</Button
-								>
-							{/if}
-						</li>
-					{/each}
-				</ul>
-
-				<div class="flex flex-wrap items-center gap-2">
-					{#if bv.state === 'confirmed' && bv.write_validated}
-						<Button tone="danger" disabled={busy !== null} onclick={() => send(bv)}>
-							{r.resume}
-						</Button>
-						<Button tone="ghost" disabled={busy !== null} onclick={() => cancel(bv)}>
-							{r.cancel}
-						</Button>
-						<span class="text-sm text-muted">{r.sendHint}</span>
-					{:else if retryable(bv)}
-						<Button disabled={busy !== null} onclick={() => retry(bv)}>{r.retry}</Button>
-					{:else if bv.state === 'confirmed'}
-						<Button tone="primary" disabled={busy !== null} onclick={() => reread(bv)}>
-							{r.reread}
-						</Button>
-						<span class="text-sm text-muted">{r.rereadHint}</span>
-					{/if}
-					{#if bv.state === 'draft' || bv.state === 'invalidated'}
-						<Button tone="ghost" disabled={busy !== null} onclick={() => discard(bv)}>
-							{r.discard}
-						</Button>
-					{/if}
-				</div>
-				<p class="text-sm text-warning" role="status">
-					{busy === bv.id ? es.connections.working : (notes[bv.id] ?? '')}
-				</p>
-			</section>
-		{/each}
-	</div>
-{/if}
+				</section>
+			{/each}
+		</div>
+	{/if}
+</div>

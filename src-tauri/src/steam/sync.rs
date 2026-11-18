@@ -166,10 +166,7 @@ pub fn map_wishlist(items: &[Value]) -> Vec<WishRow> {
                 native_id: id_text(i.get("appid"))?,
                 // In the real list (18 Nov 2026) 321 of 344 entries had priority 0 and the rest
                 // unique, non-consecutive ranks from 2 up: 0 means "not ranked", not "first".
-                priority: i
-                    .get("priority")
-                    .and_then(Value::as_i64)
-                    .filter(|p| *p > 0),
+                priority: i.get("priority").and_then(Value::as_i64).filter(|p| *p > 0),
                 added_at: i.get("date_added").and_then(Value::as_i64),
                 confirmed: true,
             })

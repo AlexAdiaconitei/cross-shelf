@@ -62,3 +62,39 @@ export function productUrl(store: string, nativeId: string, url: string | null):
 		'https://store.steampowered.com/wishlist/'
 	);
 }
+
+export type CapabilityLine = {
+	/** Short state, never a success when the read was partial or failed. */
+	state: string;
+	tone: Tone;
+	count: number | null;
+	unit: string | null;
+	/** Date of the data shown, when there is any. */
+	date: string | null;
+};
+
+/** One line of a store card: the count big, the state short, the date of the data shown. */
+export function capabilityLine(c: CapabilityView): CapabilityLine {
+	const card = es.capabilityCard;
+	const unit = card.units[c.capability as keyof typeof card.units] ?? null;
+	const date = c.last_complete_at === null ? null : when(c.last_complete_at);
+	const count = unit === null ? null : c.item_count;
+	switch (c.state) {
+		case 'complete':
+			return { state: card.complete, tone: 'ok', count, unit, date };
+		case 'partial':
+			return { state: card.partial, tone: 'warn', count, unit, date: date && card.dataFrom(date) };
+		case 'failed':
+			return {
+				state: card.failed(errorText(c.error_code)),
+				tone: 'warn',
+				count: date ? count : null,
+				unit,
+				date: date && card.dataFrom(date)
+			};
+		default: {
+			const t = capabilityText(c);
+			return { state: t.text, tone: t.tone, count: null, unit: null, date: null };
+		}
+	}
+}

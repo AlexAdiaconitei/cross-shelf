@@ -31,7 +31,7 @@ regex = "1.13.1"
 thiserror = "2.0.21"
 log = "0.4.35"
 url = "2.5.8"
-tokio = { version = "1.54.1", features = ["macros", "time"] }
+tokio = { version = "1.54.1", features = ["macros", "rt", "time"] }
 windows = { version = "0.62.2", features = ["Win32_Security_Cryptography", "Win32_Foundation", "Win32_System_Memory"] }
 reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "json", "gzip", "query", "form"] }
 unicode-normalization = "0.1.26"

@@ -616,6 +616,9 @@ mod tests {
             parse_profile_xml_name("<steamID><![CDATA[ ]]></steamID>"),
             None
         );
-        assert_eq!(parse_profile_xml_name("<response><error/></response>"), None);
+        assert_eq!(
+            parse_profile_xml_name("<response><error/></response>"),
+            None
+        );
     }
 }

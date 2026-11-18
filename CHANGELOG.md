@@ -9,6 +9,19 @@ the matching `## [X.Y.Z]` section, and CI refuses a tag without one.
 
 ## [Unreleased]
 
+### Changed
+
+- Diseño nuevo de toda la app: cada tienda tiene su color y su logo (Steam cian, GOG magenta, Epic negro), y el amarillo marca solo el siguiente paso. Titulares en Archivo condensada.
+- La app se abre en la Biblioteca. La barra lateral se pliega en un raíl de iconos o se abre con secciones, el número de deseados por revisar y el estado de cada tienda.
+- Biblioteca agrupa por juego los productos con el mismo título en varias tiendas (con un conmutador para verlos por tienda) y abre una ficha lateral con los productos y accesos de cada juego. Las pestañas Steam, GOG, Epic y Steam familiar pasan a ser filtros de tienda y de acceso que se combinan.
+- Conexiones enseña cada recuento en grande (juegos, compartidos, deseados) con su estado y la fecha de los datos.
+- Revisar limpieza compara cada deseado con lo que ya tienes en dos mitades, con un sello de veredicto, y el lote queda fijo abajo.
+
+### Fixed
+
+- Sincronizar Epic tarda unos 20 segundos en vez de más de dos minutos: las fichas del catálogo se piden varias a la vez.
+- Biblioteca escribe «familia de Steam» con mayúscula, y Ajustes explica bien por qué una copia construida sin firma no se actualiza sola.
+
 ## [0.1.0] - 2026-11-18
 
 Primera versión. CrossShelf reúne tus bibliotecas de Steam, GOG y Epic y te ayuda a limpiar tus
