@@ -88,20 +88,20 @@ impl DiagError {
     fn not_connected() -> Self {
         Self {
             code: "not_connected",
-            message: "Epic no está conectado".into(),
+            message: "Epic is not connected".into(),
         }
     }
     fn needs_reauth() -> Self {
         Self {
             code: "needs_reauth",
-            message: "Vuelve a conectar Epic".into(),
+            message: "Reconnect Epic".into(),
         }
     }
     fn from_epic(e: EpicError) -> Self {
         match e {
             EpicError::Network(_) => Self {
                 code: "network",
-                message: "Sin red o Epic no responde".into(),
+                message: "No network or Epic is not answering".into(),
             },
             EpicError::Rejected => Self::needs_reauth(),
             other => Self {
@@ -166,7 +166,7 @@ pub async fn epic_connect(
         let _ = w.set_focus();
         return Err(DiagError {
             code: "in_progress",
-            message: "Ya hay un acceso a Epic abierto".into(),
+            message: "A Epic sign-in window is already open".into(),
         });
     }
     let dir = app
@@ -184,7 +184,7 @@ pub async fn epic_connect(
 
     // No capability targets this window: the provider page cannot call app commands.
     let win = WebviewWindowBuilder::new(&app, LOGIN_LABEL, WebviewUrl::External(api::login_url()))
-        .title("Conectar Epic")
+        .title("CrossShelf · Epic")
         .inner_size(520.0, 780.0)
         .data_directory(dir)
         .on_navigation(move |url| {
@@ -240,9 +240,9 @@ pub async fn epic_connect(
             message: format!(
                 "{}. Hosts visitados: {}",
                 if landed {
-                    "Epic no devolvió un código legible"
+                    "Epic did not return a readable code"
                 } else {
-                    "Acceso cancelado"
+                    "Sign-in cancelled"
                 },
                 seen.join(" > ")
             ),
@@ -302,7 +302,7 @@ pub async fn epic_diag_run(state: State<'_, EpicState>) -> Result<EpicReport, Di
         access_token_was_expired: was_expired,
         token_refreshed,
         library_service_items: lib_service.map_err(|e| e.to_string()),
-        wishlist: "no implementada: necesita la sesión web de la tienda (capacidad aparte)",
+        wishlist: "not implemented: needs the store web session (a separate capability)",
     })
 }
 

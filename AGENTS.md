@@ -1,7 +1,8 @@
 # CrossShelf
 
 Aplicación de escritorio para Windows que reúne las bibliotecas de Steam, GOG y Epic y ayuda a limpiar wishlists cuando el juego ya está en otra tienda. Pensada para personas sin conocimientos técnicos. Tauri 2 + SvelteKit estático + Svelte 5 + Rust.
-La especificación completa es `docs/crossshelf-build-prompt.md` y manda sobre cualquier otra fuente. Documentación y copy en español.
+La especificación completa es `docs/crossshelf-build-prompt.md` y manda sobre cualquier otra fuente. Documentación en español. La interfaz está en inglés (por defecto) y español: todo texto visible va
+en `src/lib/i18n/en.ts` y `es.ts`, con las mismas claves (lo comprueba `i18n.test.ts`).
 
 ## Commands
 

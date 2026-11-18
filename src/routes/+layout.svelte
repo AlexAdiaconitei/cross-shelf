@@ -20,13 +20,14 @@
 	} from '#lib/shell/state.svelte.ts';
 	import logoSmall from '#lib/assets/brand/cross-shelf-small-on-dark.svg';
 	import logoWide from '#lib/assets/brand/cross-shelf-horizontal-on-dark.svg';
-	import { es } from '#lib/strings.ts';
+	import { intl, lang, tr } from '#lib/i18n/index.ts';
 
 	let { children } = $props();
 	let open = $state(false);
 
 	onMount(() => {
 		open = readSidebarOpen();
+		document.documentElement.lang = lang;
 		// No browser menu on right click: it offers reload and print, not app actions. Text fields
 		// keep it for copy and paste, and dev builds keep it for the inspector.
 		const noMenu = (e: MouseEvent) => {
@@ -58,11 +59,11 @@
 			const lib = c.capabilities.find((x) => x.capability === 'library');
 			const why =
 				c.state !== 'connected'
-					? es.connections.disconnected
+					? tr.connections.disconnected
 					: lib?.state === 'partial'
-						? es.capabilityState.partial
+						? tr.capabilityState.partial
 						: lib?.state === 'failed'
-							? es.shell.syncFailed
+							? tr.shell.syncFailed
 							: '';
 			return { store: c.provider, count: lib?.item_count ?? null, why };
 		})
@@ -70,20 +71,20 @@
 </script>
 
 <div class="shell" class:open>
-	<nav class="side" aria-label={es.appName}>
+	<nav class="side" aria-label={tr.appName}>
 		<div class="brand">
 			{#if open}
-				<img class="mark wide" src={logoWide} alt={es.appName} />
+				<img class="mark wide" src={logoWide} alt={tr.appName} />
 			{:else}
-				<img class="mark small" src={logoSmall} alt={es.appName} />
+				<img class="mark small" src={logoSmall} alt={tr.appName} />
 			{/if}
 			<button
 				type="button"
 				class="fold"
 				onclick={toggle}
 				aria-expanded={open}
-				aria-label={open ? es.shell.foldSidebar : es.shell.openSidebar}
-				title={open ? es.shell.foldSidebar : es.shell.openSidebar}
+				aria-label={open ? tr.shell.foldSidebar : tr.shell.openSidebar}
+				title={open ? tr.shell.foldSidebar : tr.shell.openSidebar}
 			>
 				{#if open}<IconLayoutSidebarLeftCollapse size={20} />{:else}<IconLayoutSidebarLeftExpand
 						size={20}
@@ -119,13 +120,13 @@
 
 		{#if open && storeBlocks.length}
 			<div class="stores">
-				<p class="label grp">{es.shell.stores}</p>
+				<p class="label grp">{tr.shell.stores}</p>
 				{#each storeBlocks as b (b.store)}
 					<a href={resolve('/conexiones')} class="st {b.store}">
 						<span class="tab store-cut"
 							><StoreLogo store={b.store} size={14} />{storeName(b.store)}</span
 						>
-						<b>{b.count?.toLocaleString('es') ?? '—'}</b>
+						<b>{b.count?.toLocaleString(intl) ?? '—'}</b>
 						{#if b.why}<span class="w" title={b.why}><IconAlertTriangle size={15} /></span>{/if}
 					</a>
 					{#if b.why}<p class="why">{storeName(b.store)}: {b.why}</p>{/if}

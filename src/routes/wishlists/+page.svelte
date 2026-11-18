@@ -23,7 +23,7 @@
 	import { visibleRange, type Entry } from '#lib/library/filter.ts';
 	import { buildShelf, shelfKey, type Shelf, type Slot, type Store } from '#lib/library/shelf.ts';
 	import { shell } from '#lib/shell/state.svelte.ts';
-	import { es } from '#lib/strings.ts';
+	import { intl, tr } from '#lib/i18n/index.ts';
 	import {
 		applyWishFilters,
 		isWishFiltering,
@@ -36,7 +36,7 @@
 
 	const ROW = 56;
 	const COLS = '30px minmax(0, 1fr) 110px 130px 28px 230px';
-	const w$ = es.wishlist;
+	const w$ = tr.wishlist;
 	const wishStores = ['steam', 'gog'] as const;
 	const statuses: [WishFilter, string][] = [
 		['all', w$.statusAll],
@@ -92,7 +92,7 @@
 			(Object.entries(r.slots) as [Store, Slot][]).some(([s, v]) => s !== w.store && v === 'own')
 		);
 	};
-	const titleOf = (w: WishlistEntry) => w.title ?? es.library.untitled(w.native_id);
+	const titleOf = (w: WishlistEntry) => w.title ?? tr.library.untitled(w.native_id);
 	const flags = (w: WishlistEntry) => [
 		...(w.already_held_here ? [w$.heldHere] : []),
 		...(!w.confirmed ? [w$.unconfirmed] : [])
@@ -104,10 +104,10 @@
 			.map((s) => {
 				const name = storeName(s.store);
 				if (s.last_complete_at === null)
-					return { warn: true, text: es.library.neverComplete(name) };
+					return { warn: true, text: tr.library.neverComplete(name) };
 				if (s.last_state !== 'complete')
-					return { warn: true, text: es.library.lastFailed(name, when(s.last_complete_at)) };
-				return { warn: false, text: es.library.dataFrom(name, when(s.last_complete_at)) };
+					return { warn: true, text: tr.library.lastFailed(name, when(s.last_complete_at)) };
+				return { warn: false, text: tr.library.dataFrom(name, when(s.last_complete_at)) };
 			})
 	);
 	const about = $derived([
@@ -123,10 +123,10 @@
 		const own = (r?.products ?? []).map((p) => ({
 			...p,
 			note: p.access
-				.map((a) => es.review.access[a.class as keyof typeof es.review.access] ?? a.class)
+				.map((a) => tr.review.access[a.class as keyof typeof tr.review.access] ?? a.class)
 				.join(', ')
 		}));
-		return [{ ...w, note: es.shelf.inWishlist }, ...own];
+		return [{ ...w, note: tr.shelf.inWishlist }, ...own];
 	}
 
 	async function load() {
@@ -156,33 +156,33 @@
 
 <div class="page" class:withDetail={sel}>
 	<section class="main">
-		<PageHeader title={es.nav.wishlists}>
+		<PageHeader title={tr.nav.wishlists}>
 			{#snippet info()}
-				<InfoTip label={es.nav.wishlists} lines={about} />
+				<InfoTip label={tr.nav.wishlists} lines={about} />
 			{/snippet}
 			{#snippet figures()}
 				<div>
-					<dt>{es.shell.wishes}</dt>
-					<dd>{entries.length.toLocaleString('es')}</dd>
+					<dt>{tr.shell.wishes}</dt>
+					<dd>{entries.length.toLocaleString(intl)}</dd>
 				</div>
 				{#each perStore as [x, n] (x)}
 					<div>
 						<dt><StoreLogo store={x} size={12} /> {storeName(x)}</dt>
-						<dd>{n.toLocaleString('es')}</dd>
+						<dd>{n.toLocaleString(intl)}</dd>
 					</div>
 				{/each}
 			{/snippet}
 			{#snippet action()}
 				{#if shell.toReview > 0}
 					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}
-						>{es.shell.toReview(shell.toReview)} <IconArrowRight size={16} /></a
+						>{tr.shell.toReview(shell.toReview)} <IconArrowRight size={16} /></a
 					>
 				{/if}
 			{/snippet}
 		</PageHeader>
 
 		{#if loadFailed}
-			<p role="alert" class="page-body text-danger">{es.library.loadError}</p>
+			<p role="alert" class="page-body text-danger">{tr.library.loadError}</p>
 		{:else if loaded}
 			<form class="toolbar" role="search" onsubmit={(e) => e.preventDefault()}>
 				<label class="control control-search">
@@ -201,12 +201,12 @@
 					type="button"
 					class="control icon"
 					disabled={!isWishFiltering(wishlistUi.filters)}
-					aria-label={es.library.clear}
-					title={es.library.clear}
+					aria-label={tr.library.clear}
+					title={tr.library.clear}
 					onclick={() => (wishlistUi.filters = { ...noWishFilters, sort: wishlistUi.filters.sort })}
 					><IconFilterOff size={16} /></button
 				>
-				<div class="push segmented" role="group" aria-label={es.library.store}>
+				<div class="push segmented" role="group" aria-label={tr.library.store}>
 					{#each wishStores as x (x)}
 						<button
 							type="button"
@@ -230,10 +230,10 @@
 			</form>
 
 			<div class="shelf-status">
-				<p aria-live="polite">{es.library.showing(shown.length, entries.length)}</p>
+				<p aria-live="polite">{tr.library.showing(shown.length, entries.length)}</p>
 				<span class="push"></span>
 				<InfoTip
-					label={es.shelf.dataInfo}
+					label={tr.shelf.dataInfo}
 					lines={notices.map((n) => n.text)}
 					warn={notices.some((n) => n.warn)}
 				/>
@@ -244,7 +244,7 @@
 					<p class="headline">{w$.noData}</p>
 					<p>{w$.noDataBody}</p>
 					<a href={resolve('/conexiones')} class={button({ tone: 'primary' })}
-						>{es.nav.conexiones}</a
+						>{tr.nav.conexiones}</a
 					>
 				</div>
 			{:else if view === 'sync_failed'}
@@ -264,10 +264,10 @@
 			{:else}
 				<div class="shelf" style="--cols: {COLS}">
 					<div class="shelf-head" aria-hidden="true">
-						<span></span><span>{es.shelf.title}</span><span class="wide-only"
+						<span></span><span>{tr.shelf.title}</span><span class="wide-only"
 							>{w$.sortPriority}</span
 						><span class="wide-only">{w$.sortAdded}</span><span></span><span class="text-right"
-							>{es.shelf.stores}</span
+							>{tr.shelf.stores}</span
 						>
 					</div>
 					<!-- A scrollable region must be reachable with the keyboard (WCAG 2.1.1). -->
@@ -276,7 +276,7 @@
 						class="shelf-scroll"
 						tabindex="0"
 						role="region"
-						aria-label={es.nav.wishlists}
+						aria-label={tr.nav.wishlists}
 						bind:clientHeight={viewport}
 						onscroll={(e) => (scrollTop = e.currentTarget.scrollTop)}
 					>
@@ -335,7 +335,7 @@
 			onclose={() => (selected = null)}
 		>
 			{#snippet spec()}
-				<dt>{es.library.store}</dt>
+				<dt>{tr.library.store}</dt>
 				<dd>{storeName(sel.store)}</dd>
 				{#if sel.priority !== null}<dt>{w$.sortPriority}</dt>
 					<dd>{sel.priority}</dd>{/if}
@@ -346,7 +346,7 @@
 			{/snippet}
 			{#snippet actions()}
 				{#if ownedElsewhere(sel)}
-					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}>{es.shelf.reviewThis}</a>
+					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}>{tr.shelf.reviewThis}</a>
 				{/if}
 			{/snippet}
 		</DetailPanel>

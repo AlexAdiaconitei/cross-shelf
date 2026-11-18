@@ -150,7 +150,8 @@ Tauri instalada.
   y la cadena de updates.** [PREGUNTAR] si el nombre provisional pasa a definitivo antes del primer
   release público; el identificador se fija ya.
 - UI y documentación en español. Cadenas de UI centralizadas en un módulo para poder traducir más
-  adelante; sin librería de i18n en v1.
+  adelante; sin librería de i18n en v1. (Actualizado en 0.2.0 a petición del usuario: la UI está en
+  inglés por defecto y en español, elegible en Ajustes, con los diccionarios de `src/lib/i18n/`.)
 - Arranque: `devkit new desktop-tauri <dir> --name "CrossShelf"`. La carpeta destino ya contiene
   `.agents/`, `.claude/`, `skills-lock.json` y `docs/`. Si el generador rechaza la carpeta no vacía,
   genera en una carpeta temporal y mueve el resultado, conservando esos cuatro elementos. Después

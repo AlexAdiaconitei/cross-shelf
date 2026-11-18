@@ -34,10 +34,10 @@
 	} from '#lib/library/shelf.ts';
 	import { libraryUi } from '#lib/library/state.svelte.ts';
 	import { shell } from '#lib/shell/state.svelte.ts';
-	import { es } from '#lib/strings.ts';
+	import { intl, tr } from '#lib/i18n/index.ts';
 
 	const ROW = 56;
-	const s = es.shelf;
+	const s = tr.shelf;
 	const COLS = '30px minmax(0, 1fr) 130px 240px 230px';
 
 	let entries = $state<Entry[]>([]);
@@ -71,10 +71,10 @@
 	const sel = $derived(list.find((r) => r.key === selected) ?? null);
 
 	const scopes: [Scope, string][] = [
-		['all', es.library.scopeAll],
-		['own', es.library.scopeOwn],
-		['family', es.library.scopeFamily],
-		['family_only', es.library.scopeFamilyOnly]
+		['all', tr.library.scopeAll],
+		['own', tr.library.scopeOwn],
+		['family', tr.library.scopeFamily],
+		['family_only', tr.library.scopeFamilyOnly]
 	];
 
 	// Where the shown data really comes from, one line per store and resource, behind an icon.
@@ -82,14 +82,14 @@
 		status
 			.filter((x) => x.resource !== 'wishlist')
 			.map((x) => {
-				const part = es.capabilities[x.resource as keyof typeof es.capabilities] ?? x.resource;
+				const part = tr.capabilities[x.resource as keyof typeof tr.capabilities] ?? x.resource;
 				// Only the first letter: «Familia de Steam» keeps its proper noun.
 				const name = `${storeName(x.store)} (${part.charAt(0).toLowerCase()}${part.slice(1)})`;
 				if (x.last_complete_at === null)
-					return { warn: true, text: es.library.neverComplete(name) };
+					return { warn: true, text: tr.library.neverComplete(name) };
 				if (x.last_state !== 'complete')
-					return { warn: true, text: es.library.lastFailed(name, when(x.last_complete_at)) };
-				return { warn: false, text: es.library.dataFrom(name, when(x.last_complete_at)) };
+					return { warn: true, text: tr.library.lastFailed(name, when(x.last_complete_at)) };
+				return { warn: false, text: tr.library.dataFrom(name, when(x.last_complete_at)) };
 			})
 	);
 
@@ -98,12 +98,12 @@
 		const first = held[0];
 		if (!first) return '';
 		if (r.slots[first] === 'family') return s.onlyFamily(r.familyNames, r.familyOwners.length);
-		return es.library[
+		return tr.library[
 			r.slots[first] === 'own' ? 'owned' : r.slots[first] === 'temp' ? 'temporary' : 'unknownAccess'
 		];
 	}
 
-	const accessName = (cls: string) => es.review.access[cls as keyof typeof es.review.access] ?? cls;
+	const accessName = (cls: string) => tr.review.access[cls as keyof typeof tr.review.access] ?? cls;
 
 	const detailProducts = (r: Shelf) => [
 		...r.products.map((p) => ({ ...p, note: p.access.map((a) => accessName(a.class)).join(', ') })),
@@ -133,46 +133,46 @@
 
 <div class="page" class:withDetail={sel}>
 	<section class="main">
-		<PageHeader title={es.nav.biblioteca}>
+		<PageHeader title={tr.nav.biblioteca}>
 			{#snippet figures()}
 				<div>
 					<dt>{s.games}</dt>
-					<dd>{allRows.length.toLocaleString('es')}</dd>
+					<dd>{allRows.length.toLocaleString(intl)}</dd>
 				</div>
 				{#each stores as x (x)}
 					<div>
 						<dt><StoreLogo store={x} size={12} /> {storeName(x)}</dt>
-						<dd>{(count.byStore[x] ?? 0).toLocaleString('es')}</dd>
+						<dd>{(count.byStore[x] ?? 0).toLocaleString(intl)}</dd>
 					</div>
 				{/each}
 				<div>
 					<dt>{s.family}</dt>
-					<dd>{count.familyAccess.toLocaleString('es')}</dd>
+					<dd>{count.familyAccess.toLocaleString(intl)}</dd>
 				</div>
 			{/snippet}
 			{#snippet action()}
 				{#if shell.toReview > 0}
 					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}
-						>{es.shell.toReview(shell.toReview)} <IconArrowRight size={16} /></a
+						>{tr.shell.toReview(shell.toReview)} <IconArrowRight size={16} /></a
 					>
 				{/if}
 			{/snippet}
 		</PageHeader>
 
 		{#if loadFailed}
-			<p role="alert" class="page-body text-danger">{es.library.loadError}</p>
+			<p role="alert" class="page-body text-danger">{tr.library.loadError}</p>
 		{:else if loaded}
 			<form class="toolbar" role="search" onsubmit={(e) => e.preventDefault()}>
 				<label class="control control-search">
 					<IconSearch size={16} />
-					<span class="sr-only">{es.library.search}</span>
+					<span class="sr-only">{tr.library.search}</span>
 					<input
 						type="search"
-						placeholder="{es.library.search}…"
+						placeholder="{tr.library.search}…"
 						bind:value={libraryUi.filters.text}
 					/>
 				</label>
-				<div class="chips when-roomy" role="group" aria-label={es.library.scope}>
+				<div class="chips when-roomy" role="group" aria-label={tr.library.scope}>
 					{#each scopes as [k, label] (k)}
 						<button
 							type="button"
@@ -184,25 +184,25 @@
 				</div>
 				<select
 					class="control when-tight"
-					aria-label={es.library.scope}
+					aria-label={tr.library.scope}
 					bind:value={libraryUi.filters.scope}
 				>
-					{#each scopes as [k, label] (k)}<option value={k}>{es.library.scope}: {label}</option
+					{#each scopes as [k, label] (k)}<option value={k}>{tr.library.scope}: {label}</option
 						>{/each}
 				</select>
-				<select class="control" aria-label={es.library.kind} bind:value={libraryUi.filters.kind}>
-					<option value="">{es.library.allKinds}</option>
+				<select class="control" aria-label={tr.library.kind} bind:value={libraryUi.filters.kind}>
+					<option value="">{tr.library.allKinds}</option>
 					{#each kinds as k (k)}<option value={k}>{kindName(k)}</option>{/each}
 				</select>
 				<button
 					type="button"
 					class="control icon"
 					disabled={!isFiltering(libraryUi.filters)}
-					aria-label={es.library.clear}
-					title={es.library.clear}
+					aria-label={tr.library.clear}
+					title={tr.library.clear}
 					onclick={() => (libraryUi.filters = { ...noFilters })}><IconFilterOff size={16} /></button
 				>
-				<div class="push segmented" role="group" aria-label={es.library.store}>
+				<div class="push segmented" role="group" aria-label={tr.library.store}>
 					{#each stores as x (x)}
 						<button
 							type="button"
@@ -233,7 +233,7 @@
 					>
 				</div>
 				<InfoTip label={s.groupInfo} lines={[s.groupNote]} />
-				<p class="push" aria-live="polite">{es.library.showing(count.shown, count.total)}</p>
+				<p class="push" aria-live="polite">{tr.library.showing(count.shown, count.total)}</p>
 				<InfoTip
 					label={s.dataInfo}
 					lines={notices.map((n) => n.text)}
@@ -243,31 +243,31 @@
 
 			{#if view === 'sync_failed'}
 				<div class="empty" role="alert">
-					<p class="headline">{es.library.syncFailed}</p>
-					<p>{es.library.syncFailedBody}</p>
-					<a href={resolve('/conexiones')} class={button()}>{es.nav.conexiones}</a>
+					<p class="headline">{tr.library.syncFailed}</p>
+					<p>{tr.library.syncFailedBody}</p>
+					<a href={resolve('/conexiones')} class={button()}>{tr.nav.conexiones}</a>
 				</div>
 			{:else if view === 'no_data'}
 				<div class="empty">
-					<p class="headline">{es.library.noData}</p>
-					<p>{es.library.noDataBody}</p>
+					<p class="headline">{tr.library.noData}</p>
+					<p>{tr.library.noDataBody}</p>
 					<a href={resolve('/conexiones')} class={button({ tone: 'primary' })}
-						>{es.nav.conexiones}</a
+						>{tr.nav.conexiones}</a
 					>
 				</div>
 			{:else if view === 'no_match'}
 				<div class="empty">
-					<p class="headline">{es.library.noMatch}</p>
+					<p class="headline">{tr.library.noMatch}</p>
 					<button
 						type="button"
 						class={button()}
-						onclick={() => (libraryUi.filters = { ...noFilters })}>{es.library.clear}</button
+						onclick={() => (libraryUi.filters = { ...noFilters })}>{tr.library.clear}</button
 					>
 				</div>
 			{:else}
 				<div class="shelf" style="--cols: {COLS}">
 					<div class="shelf-head" aria-hidden="true">
-						<span></span><span>{s.title}</span><span class="wide-only">{es.library.kind}</span><span
+						<span></span><span>{s.title}</span><span class="wide-only">{tr.library.kind}</span><span
 							class="wide-only">{s.access}</span
 						><span class="text-right">{s.stores}</span>
 					</div>
@@ -277,7 +277,7 @@
 						class="shelf-scroll"
 						tabindex="0"
 						role="region"
-						aria-label={es.nav.biblioteca}
+						aria-label={tr.nav.biblioteca}
 						bind:clientHeight={viewport}
 						onscroll={(e) => (scrollTop = e.currentTarget.scrollTop)}
 					>
@@ -315,7 +315,7 @@
 					</div>
 				</div>
 			{/if}
-			<div class="foot"><ExportButtons what="library" label={es.library.export} /></div>
+			<div class="foot"><ExportButtons what="library" label={tr.library.export} /></div>
 		{/if}
 	</section>
 
@@ -330,7 +330,7 @@
 			onclose={() => (selected = null)}
 		>
 			{#snippet spec()}
-				<dt>{es.library.kind}</dt>
+				<dt>{tr.library.kind}</dt>
 				<dd>{kindName(sel.kind)}</dd>
 				{#if sel.familyOwners.length}
 					<dt>{s.family}</dt>

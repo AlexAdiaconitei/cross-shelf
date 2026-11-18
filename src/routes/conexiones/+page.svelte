@@ -7,7 +7,7 @@
 	import { Button, Dialog, InfoTip } from '#lib/components/ui/index.ts';
 	import { capabilityLine, errorText, storeName } from '#lib/format.ts';
 	import { asCommandError, ipc, type Provider } from '#lib/ipc.ts';
-	import { es } from '#lib/strings.ts';
+	import { intl, tr } from '#lib/i18n/index.ts';
 
 	let connections = $state<ConnectionView[]>([]);
 	let loadFailed = $state(false);
@@ -44,8 +44,8 @@
 				warn: true,
 				text:
 					err.code === 'cancelled'
-						? es.connections.cancelled
-						: err.code in es.errors
+						? tr.connections.cancelled
+						: err.code in tr.errors
 							? errorText(err.code)
 							: err.code === 'internal'
 								? errorText('app')
@@ -60,15 +60,15 @@
 	const connect = (p: Provider) =>
 		act(p, 'login', async () => {
 			const r = await ipc.connect(p);
-			if (r.account_changed) notes[p] = { warn: true, text: es.connections.accountChanged };
+			if (r.account_changed) notes[p] = { warn: true, text: tr.connections.accountChanged };
 		});
 
 	const sync = (p: Provider) =>
 		act(p, 'sync', async () => {
 			const r = await ipc.sync(p);
 			notes[p] = r.account_changed
-				? { warn: true, text: es.connections.accountChanged }
-				: { warn: false, text: es.connections.syncDone };
+				? { warn: true, text: tr.connections.accountChanged }
+				: { warn: false, text: tr.connections.syncDone };
 		});
 
 	function askDisconnect(p: Provider) {
@@ -85,12 +85,12 @@
 	onMount(load);
 </script>
 
-<PageHeader title={es.nav.conexiones}>
-	{#snippet info()}<InfoTip label={es.nav.conexiones} lines={[es.connections.intro]} />{/snippet}
+<PageHeader title={tr.nav.conexiones}>
+	{#snippet info()}<InfoTip label={tr.nav.conexiones} lines={[tr.connections.intro]} />{/snippet}
 </PageHeader>
 
 {#if loadFailed}
-	<p role="alert" class="intro text-danger">{es.library.loadError}</p>
+	<p role="alert" class="intro text-danger">{tr.library.loadError}</p>
 {/if}
 
 <div class="fichas">
@@ -104,30 +104,30 @@
 			</h2>
 			<p class="acct">
 				<span class={isConnected ? 'text-success' : 'text-muted'}
-					>{isConnected ? es.connections.connected : es.connections.disconnected}</span
+					>{isConnected ? tr.connections.connected : tr.connections.disconnected}</span
 				>
 				{#if c.account_id}
 					{sep}{c.display_name
-						? es.connections.account(c.display_name)
-						: es.connections.accountId(c.account_id)}
+						? tr.connections.account(c.display_name)
+						: tr.connections.accountId(c.account_id)}
 				{/if}
 				{#if c.other_account_data}<InfoTip
 						label={storeName(p)}
-						lines={[es.connections.otherAccountData]}
+						lines={[tr.connections.otherAccountData]}
 					/>{/if}
 			</p>
 
-			<ul class="caps" aria-label={es.connections.capabilitiesLabel(storeName(p))}>
+			<ul class="caps" aria-label={tr.connections.capabilitiesLabel(storeName(p))}>
 				{#each c.capabilities as cap (cap.capability)}
 					{@const l = capabilityLine(cap)}
 					<li class="cap {l.tone}">
 						<span class="cl"
-							>{es.capabilities[cap.capability as keyof typeof es.capabilities] ??
+							>{tr.capabilities[cap.capability as keyof typeof tr.capabilities] ??
 								cap.capability}</span
 						>
 						{#if l.count !== null}
 							<span class="cn"
-								><b class="figure">{l.count.toLocaleString('es')}</b> <small>{l.unit}</small></span
+								><b class="figure">{l.count.toLocaleString(intl)}</b> <small>{l.unit}</small></span
 							>
 						{/if}
 						<span class="cs"
@@ -140,17 +140,17 @@
 			<div class="acts">
 				{#if !isConnected || needsReauth(c)}
 					<Button tone="primary" disabled={busy !== null} onclick={() => connect(p)}>
-						{isConnected || c.account_id ? es.connections.reconnect : es.connections.connect}
+						{isConnected || c.account_id ? tr.connections.reconnect : tr.connections.connect}
 					</Button>
 				{/if}
 				{#if isConnected}
 					<Button
 						tone={needsReauth(c) ? 'quiet' : 'primary'}
 						disabled={busy !== null}
-						onclick={() => sync(p)}>{es.connections.sync}</Button
+						onclick={() => sync(p)}>{tr.connections.sync}</Button
 					>
 					<Button tone="ghost" disabled={busy !== null} onclick={() => askDisconnect(p)}>
-						{es.connections.disconnect}
+						{tr.connections.disconnect}
 					</Button>
 				{/if}
 			</div>
@@ -158,12 +158,12 @@
 			<p class="small" role="status">
 				{#if working}
 					<span class="muted">
-						{busy?.what === 'login' ? es.connections.waitingLogin : es.connections.working}
+						{busy?.what === 'login' ? tr.connections.waitingLogin : tr.connections.working}
 					</span>
 				{:else if notes[p]}
 					<span class={notes[p].warn ? 'text-warning' : 'muted'}>{notes[p].text}</span>
 					{#if !notes[p].warn}
-						<a class="link" href={resolve('/limpieza')}>{es.connections.nextStep}</a>
+						<a class="link" href={resolve('/limpieza')}>{tr.connections.nextStep}</a>
 					{/if}
 				{/if}
 			</p>
@@ -173,13 +173,13 @@
 
 <Dialog
 	bind:open={confirmOpen}
-	title={es.connections.disconnectTitle(storeName(confirming ?? ''))}
-	description={es.connections.disconnectBody}
-	closeLabel={es.connections.cancel}
+	title={tr.connections.disconnectTitle(storeName(confirming ?? ''))}
+	description={tr.connections.disconnectBody}
+	closeLabel={tr.connections.cancel}
 >
 	{#snippet footer()}
-		<Button onclick={() => (confirmOpen = false)}>{es.connections.cancel}</Button>
-		<Button tone="danger" onclick={disconnect}>{es.connections.disconnect}</Button>
+		<Button onclick={() => (confirmOpen = false)}>{tr.connections.cancel}</Button>
+		<Button tone="danger" onclick={disconnect}>{tr.connections.disconnect}</Button>
 	{/snippet}
 </Dialog>
 

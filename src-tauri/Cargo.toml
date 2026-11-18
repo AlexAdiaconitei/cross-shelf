@@ -1,7 +1,7 @@
 [package]
 name = "cross-shelf"
-version = "0.1.0"
-description = "Bibliotecas y wishlists de Steam, GOG y Epic"
+version = "0.2.0"
+description = "Steam, GOG and Epic libraries and wishlists in one place"
 authors = ["Alex Adiaconitei"]
 license = "MIT"
 edition = "2024"

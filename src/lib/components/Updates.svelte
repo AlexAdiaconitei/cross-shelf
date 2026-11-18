@@ -2,12 +2,12 @@
 	import { check, type Update } from '@tauri-apps/plugin-updater';
 	import { relaunch } from '@tauri-apps/plugin-process';
 	import { Button } from '#lib/components/ui/index.ts';
-	import { es } from '#lib/strings.ts';
+	import { tr } from '#lib/i18n/index.ts';
 
 	/** Whether this build carries the signed updater configuration (from `app_status`). */
 	let { enabled }: { enabled: boolean } = $props();
 
-	const t = es.updates;
+	const t = tr.updates;
 	let phase = $state<'idle' | 'checking' | 'none' | 'found' | 'installing' | 'failed'>('idle');
 	let found = $state<Update | null>(null);
 	let progress = $state('');

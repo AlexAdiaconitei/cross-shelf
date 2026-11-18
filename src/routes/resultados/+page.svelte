@@ -6,9 +6,9 @@
 	import { Button, InfoTip } from '#lib/components/ui/index.ts';
 	import { errorText, productUrl, storeName, when } from '#lib/format.ts';
 	import { asCommandError, ipc } from '#lib/ipc.ts';
-	import { es } from '#lib/strings.ts';
+	import { tr } from '#lib/i18n/index.ts';
 
-	const r = es.results;
+	const r = tr.results;
 
 	let batches = $state<BatchView[]>([]);
 	let loaded = $state(false);
@@ -48,8 +48,8 @@
 	/** A readable sentence for any command error: never the raw text of the error. */
 	function failure(prefix: string, e: unknown): string {
 		const code = typeof e === 'string' ? e : asCommandError(e).code;
-		if (code in es.batch.errors) return es.batch.errors[code as keyof typeof es.batch.errors];
-		return `${prefix} (${errorText(code in es.errors ? code : 'app')})`;
+		if (code in tr.batch.errors) return tr.batch.errors[code as keyof typeof tr.batch.errors];
+		return `${prefix} (${errorText(code in tr.errors ? code : 'app')})`;
 	}
 
 	async function run(bv: BatchView, job: () => Promise<unknown>, prefix: string = r.actionFailed) {
@@ -99,12 +99,12 @@
 	onMount(load);
 </script>
 
-<PageHeader title={es.nav.resultados}>
-	{#snippet info()}<InfoTip label={es.nav.resultados} lines={[r.intro]} />{/snippet}
+<PageHeader title={tr.nav.resultados}>
+	{#snippet info()}<InfoTip label={tr.nav.resultados} lines={[r.intro]} />{/snippet}
 </PageHeader>
 <div class="page-body">
 	{#if loadFailed}
-		<p role="alert" class="text-danger">{es.library.loadError}</p>
+		<p role="alert" class="text-danger">{tr.library.loadError}</p>
 	{:else if loaded && batches.length === 0}
 		<div class="rounded-panel border border-border p-6">
 			<p class="font-medium">{r.empty}</p>
@@ -116,7 +116,7 @@
 				<section aria-labelledby="batch-{bv.id}" class="grid gap-3 py-5">
 					<header class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
 						<h2 id="batch-{bv.id}" class="font-semibold">
-							{es.batch.summary(es.batch.part(bv.ops.length, storeName(bv.store)))}
+							{tr.batch.summary(tr.batch.part(bv.ops.length, storeName(bv.store)))}
 						</h2>
 						<p class="text-sm text-muted">
 							{label(r.state, bv.state)} · {r.created(when(bv.created_at))}
@@ -127,7 +127,7 @@
 						{#each bv.ops as o (o.op_id)}
 							<li class="flex flex-wrap items-center justify-between gap-2">
 								<div class="min-w-0">
-									<p class="truncate">{o.title ?? es.library.untitled(o.native_id)}</p>
+									<p class="truncate">{o.title ?? tr.library.untitled(o.native_id)}</p>
 									<p class={statusClass(o.status)}>
 										{o.status === 'pending' && bv.write_validated
 											? r.op.pendingSend
@@ -169,7 +169,7 @@
 						{/if}
 					</div>
 					<p class="text-sm text-warning" role="status">
-						{busy === bv.id ? es.connections.working : (notes[bv.id] ?? '')}
+						{busy === bv.id ? tr.connections.working : (notes[bv.id] ?? '')}
 					</p>
 				</section>
 			{/each}

@@ -62,15 +62,15 @@ impl DiagError {
         match e {
             SteamError::Network(_) => Self {
                 code: "network",
-                message: "Sin red o Steam no responde".into(),
+                message: "No network or Steam is not answering".into(),
             },
             SteamError::NeedsReauth => Self {
                 code: "needs_reauth",
-                message: "Vuelve a conectar Steam".into(),
+                message: "Reconnect Steam".into(),
             },
             SteamError::Private => Self {
                 code: "private",
-                message: "Lista privada o sin permiso".into(),
+                message: "Private list or no permission".into(),
             },
             other => Self {
                 code: "provider",
@@ -148,7 +148,7 @@ pub async fn steam_connect(
         let _ = w.set_focus();
         return Err(DiagError {
             code: "in_progress",
-            message: "Ya hay un acceso a Steam abierto".into(),
+            message: "A Steam sign-in window is already open".into(),
         });
     }
     let dir = app
@@ -163,7 +163,7 @@ pub async fn steam_connect(
     let nav_tx = tx.clone();
 
     let win = WebviewWindowBuilder::new(&app, LOGIN_LABEL, WebviewUrl::External(api::login_url()))
-        .title("Conectar Steam")
+        .title("CrossShelf · Steam")
         .inner_size(520.0, 780.0)
         .data_directory(dir)
         .on_navigation(move |url| {
@@ -196,7 +196,7 @@ pub async fn steam_connect(
         let _ = win.destroy();
         return Err(DiagError {
             code: "cancelled",
-            message: "Acceso cancelado".into(),
+            message: "Sign-in cancelled".into(),
         });
     }
     // Give the redirect target a moment to set its final cookies.
@@ -239,7 +239,7 @@ pub async fn steam_connect(
 pub async fn steam_diag_run(state: State<'_, SteamState>) -> Result<SteamReport, DiagError> {
     let stored = state.load()?.ok_or(DiagError {
         code: "not_connected",
-        message: "Steam no está conectado".into(),
+        message: "Steam is not connected".into(),
     })?;
     // The web API token is short-lived: re-obtain it from the stored cookies on every run.
     let session = api::fetch_session(&state.http, &stored.cookie_header)
@@ -301,7 +301,7 @@ pub struct SteamShapes {
 pub async fn steam_diag_shape(state: State<'_, SteamState>) -> Result<SteamShapes, DiagError> {
     let stored = state.load()?.ok_or(DiagError {
         code: "not_connected",
-        message: "Steam no está conectado".into(),
+        message: "Steam is not connected".into(),
     })?;
     let session = api::fetch_session(&state.http, &stored.cookie_header)
         .await
@@ -315,7 +315,7 @@ pub async fn steam_diag_shape(state: State<'_, SteamState>) -> Result<SteamShape
     let wish = rep(api::wishlist_raw(&state.http, &session).await);
     let family = match api::family_group(&state.http, &session).await {
         Ok(Some(g)) => rep(api::shared_apps_raw(&state.http, &session, &g).await),
-        Ok(None) => Err("sin grupo familiar".into()),
+        Ok(None) => Err("no family group".into()),
         Err(e) => Err(e.to_string()),
     };
     Ok(SteamShapes {
@@ -337,7 +337,7 @@ pub struct SteamTypeShapes {
 pub async fn steam_diag_types(state: State<'_, SteamState>) -> Result<SteamTypeShapes, DiagError> {
     let stored = state.load()?.ok_or(DiagError {
         code: "not_connected",
-        message: "Steam no está conectado".into(),
+        message: "Steam is not connected".into(),
     })?;
     let session = api::fetch_session(&state.http, &stored.cookie_header)
         .await
@@ -473,7 +473,7 @@ pub async fn steam_sync(
     use crate::sync::{self, ReadOutcome, Resource};
     let stored = state.load()?.ok_or(DiagError {
         code: "not_connected",
-        message: "Steam no está conectado".into(),
+        message: "Steam is not connected".into(),
     })?;
     let session = api::fetch_session(&state.http, &stored.cookie_header)
         .await

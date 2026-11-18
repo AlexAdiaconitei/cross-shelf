@@ -195,7 +195,7 @@ pub fn error_code(body: &str) -> String {
                 .and_then(|c| c.as_str())
                 .map(str::to_owned)
         })
-        .unwrap_or_else(|| "sin errorCode".into())
+        .unwrap_or_else(|| "no errorCode".into())
 }
 
 /// Items of the launcher library service (the route Legendary uses for non-asset titles).
@@ -423,7 +423,7 @@ mod tests {
             error_code(r#"{"errorCode":"errors.com.x.missing","errorMessage":"secret"}"#),
             "errors.com.x.missing"
         );
-        assert_eq!(error_code("<html>"), "sin errorCode");
+        assert_eq!(error_code("<html>"), "no errorCode");
     }
 
     #[test]

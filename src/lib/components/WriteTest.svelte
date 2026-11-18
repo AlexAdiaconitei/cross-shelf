@@ -2,9 +2,9 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import type { WriteTestResult } from '#lib/bindings/WriteTestResult.ts';
 	import { Button, Dialog } from '#lib/components/ui/index.ts';
-	import { es } from '#lib/strings.ts';
+	import { tr } from '#lib/i18n/index.ts';
 
-	const t = es.writeTest;
+	const t = tr.writeTest;
 
 	let store = $state<'steam' | 'gog'>('steam');
 	let productId = $state('');
@@ -14,7 +14,7 @@
 	let result = $state('');
 
 	const validId = $derived(/^\d+$/.test(productId.trim()));
-	const storeLabel = $derived(es.stores[store]);
+	const storeLabel = $derived(tr.stores[store]);
 
 	async function run() {
 		confirmOpen = false;
@@ -40,7 +40,7 @@
 	<p class="text-sm text-muted">{t.intro}</p>
 	<div class="flex flex-wrap items-end gap-3">
 		<fieldset class="grid gap-1 text-sm">
-			<legend class="mb-1 text-muted">{es.library.store}</legend>
+			<legend class="mb-1 text-muted">{tr.library.store}</legend>
 			<div class="flex gap-4 py-2">
 				<label class="flex items-center gap-1.5">
 					<input type="radio" name="write-store" value="steam" bind:group={store} /> Steam
@@ -75,17 +75,17 @@
 			{t.run}
 		</Button>
 	</div>
-	<p class="text-sm" role="status">{busy ? es.diag.running : result}</p>
+	<p class="text-sm" role="status">{busy ? tr.diag.running : result}</p>
 </section>
 
 <Dialog
 	bind:open={confirmOpen}
 	title={t.confirmTitle}
 	description={t.confirmBody(present ? t.add : t.remove, productId.trim(), storeLabel)}
-	closeLabel={es.connections.cancel}
+	closeLabel={tr.connections.cancel}
 >
 	{#snippet footer()}
-		<Button onclick={() => (confirmOpen = false)}>{es.connections.cancel}</Button>
+		<Button onclick={() => (confirmOpen = false)}>{tr.connections.cancel}</Button>
 		<Button tone="danger" onclick={run}>{t.confirm}</Button>
 	{/snippet}
 </Dialog>

@@ -9,7 +9,7 @@
 	import { button } from '#lib/components/ui/index.ts';
 	import { productUrl, storeName } from '#lib/format.ts';
 	import type { Slot, Store } from '#lib/library/shelf.ts';
-	import { es } from '#lib/strings.ts';
+	import { tr } from '#lib/i18n/index.ts';
 	import Cover from './Cover.svelte';
 	import StoreLogo from './StoreLogo.svelte';
 	import StoreTabs from './StoreTabs.svelte';
@@ -44,7 +44,7 @@
 		actions?: Snippet;
 	} = $props();
 
-	const s = es.shelf;
+	const s = tr.shelf;
 </script>
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && onclose()} />
@@ -73,7 +73,7 @@
 			<li class={p.store}>
 				<span class="pt"><StoreLogo store={p.store} size={14} /></span>
 				<div>
-					<b class="selectable">{p.title ?? es.library.untitled(p.native_id)}</b>
+					<b class="selectable">{p.title ?? tr.library.untitled(p.native_id)}</b>
 					{#if p.note}<small>{p.note}</small>{/if}
 				</div>
 				<button

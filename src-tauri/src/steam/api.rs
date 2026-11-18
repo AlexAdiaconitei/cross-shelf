@@ -137,7 +137,7 @@ pub async fn probe_config(http: &reqwest::Client, cookie_header: &str) -> String
         .await
     {
         Ok(r) => r,
-        Err(_) => return "sin respuesta de la red".into(),
+        Err(_) => return "no response from the network".into(),
     };
     let status = resp.status().as_u16();
     let body = resp.text().await.unwrap_or_default();
@@ -159,7 +159,7 @@ pub fn describe_config(status: u16, body: &str) -> String {
         .and_then(|t| t.as_str())
         .map_or(0, str::len);
     format!(
-        "HTTP {status}, claves raíz [{}], claves data [{}], longitud webapi_token {token_len}, steamid presente {}",
+        "HTTP {status}, root keys [{}], data keys [{}], webapi_token length {token_len}, steamid present {}",
         keys(&v),
         data.map(keys).unwrap_or_default(),
         data.and_then(|d| d.get("steamid")).is_some()
@@ -497,7 +497,7 @@ mod tests {
             r#"{"data":{"webapi_token":"SENTINEL_TOKEN","steamid":"1"}}"#,
         );
         assert!(!d.contains("SENTINEL"));
-        assert!(d.contains("webapi_token") && d.contains("longitud webapi_token 14"));
+        assert!(d.contains("webapi_token") && d.contains("webapi_token length 14"));
     }
 
     #[test]

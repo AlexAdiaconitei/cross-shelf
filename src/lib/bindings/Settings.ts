@@ -8,4 +8,8 @@ include_family_in_cleanup: boolean,
 /**
  * Draw store covers from the store CDNs. On by default; off shows initials only.
  */
-show_covers: boolean, };
+show_covers: boolean, 
+/**
+ * Interface language: `en` (default) or `es`.
+ */
+language: string, };

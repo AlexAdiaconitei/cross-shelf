@@ -25,10 +25,10 @@
 		sortMatches,
 		type ReviewFilter
 	} from '#lib/review/view.ts';
-	import { es } from '#lib/strings.ts';
+	import { tr } from '#lib/i18n/index.ts';
 
 	const filters: ReviewFilter[] = ['to_review', 'kept', 'no_match', 'repeated', 'all'];
-	const r = es.review;
+	const r = tr.review;
 
 	let items = $state<ReviewItem[]>([]);
 	let loaded = $state(false);
@@ -49,11 +49,11 @@
 	const groups = $derived(groupSelection(items, selected));
 	const selectedCount = $derived(groups.reduce((n, g) => n + g.items.length, 0));
 	const summary = $derived(
-		es.batch.summary(
-			groups.map((g) => es.batch.part(g.items.length, storeName(g.store))).join(' y ')
+		tr.batch.summary(
+			groups.map((g) => tr.batch.part(g.items.length, storeName(g.store))).join(' y ')
 		)
 	);
-	const b = es.batch;
+	const b = tr.batch;
 	const removableItems = $derived(items.filter(removable));
 	/** Why each selected entry is safe to remove, keyed like the batch operations. */
 	const evidenceFor = $derived(
@@ -225,13 +225,13 @@
 	onMount(load);
 </script>
 
-<PageHeader title={es.nav.limpieza}>
-	{#snippet info()}<InfoTip label={es.nav.limpieza} lines={[r.intro]} />{/snippet}
+<PageHeader title={tr.nav.limpieza}>
+	{#snippet info()}<InfoTip label={tr.nav.limpieza} lines={[r.intro]} />{/snippet}
 </PageHeader>
 
 <div class="wrap">
 	{#if loadFailed}
-		<p role="alert" class="text-danger">{es.library.loadError}</p>
+		<p role="alert" class="text-danger">{tr.library.loadError}</p>
 	{:else if loaded}
 		<div class="toolbar">
 			<div class="chips when-roomy" role="group" aria-label={r.filtersLabel}>
@@ -246,7 +246,7 @@
 			</div>
 			<select class="control when-tight" aria-label={r.filtersLabel} bind:value={filter}>
 				{#each filters as f (f)}<option value={f}
-						>{es.wishlist.status}: {r.filters[f]} · {counts[f]}</option
+						>{tr.wishlist.status}: {r.filters[f]} · {counts[f]}</option
 					>{/each}
 			</select>
 			<label class="control control-search">
@@ -266,7 +266,7 @@
 		{#if items.length === 0}
 			<div class="empty">
 				<p class="headline">{r.noWishes}</p>
-				<p>{es.wishlist.noDataBody}</p>
+				<p>{tr.wishlist.noDataBody}</p>
 			</div>
 		{:else if shown.length === 0}
 			<div class="empty">
@@ -276,7 +276,7 @@
 		{:else}
 			<ul class="cmp">
 				{#each shown as it (`${it.account_id}:${it.wanted.store}:${it.wanted.native_id}`)}
-					{@const wantedTitle = it.wanted.title ?? es.library.untitled(it.wanted.native_id)}
+					{@const wantedTitle = it.wanted.title ?? tr.library.untitled(it.wanted.native_id)}
 					<li class="item" class:picked={selected.has(itemKey(it))}>
 						<div class="pick">
 							{#if removable(it)}
@@ -307,7 +307,7 @@
 						</div>
 						<div class="matches">
 							{#each sortMatches(it.matches) as m (`${m.held.store}:${m.held.native_id}:${m.access}`)}
-								{@const heldTitle = m.held.title ?? es.library.untitled(m.held.native_id)}
+								{@const heldTitle = m.held.title ?? tr.library.untitled(m.held.native_id)}
 								<div class="match">
 									<p class="stamp {tone(m.outcome)}">{label(r.outcome, m.outcome)}</p>
 									<div class="half">
@@ -423,7 +423,7 @@
 				<ul class="grid gap-1.5">
 					{#each d.ops as o (o.op_id)}
 						<li>
-							<p>{o.title ?? es.library.untitled(o.native_id)}</p>
+							<p>{o.title ?? tr.library.untitled(o.native_id)}</p>
 							<p class="text-xs text-muted">{evidenceFor.get(`${d.store}:${o.native_id}`)}</p>
 						</li>
 					{/each}

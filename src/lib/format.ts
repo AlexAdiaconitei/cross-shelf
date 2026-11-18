@@ -1,25 +1,25 @@
 // Display helpers shared by the views. Plain functions over generated types and the copy module.
 import type { CapabilityView } from '#lib/bindings/CapabilityView.ts';
-import { es } from '#lib/strings.ts';
+import { intl, tr } from '#lib/i18n/index.ts';
 
-const dateTime = new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
-const dateOnly = new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium' });
+const dateTime = new Intl.DateTimeFormat(intl, { dateStyle: 'medium', timeStyle: 'short' });
+const dateOnly = new Intl.DateTimeFormat(intl, { dateStyle: 'medium' });
 
 export const when = (secs: number) => dateTime.format(new Date(secs * 1000));
 export const day = (secs: number) => dateOnly.format(new Date(secs * 1000));
 
-export const storeName = (s: string) => es.stores[s as keyof typeof es.stores] ?? s;
-export const kindName = (k: string) => es.kinds[k as keyof typeof es.kinds] ?? k;
+export const storeName = (s: string) => tr.stores[s as keyof typeof tr.stores] ?? s;
+export const kindName = (k: string) => tr.kinds[k as keyof typeof tr.kinds] ?? k;
 
 export function errorText(code: string | null): string {
-	return es.errors[(code ?? 'unknown') as keyof typeof es.errors] ?? es.errors.unknown;
+	return tr.errors[(code ?? 'unknown') as keyof typeof tr.errors] ?? tr.errors.unknown;
 }
 
 export type Tone = 'ok' | 'warn' | 'muted';
 
 /** Plain-language state of one capability, with a tone for its marker. */
 export function capabilityText(c: CapabilityView): { text: string; tone: Tone } {
-	const t = es.capabilityState;
+	const t = tr.capabilityState;
 	switch (c.state) {
 		case 'complete':
 			return { text: t.complete(c.item_count ?? 0, when(c.last_complete_at ?? 0)), tone: 'ok' };
@@ -75,7 +75,7 @@ export type CapabilityLine = {
 
 /** One line of a store card: the count big, the state short, the date of the data shown. */
 export function capabilityLine(c: CapabilityView): CapabilityLine {
-	const card = es.capabilityCard;
+	const card = tr.capabilityCard;
 	const unit = card.units[c.capability as keyof typeof card.units] ?? null;
 	const date = c.last_complete_at === null ? null : when(c.last_complete_at);
 	const count = unit === null ? null : c.item_count;

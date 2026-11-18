@@ -113,16 +113,16 @@ pub fn library_table(entries: &[crate::queries::LibraryEntry]) -> Table {
         .collect();
     Table {
         header: vec![
-            "tienda",
-            "id_producto",
-            "titulo",
-            "tipo",
+            "store",
+            "product_id",
+            "title",
+            "kind",
             "windows",
-            "acceso",
-            "propietarios_familia",
-            "motivo_exclusion",
+            "access",
+            "family_owners",
+            "exclusion_reason",
             "url",
-            "observado",
+            "observed_at",
         ],
         rows,
     }
@@ -138,21 +138,21 @@ pub fn wishlist_table(entries: &[crate::queries::WishlistEntry]) -> Table {
                 opt(&w.title),
                 opt(&w.priority),
                 w.added_at.map(iso_utc).unwrap_or_default(),
-                if w.confirmed { "si" } else { "sin_confirmar" }.to_owned(),
-                if w.already_held_here { "si" } else { "no" }.to_owned(),
+                if w.confirmed { "yes" } else { "unconfirmed" }.to_owned(),
+                if w.already_held_here { "yes" } else { "no" }.to_owned(),
                 opt(&w.url),
             ]
         })
         .collect();
     Table {
         header: vec![
-            "tienda",
-            "id_producto",
-            "titulo",
-            "prioridad",
-            "fecha_alta",
-            "confirmada",
-            "en_tu_biblioteca_de_esa_tienda",
+            "store",
+            "product_id",
+            "title",
+            "priority",
+            "added_at",
+            "confirmed",
+            "held_in_same_store",
             "url",
         ],
         rows,
@@ -161,11 +161,11 @@ pub fn wishlist_table(entries: &[crate::queries::WishlistEntry]) -> Table {
 
 #[derive(Debug, thiserror::Error)]
 pub enum ExportError {
-    #[error("ruta no válida")]
+    #[error("bad_path")]
     BadPath,
-    #[error("la extensión no coincide con el formato")]
+    #[error("bad_extension")]
     BadExtension,
-    #[error("no se pudo escribir el archivo")]
+    #[error("io")]
     Io(#[from] std::io::Error),
 }
 
@@ -241,8 +241,8 @@ mod tests {
         }
         assert!(t.csv().contains("'=cmd"), "formula defused in CSV");
         let v: serde_json::Value = serde_json::from_str(&t.json()).unwrap();
-        assert_eq!(v[0]["propietarios_familia"], "1");
-        assert_eq!(v[0]["acceso"], "family_shared");
+        assert_eq!(v[0]["family_owners"], "1");
+        assert_eq!(v[0]["access"], "family_shared");
     }
 
     #[test]
@@ -262,7 +262,7 @@ mod tests {
         let t = wishlist_table(&[w]);
         let csv = t.csv();
         assert!(!csv.contains("48000000000000001"));
-        assert!(csv.contains("sin_confirmar"));
+        assert!(csv.contains("unconfirmed"));
         assert!(csv.contains("1970-01-01T00:00:00Z"));
     }
 

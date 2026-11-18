@@ -3,6 +3,7 @@
 // together: it is never evidence that two products are the same game, and the cleanup never
 // reads it. The view keeps a switch to separate records.
 import type { WishlistEntry } from '#lib/bindings/WishlistEntry.ts';
+import { intl } from '#lib/i18n/index.ts';
 import { normalize, type Entry } from './filter.ts';
 
 export const stores = ['steam', 'gog', 'epic'] as const;
@@ -84,7 +85,7 @@ export function buildShelf(entries: Entry[], wishlist: WishlistEntry[] = []): Sh
 		row.wishedElsewhere = owned && stores.some((s) => row.slots[s] === 'wish');
 	}
 	return [...rows.values()].sort((a, b) =>
-		normalize(a.title).localeCompare(normalize(b.title), 'es')
+		normalize(a.title).localeCompare(normalize(b.title), intl)
 	);
 }
 

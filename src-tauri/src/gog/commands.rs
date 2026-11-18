@@ -88,20 +88,20 @@ impl DiagError {
     fn not_connected() -> Self {
         Self {
             code: "not_connected",
-            message: "GOG no está conectado".into(),
+            message: "GOG is not connected".into(),
         }
     }
     fn needs_reauth() -> Self {
         Self {
             code: "needs_reauth",
-            message: "Vuelve a conectar GOG".into(),
+            message: "Reconnect GOG".into(),
         }
     }
     fn from_auth(e: AuthError) -> Self {
         match e {
             AuthError::Network(_) => Self {
                 code: "network",
-                message: "Sin red o GOG no responde".into(),
+                message: "No network or GOG is not answering".into(),
             },
             AuthError::Rejected(_) => Self::needs_reauth(),
             other => Self {
@@ -114,7 +114,7 @@ impl DiagError {
         match e {
             ReadError::Network(_) => Self {
                 code: "network",
-                message: "Sin red o GOG no responde".into(),
+                message: "No network or GOG is not answering".into(),
             },
             ReadError::Unauthorized(_) => Self::needs_reauth(),
             other => Self {
@@ -180,7 +180,7 @@ pub async fn gog_connect(
         let _ = w.set_focus();
         return Err(DiagError {
             code: "in_progress",
-            message: "Ya hay un acceso a GOG abierto".into(),
+            message: "A GOG sign-in window is already open".into(),
         });
     }
     let dir = app
@@ -196,7 +196,7 @@ pub async fn gog_connect(
 
     // No capability targets this window: the provider page cannot call app commands.
     let win = WebviewWindowBuilder::new(&app, LOGIN_LABEL, WebviewUrl::External(auth::login_url()))
-        .title("Conectar GOG")
+        .title("CrossShelf · GOG")
         .inner_size(520.0, 760.0)
         .data_directory(dir)
         .on_navigation(move |url| {
@@ -231,7 +231,7 @@ pub async fn gog_connect(
         _ => {
             return Err(DiagError {
                 code: "cancelled",
-                message: "Acceso cancelado".into(),
+                message: "Sign-in cancelled".into(),
             });
         }
     };

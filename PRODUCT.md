@@ -51,7 +51,8 @@ confirmado. Distingue propiedad, acceso familiar de Steam y accesos temporales.
 
 ## Brand Commitments
 
-- Nombre: CrossShelf. Copy en español llano.
+- Nombre: CrossShelf. Interfaz en inglés (por defecto) y español, elegible en Ajustes; copy llano en
+  los dos idiomas.
 - Sin logo ni identidad visual previa vinculante.
 
 ## Evidence on Hand

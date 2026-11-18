@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import { storeName } from '#lib/format.ts';
-	import { es } from '#lib/strings.ts';
+	import { tr } from '#lib/i18n/index.ts';
 	import { stores, type Slot, type Store } from '#lib/library/shelf.ts';
 	import StoreLogo from './StoreLogo.svelte';
 
@@ -22,11 +22,11 @@
 	} = $props();
 </script>
 
-<ul class="tabs {size}" aria-label={es.shelf.storesOf(title)}>
+<ul class="tabs {size}" aria-label={tr.shelf.storesOf(title)}>
 	{#each stores as s (s)}
 		{@const slot = slots[s]}
 		{#if slot !== 'none'}
-			{@const text = `${storeName(s)}: ${es.shelf.slot[slot]}`}
+			{@const text = `${storeName(s)}: ${tr.shelf.slot[slot]}`}
 			<li class="t {s} {slot}" class:repe={slot === 'wish' && wishedElsewhere} title={text}>
 				<StoreLogo store={s} size={size === 'lg' ? 18 : 14} />
 				<span class="sr-only">{text}</span>

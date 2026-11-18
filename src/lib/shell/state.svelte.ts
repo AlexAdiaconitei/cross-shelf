@@ -3,6 +3,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { ConnectionView } from '#lib/bindings/ConnectionView.ts';
 import type { ReviewItem } from '#lib/bindings/ReviewItem.ts';
+import { isLang, rememberLang } from '#lib/i18n/index.ts';
 import { ipc } from '#lib/ipc.ts';
 import { needsReview } from '#lib/review/view.ts';
 
@@ -25,6 +26,8 @@ export async function refreshShell() {
 		]);
 		shell.connections = connections;
 		shell.showCovers = settings.show_covers;
+		// The database holds the language; the local copy only makes it available at start.
+		if (isLang(settings.language) && rememberLang(settings.language)) location.reload();
 		shell.toReview = review.filter(needsReview).length;
 	} catch {
 		// The views report their own load errors; the shell just keeps the last values.

@@ -44,10 +44,21 @@ pub struct Settings {
     pub include_family_in_cleanup: bool,
     /// Draw store covers from the store CDNs. On by default; off shows initials only.
     pub show_covers: bool,
+    /// Interface language: `en` (default) or `es`.
+    pub language: String,
 }
 
 const KEY_FAMILY: &str = "include_family_in_cleanup";
 const KEY_COVERS: &str = "show_covers";
+const KEY_LANGUAGE: &str = "language";
+
+/// Languages the interface ships with; anything else falls back to English.
+pub const LANGUAGES: &[&str] = &["en", "es"];
+
+fn language_or_default(v: Option<String>) -> String {
+    v.filter(|l| LANGUAGES.contains(&l.as_str()))
+        .unwrap_or_else(|| "en".into())
+}
 
 fn get_bool(c: &Connection, key: &str, default: bool) -> Result<bool, rusqlite::Error> {
     Ok(
@@ -63,6 +74,14 @@ pub fn read_settings(c: &Connection) -> Result<Settings, rusqlite::Error> {
     Ok(Settings {
         include_family_in_cleanup: get_bool(c, KEY_FAMILY, false)?,
         show_covers: get_bool(c, KEY_COVERS, true)?,
+        language: language_or_default(
+            c.query_row(
+                "SELECT value FROM setting WHERE key = ?1",
+                [KEY_LANGUAGE],
+                |r| r.get::<_, String>(0),
+            )
+            .optional()?,
+        ),
     })
 }
 
@@ -76,6 +95,11 @@ pub fn write_settings(c: &Connection, s: &Settings) -> Result<(), rusqlite::Erro
         "INSERT INTO setting(key, value) VALUES (?1, ?2)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value",
         params![KEY_COVERS, s.show_covers.to_string()],
+    )?;
+    c.execute(
+        "INSERT INTO setting(key, value) VALUES (?1, ?2)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        params![KEY_LANGUAGE, language_or_default(Some(s.language.clone()))],
     )?;
     Ok(())
 }
@@ -517,6 +541,7 @@ mod tests {
             &Settings {
                 include_family_in_cleanup: true,
                 show_covers: true,
+                language: "en".into(),
             },
         )
         .unwrap();
@@ -532,12 +557,30 @@ mod tests {
             &Settings {
                 include_family_in_cleanup: false,
                 show_covers: false,
+                language: "es".into(),
             },
         )
         .unwrap();
         let s = read_settings(&c).unwrap();
         assert!(!s.show_covers);
+        assert_eq!(s.language, "es");
         assert!(!s.include_family_in_cleanup);
+    }
+
+    #[test]
+    fn language_is_english_by_default_and_rejects_unknown_values() {
+        let c = db();
+        assert_eq!(read_settings(&c).unwrap().language, "en");
+        write_settings(
+            &c,
+            &Settings {
+                include_family_in_cleanup: false,
+                show_covers: true,
+                language: "fr".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(read_settings(&c).unwrap().language, "en");
     }
 
     #[test]
