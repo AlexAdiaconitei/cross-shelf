@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#100f0d" />
+		<title>CrossShelf — All your games. One library.</title>
+		<meta
+			name="description"
+			content="Your Steam, GOG and Epic libraries in one Windows app. Browse your collection, search for games and see where you own them. Free and open source."
+		/>
+		<link rel="icon" type="image/png" href="./assets/favicon.png" />
+		<link
+			rel="preload"
+			href="./assets/fonts/archivo-latin.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
+		<link rel="stylesheet" href="./about-card.css" />
+		<link rel="stylesheet" href="./site.css" />
+		<script type="module" src="./site.js"></script>
+		<script src="./about-card.js" defer></script>
+	</head>
+	<body>
+		<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+		<header class="header wrap">
+			<a class="brand" href="#" aria-label="CrossShelf"
+				><img src="./assets/logo.svg" alt="CrossShelf" width="205" height="44"
+			/></a>
+			<nav data-i18n-label="navLabel" aria-label="Main navigation">
+				<a href="#preview" data-i18n="navPreview">The app</a>
+				<a href="#how" data-i18n="navHow">How it works</a>
+				<a href="#about" data-i18n="navAbout">The creator</a>
+			</nav>
+			<div
+				class="languages"
+				role="group"
+				data-i18n-label="languageLabel"
+				aria-label="Page language"
+			>
+				<button type="button" data-language="en" lang="en" aria-pressed="true" hidden>EN</button>
+				<button type="button" data-language="es" lang="es" aria-pressed="false" hidden>ES</button>
+			</div>
+		</header>
+		<main id="main">
+			<section class="hero wrap">
+				<div class="hero-intro">
+					<h1 data-i18n="heroTitle">All your games. One library.</h1>
+					<div class="hero-copy">
+						<p data-i18n="heroBody">
+							Bring your Steam, GOG and Epic libraries together. Browse your whole collection, find
+							any game and see where you own it.
+						</p>
+						<a
+							class="button download"
+							data-download
+							href="https://github.com/AlexAdiacontiei/cross-shelf/releases/latest"
+						>
+							<svg
+								width="22"
+								height="22"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.75"
+								aria-hidden="true"
+							>
+								<path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" />
+							</svg>
+							<span data-download-label data-i18n="viewDownloads">View Windows downloads</span>
+						</a>
+						<a
+							class="notes"
+							data-release-notes
+							href="https://github.com/AlexAdiacontiei/cross-shelf/releases/latest"
+							data-i18n="releaseNotes"
+							>Latest release notes</a
+						>
+						<p class="release-status" data-release-status data-i18n="releaseFallback" role="status">
+							Windows 10 / 11 · 64-bit · Downloads on GitHub
+						</p>
+					</div>
+				</div>
+				<figure class="hero-screen">
+					<div
+						class="folder-tabs"
+						data-i18n-label="storesLabel"
+						aria-label="One library. Three stores."
+					>
+						<span class="store steam"
+							><img src="./assets/steam.svg" width="24" height="24" alt="" />Steam</span
+						>
+						<span class="store gog"
+							><img src="./assets/gog.svg" width="24" height="24" alt="" />GOG</span
+						>
+						<span class="store epic"
+							><img src="./assets/epic.svg" width="24" height="24" alt="" />Epic Games</span
+						>
+						<span class="free" data-i18n="free">Free &amp; open source</span>
+					</div>
+					<img
+						class="app-shot"
+						data-language-image="detail"
+						src="./assets/screenshots/detail-en.webp"
+						width="1440"
+						height="900"
+						fetchpriority="high"
+						data-i18n-alt="heroAlt"
+						alt="CrossShelf demo library with Celeste and other real games, store tabs and a game detail panel."
+					/>
+					<figcaption data-i18n="example">Real games · simulated library and accounts</figcaption>
+				</figure>
+				<p class="artwork-note" data-i18n="artworkDisclaimer">
+					Demo library: accounts, ownership and wishlists are simulated. Game artwork and trademarks
+					belong to their respective owners. CrossShelf is not affiliated with or endorsed by the
+					stores, developers or publishers shown.
+				</p>
+			</section>
+			<div class="paper">
+				<section id="preview" class="preview wrap section">
+					<div class="section-intro">
+						<h2 data-i18n="previewTitle">See your whole shelf.</h2>
+						<p data-i18n="previewBody">
+							A game gets one row, even when you own it in more than one store. The store tabs tell
+							you where it is yours, shared by family, or still on a wishlist.
+						</p>
+					</div>
+					<div
+						class="view-picker"
+						role="group"
+						data-i18n-label="previewLabel"
+						aria-label="Choose an app screenshot"
+					>
+						<button
+							type="button"
+							data-view="library"
+							aria-pressed="true"
+							data-i18n="viewLibrary"
+							hidden
+						>
+							Library
+						</button>
+						<button
+							type="button"
+							data-view="review"
+							aria-pressed="false"
+							data-i18n="viewReview"
+							hidden
+						>
+							Wishlist review
+						</button>
+						<button
+							type="button"
+							data-view="connections"
+							aria-pressed="false"
+							data-i18n="viewConnections"
+							hidden
+						>
+							Connections
+						</button>
+					</div>
+					<div class="legend">
+						<span><i class="legend-tab solid"></i><span data-i18n="owned">Owned</span></span>
+						<span
+							><i class="legend-tab outline"></i><span data-i18n="family">Family access</span></span
+						>
+						<span><i class="legend-tab dotted"></i><span data-i18n="wished">Wishlisted</span></span>
+					</div>
+					<figure class="preview-screen">
+						<img
+							class="app-shot"
+							data-showcase
+							src="./assets/screenshots/library-en.webp"
+							width="1440"
+							height="900"
+							loading="lazy"
+							data-i18n-alt="libraryAlt"
+							alt="CrossShelf demo library: real games grouped across Steam, GOG and Epic, with simulated ownership and Steam family access shown separately."
+						/>
+						<figcaption data-showcase-caption data-i18n="libraryCaption">
+							Search once. See every store, your own copies and Steam family access.
+						</figcaption>
+					</figure>
+				</section>
+				<section class="cleanup wrap section">
+					<div class="cleanup-copy">
+						<h2 data-i18n="cleanupTitle">Your wishlist. Your call.</h2>
+						<p data-i18n="cleanupBody">
+							A similar title is a reason to look closer. Check the game, edition and platform side
+							by side, then mark only the wishes you want to remove.
+						</p>
+						<p class="firm" data-i18n="cleanupPoint">
+							Nothing leaves a wishlist until you review and confirm the batch.
+						</p>
+					</div>
+					<figure class="review-crop">
+						<img
+							data-language-image="review"
+							src="./assets/screenshots/review-en.webp"
+							width="1440"
+							height="900"
+							loading="lazy"
+							data-i18n-alt="cleanupAlt"
+							alt="CrossShelf demo review showing real games with simulated wishlist entries, owned copies and the option to keep a wish."
+						/>
+						<figcaption data-i18n="example">Real games · simulated library and accounts</figcaption>
+					</figure>
+				</section>
+				<section id="how" class="how wrap section">
+					<div>
+						<h2 data-i18n="howTitle">From scattered to sorted.</h2>
+						<p data-i18n="howBody">
+							No API keys or terminal. Install the app and use the accounts you already have.
+						</p>
+					</div>
+					<ol class="steps">
+						<li>
+							<img src="./assets/connect.svg" width="28" height="28" alt="" />
+							<div>
+								<h3 data-i18n="stepConnect">Connect your stores</h3>
+								<p data-i18n="stepConnectBody">
+									Sign in on the official Steam, GOG and Epic pages. CrossShelf never asks for your
+									password.
+								</p>
+							</div>
+						</li>
+						<li>
+							<img src="./assets/library.svg" width="28" height="28" alt="" />
+							<div>
+								<h3 data-i18n="stepSync">Bring in your libraries</h3>
+								<p data-i18n="stepSyncBody">
+									Sync, search and filter your games. Steam family access is always labelled
+									separately.
+								</p>
+							</div>
+						</li>
+						<li>
+							<img src="./assets/checklist.svg" width="28" height="28" alt="" />
+							<div>
+								<h3 data-i18n="stepReview">Review before removing</h3>
+								<p data-i18n="stepReviewBody">
+									Choose the Steam and GOG wishes to remove, review the batch and confirm. The app
+									checks each result.
+								</p>
+							</div>
+						</li>
+					</ol>
+				</section>
+			</div>
+			<section class="privacy-band">
+				<div class="wrap privacy-content">
+					<h2 data-i18n="localTitle">Your shelf lives on your PC.</h2>
+					<div>
+						<p data-i18n="localBody">
+							No CrossShelf account. No telemetry. Your library stays on your computer, and saved
+							sessions are encrypted with Windows data protection.
+						</p>
+						<p class="secondary" data-i18n="localDetail">
+							Export your library and wishlists to CSV or JSON whenever you want.
+						</p>
+					</div>
+				</div>
+			</section>
+			<div class="paper">
+				<section class="faq wrap section">
+					<h2 data-i18n="faqTitle">Before you install.</h2>
+					<div class="questions">
+						<details open>
+							<summary data-i18n="faqStores">What works with each store?</summary>
+							<p data-i18n="faqStoresBody">
+								Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean
+								Steam and GOG wishlists. For Epic wishlists, the app opens the store website;
+								reading and removal are not available in the app.
+							</p>
+						</details>
+						<details>
+							<summary data-i18n="faqFamily">Does family access count as owning a game?</summary>
+							<p data-i18n="faqFamilyBody">
+								Family access is labelled separately and excluded from cleanup by default. You can
+								include it in Settings, where it remains a separate reason to review a wish.
+							</p>
+						</details>
+						<details>
+							<summary data-i18n="faqWindows">What do I need to run it?</summary>
+							<p data-i18n="faqWindowsBody">
+								Windows 10 22H2 or Windows 11, 64-bit. The installer runs for your user without
+								administrator permissions and downloads WebView2 if it is missing.
+							</p>
+						</details>
+						<details>
+							<summary data-i18n="faqWarning">Why might Windows show a warning?</summary>
+							<p data-i18n="faqWarningBody">
+								The installer is not signed with a publisher certificate, so Windows SmartScreen may
+								warn on first run. If you downloaded it from this project’s GitHub release, choose
+								“More info”, then “Run anyway”.
+							</p>
+						</details>
+						<details>
+							<summary data-i18n="faqPrice">Is CrossShelf free?</summary>
+							<p data-i18n="faqPriceBody">
+								Yes. CrossShelf is free and open source under the MIT licence. It does not install
+								or launch games, buy anything, or transfer game licences.
+							</p>
+						</details>
+					</div>
+				</section>
+			</div>
+			<section class="about-section wrap section" id="about">
+				<h2 data-i18n="aboutTitle">Behind CrossShelf.</h2>
+				<article class="about-card" data-about-card data-src="./about.json" aria-live="polite">
+					<div class="about-photo-wrap">
+						<img
+							src="./alex.webp"
+							alt="Alex Adiaconitei"
+							class="about-photo"
+							width="688"
+							height="917"
+							loading="lazy"
+						/>
+					</div>
+					<div class="about-content">
+						<h3>Alex Adiaconitei</h3>
+						<p class="about-bio">
+							Software engineer. At work I do backend with Java and Spring Boot; at home I build my
+							own tools in TypeScript, Rust or whatever each problem needs, and I run a VPS and a
+							homelab to learn infrastructure.
+						</p>
+						<ul class="about-facts">
+							<li>Software Engineer</li>
+							<li>TypeScript, Rust, Java, Python</li>
+							<li>Remote</li>
+						</ul>
+						<div class="about-links">
+							<a href="https://github.com/AlexAdiaconitei" target="_blank" rel="noreferrer"
+								>GitHub</a
+							><a
+								href="https://www.linkedin.com/in/alexadiaconitei/"
+								target="_blank"
+								rel="noreferrer"
+								>LinkedIn</a
+							><a href="https://ko-fi.com/K3Q5236GOO" target="_blank" rel="noreferrer">Ko-fi</a>
+						</div>
+					</div>
+				</article>
+			</section>
+		</main>
+		<footer class="wrap footer">
+			<a href="https://github.com/AlexAdiaconitei" data-i18n="footerCredit"
+				>Built by Alex Adiaconitei</a
+			>
+			<div>
+				<a href="https://github.com/AlexAdiacontiei/cross-shelf" data-i18n="source"
+					>Source on GitHub</a
+				><a
+					href="https://github.com/AlexAdiacontiei/cross-shelf/blob/main/LICENSE"
+					data-i18n="license"
+					>MIT licence</a
+				>
+			</div>
+			<p data-i18n="privacy">No analytics or tracking cookies.</p>
+		</footer>
+		<noscript
+			><p class="wrap" data-i18n="noScript">
+				This is the English version. Enable JavaScript to switch languages, choose screenshots and
+				resolve the direct installer link.
+			</p></noscript
+		>
+	</body>
+</html>

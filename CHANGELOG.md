@@ -9,52 +9,60 @@ the matching `## [X.Y.Z]` section, and CI refuses a tag without one.
 
 ## [Unreleased]
 
+### Added
+
+- Bilingual GitHub Pages landing in `gh-pages/`, with English by default, the app's design and icons, real game artwork in simulated libraries, attribution notices and an author profile. The hero links directly to the latest Windows installer and its release notes when available.
+- Independent Pages deployment only for changes inside `gh-pages/` on `main`, plus local preview, screenshot generation, browser checks and an English maintenance README.
+
 ## [0.2.0] - 2026-11-18
 
-Primera versión estable. CrossShelf estrena diseño, se abre en tu biblioteca y enseña la carátula
-de cada juego, en qué tiendas lo tienes y, en la familia de Steam, quién te lo comparte.
+First stable version. CrossShelf gets a new design, opens on your library and shows each game's
+cover, which stores you own it on and, in the Steam family, who shares it with you. The interface
+is now in English and Spanish.
 
 ### Added
 
-- Carátulas de los juegos en la Biblioteca (pequeña en cada fila, grande en la ficha), en Wishlists y en Revisar limpieza. Se cargan desde la web de cada tienda; si una no carga se ven las iniciales del juego, nunca una imagen rota. Se pueden ocultar en Ajustes. Aparecen después de volver a sincronizar cada tienda.
-- Ficha lateral de cada juego en la Biblioteca y en Wishlists, con sus productos y accesos en cada tienda y un botón para abrirlos en la tienda.
-- El acceso familiar de Steam dice quién te comparte cada juego, con su nombre público de Steam. Si su perfil es privado, dice cuántas personas.
-- La app está en inglés y en español. El inglés es el idioma por defecto; se cambia en Ajustes → Apariencia. Fechas y números siguen el idioma elegido.
-- Logo de CrossShelf en la barra lateral, en la barra de la ventana y en el icono de Windows, y una pantalla de carga con el logo en vez de una ventana en negro al abrir.
+- Game covers in the Library (small in each row, large in the sheet), in Wishlists and in Review cleanup. They load from each store's website; if one does not load, the game initials show instead, never a broken image. They can be hidden in Settings. They appear after syncing each store again.
+- A side sheet for each game in the Library and in Wishlists, with its products and access in each store and a button to open them in the store.
+- Steam family access says who shares each game with you, by their public Steam name. If their profile is private, it says how many people.
+- The app is in English and Spanish. English is the default; change it in Settings → Appearance. Dates and numbers follow the chosen language.
+- CrossShelf logo in the sidebar, in the window title bar and in the Windows icon, and a loading screen with the logo instead of a black window when the app opens.
 
 ### Changed
 
-- Diseño nuevo de toda la app: cada tienda tiene su color y su logo (Steam cian, GOG magenta, Epic negro), y el amarillo marca solo el siguiente paso. Titulares en Archivo condensada.
-- La app se abre en la Biblioteca. La barra lateral se pliega en un raíl de iconos o se abre con secciones, el número de deseados por revisar y el estado de cada tienda.
-- Biblioteca agrupa en una fila los productos con el mismo título en varias tiendas, con un conmutador para verlos por tienda. Las pestañas Steam, GOG, Epic y Steam familiar pasan a ser filtros de tienda y de acceso que se combinan.
-- Wishlists se ve como la Biblioteca: carátula, pestañas de tienda con dónde ya tienes cada deseado y ficha al pulsarlo.
-- Revisar limpieza compara cada deseado con lo que ya tienes en dos mitades, con un sello de veredicto, y el lote queda fijo abajo.
-- Conexiones enseña cada recuento en grande (juegos, compartidos, deseados) con su estado y la fecha de los datos.
-- Los textos de ayuda y el origen de los datos pasan a un icono de información; un aviso (una sincronización parcial o fallida) se ve como icono ámbar.
-- Las barras de filtros y las cabeceras ocupan siempre una fila: se adaptan al ancho en vez de saltar de línea, y ninguna vista tiene scroll horizontal. La ventana tiene un tamaño mínimo de 1024 × 640; si no es ancha, la ficha del juego se abre encima de la lista.
-- Barras de scroll finas a juego con el diseño. El clic derecho ya no abre el menú del navegador (salvo en campos de texto) y solo se puede seleccionar texto en la ficha del juego y en los campos.
+- New design across the whole app: each store has its colour and logo (Steam cyan, GOG magenta, Epic black), and yellow marks only the next step. Headings in condensed Archivo.
+- The app opens on the Library. The sidebar folds into an icon rail or opens with sections, the number of wishes to review and the state of each store.
+- The Library groups into one row the products with the same title in several stores, with a switch to see them per store. The Steam, GOG, Epic and Steam family tabs become store and access filters that combine.
+- Wishlists looks like the Library: cover, store tabs showing where you already own each wish, and a sheet when you click it.
+- Review cleanup compares each wish with what you own in two halves, with a verdict stamp, and the batch stays pinned at the bottom.
+- Connections shows each count large (games, shared, wishes) with its state and how recent the data is.
+- Help texts and data origin move behind an information icon; a warning (a partial or failed sync) shows as an amber icon.
+- Filter bars and page headers always take one row: they adapt to the width instead of wrapping, and no view scrolls sideways. The window has a minimum size of 1024 × 640; when it is not wide, the game sheet opens over the list.
+- Slim scrollbars that match the design. Right click no longer opens the browser menu (except in text fields), and text can only be selected in the game sheet and in fields.
+- Exported CSV and JSON files use English column names (`store`, `product_id`, `title`…).
+- The installer is in English and Spanish.
 
 ### Fixed
 
-- Sincronizar Epic tarda unos 20 segundos en vez de más de dos minutos: las fichas del catálogo se piden varias a la vez.
-- Biblioteca escribe «familia de Steam» con mayúscula, y Ajustes explica bien por qué una copia construida sin firma no se actualiza sola.
+- Syncing Epic takes about 20 seconds instead of more than two minutes: catalog records are requested several at a time.
+- The Library capitalises «Steam family», and Settings explains properly why a copy built without the signature does not update itself.
 
 ## [0.1.0] - 2026-11-18
 
-Primera versión. CrossShelf reúne tus bibliotecas de Steam, GOG y Epic y te ayuda a limpiar tus
-wishlists cuando un juego que deseas ya lo tienes.
+First version. CrossShelf brings your Steam, GOG and Epic libraries together and helps you clean
+your wishlists when you already own a game you wish for.
 
 ### Added
 
-- Conexiones: conecta Steam, GOG y Epic en la ventana oficial de cada tienda; la app nunca ve tu contraseña. Cada tienda muestra el estado real de lo que la app puede hacer con ella (biblioteca, familia, wishlist, quitar deseados), con sincronizar, volver a conectar y desconectar.
-- Biblioteca de las tres tiendas por pestañas (Todas, Steam, Steam familiar, GOG y Epic), con búsqueda, filtros y la fecha de los datos de cada tienda. El acceso familiar de Steam se marca siempre como tal, nunca como comprado.
-- Nombre, tipo (juego, DLC, demo, banda sonora, aplicación…) y soporte de Windows de cada producto, sacados de las fichas de cada tienda.
-- Wishlists de Steam y GOG con búsqueda, filtros, orden por prioridad o fecha y «Abrir en la tienda». La de Epic aparece como no disponible, nunca como lista vacía.
-- Revisar limpieza: cada deseado junto a lo que ya tienes y podría cubrirlo, con el motivo. «Es el mismo», «Son diferentes» y «Mantener en esta wishlist» se guardan y sobreviven a nuevas sincronizaciones. Nada se preselecciona y un título parecido nunca basta para quitar nada.
-- Quitar deseados de Steam y GOG desde la app: eliges los que ya tienes, revisas por qué se quita cada uno y «Quitar N deseados ahora» los quita y comprueba cada uno leyendo la wishlist otra vez. Validado con cuentas reales.
-- Resultados: historial de cada lote con el estado de cada entrada; puedes cancelar lo que falte o reintentar lo que falló.
-- Exportación de biblioteca y wishlists a CSV o JSON, sin IDs de cuenta.
-- Ajustes: acceso familiar en la limpieza (desactivado por defecto), carpeta de datos, borrar los datos sincronizados, buscar actualizaciones firmadas y diagnóstico de conexiones.
-- Si conectas otra cuenta de la misma tienda, los datos de la anterior se guardan aparte y no se mezclan.
-- Todo se guarda solo en tu equipo, con la fecha de cada copia, y las sesiones van cifradas con la protección de datos de Windows.
-- Instalador para Windows 10 y 11 en español, con la licencia MIT y los avisos de terceros.
+- Connections: connect Steam, GOG and Epic in each store's official window; the app never sees your password. Each store shows the real state of what the app can do with it (library, family, wishlist, removing wishes), with sync, reconnect and disconnect.
+- Library of the three stores in tabs (All, Steam, Steam family, GOG and Epic), with search, filters and the date of each store's data. Steam family access is always marked as such, never as bought.
+- Name, type (game, DLC, demo, soundtrack, application…) and Windows support of each product, taken from each store's records.
+- Steam and GOG wishlists with search, filters, sorting by priority or date and «Open in the store». The Epic one shows as not available, never as an empty list.
+- Review cleanup: each wish next to what you own that might cover it, with the reason. «It is the same», «They are different» and «Keep on this wishlist» are saved and survive new syncs. Nothing is preselected and a similar title is never enough to remove anything.
+- Removing Steam and GOG wishes from the app: you pick the ones you already own, review why each is removed, and «Remove N wishes now» removes and checks each one by reading the wishlist again. Validated with real accounts.
+- Results: history of each batch with the state of each entry; you can cancel what is left or retry what failed.
+- Export of library and wishlists to CSV or JSON, without account IDs.
+- Settings: family access in the cleanup (off by default), data folder, deleting the synced data, checking for signed updates and connection diagnostics.
+- If you connect another account of the same store, the data of the previous one is kept apart and never mixed.
+- Everything is stored only on your computer, with the date of each copy, and sessions are encrypted with Windows data protection.
+- Installer for Windows 10 and 11 in Spanish, with the MIT licence and third-party notices.

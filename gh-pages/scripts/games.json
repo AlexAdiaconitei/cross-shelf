@@ -1,0 +1,98 @@
+[
+	{
+		"title": "Celeste",
+		"steamAppId": "504230",
+		"source": "https://store.steampowered.com/app/504230/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/504230/library_600x900.jpg"
+	},
+	{
+		"title": "Cyberpunk 2077",
+		"steamAppId": "1091500",
+		"source": "https://store.steampowered.com/app/1091500/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/library_600x900.jpg"
+	},
+	{
+		"title": "Disco Elysium - The Final Cut",
+		"steamAppId": "632470",
+		"source": "https://store.steampowered.com/app/632470/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/632470/library_600x900.jpg"
+	},
+	{
+		"title": "Stardew Valley",
+		"steamAppId": "413150",
+		"source": "https://store.steampowered.com/app/413150/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/413150/library_600x900.jpg"
+	},
+	{
+		"title": "Terraria",
+		"steamAppId": "105600",
+		"source": "https://store.steampowered.com/app/105600/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/105600/library_600x900.jpg"
+	},
+	{
+		"title": "Hades",
+		"steamAppId": "1145360",
+		"source": "https://store.steampowered.com/app/1145360/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1145360/library_600x900.jpg"
+	},
+	{
+		"title": "Hollow Knight",
+		"steamAppId": "367520",
+		"source": "https://store.steampowered.com/app/367520/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/library_600x900.jpg"
+	},
+	{
+		"title": "Portal 2",
+		"steamAppId": "620",
+		"source": "https://store.steampowered.com/app/620/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/620/library_600x900.jpg"
+	},
+	{
+		"title": "Outer Wilds",
+		"steamAppId": "753640",
+		"source": "https://store.steampowered.com/app/753640/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/753640/library_600x900.jpg"
+	},
+	{
+		"title": "Dead Cells",
+		"steamAppId": "588650",
+		"source": "https://store.steampowered.com/app/588650/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/588650/library_600x900.jpg"
+	},
+	{
+		"title": "Portal",
+		"steamAppId": "400",
+		"source": "https://store.steampowered.com/app/400/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/400/library_600x900.jpg"
+	},
+	{
+		"title": "Subnautica",
+		"steamAppId": "264710",
+		"source": "https://store.steampowered.com/app/264710/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/264710/library_600x900.jpg"
+	},
+	{
+		"title": "Slay the Spire",
+		"steamAppId": "646570",
+		"source": "https://store.steampowered.com/app/646570/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/646570/library_600x900.jpg"
+	},
+	{
+		"title": "The Witcher 3: Wild Hunt",
+		"steamAppId": "292030",
+		"source": "https://store.steampowered.com/app/292030/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/library_600x900.jpg"
+	},
+	{
+		"title": "Into the Breach",
+		"steamAppId": "590380",
+		"source": "https://store.steampowered.com/app/590380/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/590380/library_600x900.jpg"
+	},
+	{
+		"title": "TUNIC",
+		"steamAppId": "553420",
+		"source": "https://store.steampowered.com/app/553420/",
+		"artwork": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/553420/library_600x900.jpg"
+	}
+]

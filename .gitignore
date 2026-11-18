@@ -13,3 +13,4 @@ src-tauri/gen/
 
 # Impeccable critique snapshots (local)
 .impeccable/
+.taste-skill/

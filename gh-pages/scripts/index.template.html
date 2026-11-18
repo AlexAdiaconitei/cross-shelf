@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#100f0d" />
+		<title>{{pageTitle}}</title>
+		<meta name="description" content="{{description}}" />
+		<link rel="icon" type="image/png" href="./assets/favicon.png" />
+		<link
+			rel="preload"
+			href="./assets/fonts/archivo-latin.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
+		<link rel="stylesheet" href="./about-card.css" />
+		<link rel="stylesheet" href="./site.css" />
+		<script type="module" src="./site.js"></script>
+		<script src="./about-card.js" defer></script>
+	</head>
+	<body>
+		<a class="skip" href="#main" data-i18n="skip">{{skip}}</a>
+		<header class="header wrap">
+			<a class="brand" href="#" aria-label="CrossShelf"
+				><img src="./assets/logo.svg" alt="CrossShelf" width="205" height="44"
+			/></a>
+			<nav data-i18n-label="navLabel" aria-label="{{navLabel}}">
+				<a href="#preview" data-i18n="navPreview">{{navPreview}}</a>
+				<a href="#how" data-i18n="navHow">{{navHow}}</a>
+				<a href="#about" data-i18n="navAbout">{{navAbout}}</a>
+			</nav>
+			<div
+				class="languages"
+				role="group"
+				data-i18n-label="languageLabel"
+				aria-label="{{languageLabel}}"
+			>
+				<button type="button" data-language="en" lang="en" aria-pressed="true" hidden>EN</button>
+				<button type="button" data-language="es" lang="es" aria-pressed="false" hidden>ES</button>
+			</div>
+		</header>
+		<main id="main">
+			<section class="hero wrap">
+				<div class="hero-intro">
+					<h1 data-i18n="heroTitle">{{heroTitle}}</h1>
+					<div class="hero-copy">
+						<p data-i18n="heroBody">{{heroBody}}</p>
+						<a
+							class="button download"
+							data-download
+							href="https://github.com/AlexAdiacontiei/cross-shelf/releases/latest"
+						>
+							<svg
+								width="22"
+								height="22"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.75"
+								aria-hidden="true"
+							>
+								<path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" />
+							</svg>
+							<span data-download-label data-i18n="viewDownloads">{{viewDownloads}}</span>
+						</a>
+						<a
+							class="notes"
+							data-release-notes
+							href="https://github.com/AlexAdiacontiei/cross-shelf/releases/latest"
+							data-i18n="releaseNotes"
+							>{{releaseNotes}}</a
+						>
+						<p class="release-status" data-release-status data-i18n="releaseFallback" role="status">
+							{{releaseFallback}}
+						</p>
+					</div>
+				</div>
+				<figure class="hero-screen">
+					<div class="folder-tabs" data-i18n-label="storesLabel" aria-label="{{storesLabel}}">
+						<span class="store steam"
+							><img src="./assets/steam.svg" width="24" height="24" alt="" />Steam</span
+						>
+						<span class="store gog"
+							><img src="./assets/gog.svg" width="24" height="24" alt="" />GOG</span
+						>
+						<span class="store epic"
+							><img src="./assets/epic.svg" width="24" height="24" alt="" />Epic Games</span
+						>
+						<span class="free" data-i18n="free">{{free}}</span>
+					</div>
+					<img
+						class="app-shot"
+						data-language-image="detail"
+						src="./assets/screenshots/detail-en.webp"
+						width="1440"
+						height="900"
+						fetchpriority="high"
+						data-i18n-alt="heroAlt"
+						alt="{{heroAlt}}"
+					/>
+					<figcaption data-i18n="example">{{example}}</figcaption>
+				</figure>
+				<p class="artwork-note" data-i18n="artworkDisclaimer">{{artworkDisclaimer}}</p>
+			</section>
+			<div class="paper">
+				<section id="preview" class="preview wrap section">
+					<div class="section-intro">
+						<h2 data-i18n="previewTitle">{{previewTitle}}</h2>
+						<p data-i18n="previewBody">{{previewBody}}</p>
+					</div>
+					<div
+						class="view-picker"
+						role="group"
+						data-i18n-label="previewLabel"
+						aria-label="{{previewLabel}}"
+					>
+						<button
+							type="button"
+							data-view="library"
+							aria-pressed="true"
+							data-i18n="viewLibrary"
+							hidden
+						>
+							{{viewLibrary}}
+						</button>
+						<button
+							type="button"
+							data-view="review"
+							aria-pressed="false"
+							data-i18n="viewReview"
+							hidden
+						>
+							{{viewReview}}
+						</button>
+						<button
+							type="button"
+							data-view="connections"
+							aria-pressed="false"
+							data-i18n="viewConnections"
+							hidden
+						>
+							{{viewConnections}}
+						</button>
+					</div>
+					<div class="legend">
+						<span><i class="legend-tab solid"></i><span data-i18n="owned">{{owned}}</span></span>
+						<span
+							><i class="legend-tab outline"></i><span data-i18n="family">{{family}}</span></span
+						>
+						<span><i class="legend-tab dotted"></i><span data-i18n="wished">{{wished}}</span></span>
+					</div>
+					<figure class="preview-screen">
+						<img
+							class="app-shot"
+							data-showcase
+							src="./assets/screenshots/library-en.webp"
+							width="1440"
+							height="900"
+							loading="lazy"
+							data-i18n-alt="libraryAlt"
+							alt="{{libraryAlt}}"
+						/>
+						<figcaption data-showcase-caption data-i18n="libraryCaption">
+							{{libraryCaption}}
+						</figcaption>
+					</figure>
+				</section>
+				<section class="cleanup wrap section">
+					<div class="cleanup-copy">
+						<h2 data-i18n="cleanupTitle">{{cleanupTitle}}</h2>
+						<p data-i18n="cleanupBody">{{cleanupBody}}</p>
+						<p class="firm" data-i18n="cleanupPoint">{{cleanupPoint}}</p>
+					</div>
+					<figure class="review-crop">
+						<img
+							data-language-image="review"
+							src="./assets/screenshots/review-en.webp"
+							width="1440"
+							height="900"
+							loading="lazy"
+							data-i18n-alt="cleanupAlt"
+							alt="{{cleanupAlt}}"
+						/>
+						<figcaption data-i18n="example">{{example}}</figcaption>
+					</figure>
+				</section>
+				<section id="how" class="how wrap section">
+					<div>
+						<h2 data-i18n="howTitle">{{howTitle}}</h2>
+						<p data-i18n="howBody">{{howBody}}</p>
+					</div>
+					<ol class="steps">
+						<li>
+							<img src="./assets/connect.svg" width="28" height="28" alt="" />
+							<div>
+								<h3 data-i18n="stepConnect">{{stepConnect}}</h3>
+								<p data-i18n="stepConnectBody">{{stepConnectBody}}</p>
+							</div>
+						</li>
+						<li>
+							<img src="./assets/library.svg" width="28" height="28" alt="" />
+							<div>
+								<h3 data-i18n="stepSync">{{stepSync}}</h3>
+								<p data-i18n="stepSyncBody">{{stepSyncBody}}</p>
+							</div>
+						</li>
+						<li>
+							<img src="./assets/checklist.svg" width="28" height="28" alt="" />
+							<div>
+								<h3 data-i18n="stepReview">{{stepReview}}</h3>
+								<p data-i18n="stepReviewBody">{{stepReviewBody}}</p>
+							</div>
+						</li>
+					</ol>
+				</section>
+			</div>
+			<section class="privacy-band">
+				<div class="wrap privacy-content">
+					<h2 data-i18n="localTitle">{{localTitle}}</h2>
+					<div>
+						<p data-i18n="localBody">{{localBody}}</p>
+						<p class="secondary" data-i18n="localDetail">{{localDetail}}</p>
+					</div>
+				</div>
+			</section>
+			<div class="paper">
+				<section class="faq wrap section">
+					<h2 data-i18n="faqTitle">{{faqTitle}}</h2>
+					<div class="questions">
+						<details open>
+							<summary data-i18n="faqStores">{{faqStores}}</summary>
+							<p data-i18n="faqStoresBody">{{faqStoresBody}}</p>
+						</details>
+						<details>
+							<summary data-i18n="faqFamily">{{faqFamily}}</summary>
+							<p data-i18n="faqFamilyBody">{{faqFamilyBody}}</p>
+						</details>
+						<details>
+							<summary data-i18n="faqWindows">{{faqWindows}}</summary>
+							<p data-i18n="faqWindowsBody">{{faqWindowsBody}}</p>
+						</details>
+						<details>
+							<summary data-i18n="faqWarning">{{faqWarning}}</summary>
+							<p data-i18n="faqWarningBody">{{faqWarningBody}}</p>
+						</details>
+						<details>
+							<summary data-i18n="faqPrice">{{faqPrice}}</summary>
+							<p data-i18n="faqPriceBody">{{faqPriceBody}}</p>
+						</details>
+					</div>
+				</section>
+			</div>
+			<section class="about-section wrap section" id="about">
+				<h2 data-i18n="aboutTitle">{{aboutTitle}}</h2>
+				<article class="about-card" data-about-card data-src="./about.json" aria-live="polite">
+					<div class="about-photo-wrap">
+						<img
+							src="./alex.webp"
+							alt="{{authorName}}"
+							class="about-photo"
+							width="688"
+							height="917"
+							loading="lazy"
+						/>
+					</div>
+					<div class="about-content">
+						<h3>{{authorName}}</h3>
+						<p class="about-bio">{{authorBio}}</p>
+						<ul class="about-facts">
+							<li>{{authorFact0}}</li>
+							<li>{{authorFact1}}</li>
+							<li>{{authorFact2}}</li>
+						</ul>
+						<div class="about-links">
+							<a href="{{authorGithub}}" target="_blank" rel="noreferrer">GitHub</a
+							><a href="{{authorLinkedin}}" target="_blank" rel="noreferrer">LinkedIn</a
+							><a href="{{authorKofi}}" target="_blank" rel="noreferrer">Ko-fi</a>
+						</div>
+					</div>
+				</article>
+			</section>
+		</main>
+		<footer class="wrap footer">
+			<a href="{{authorGithub}}" data-i18n="footerCredit">{{footerCredit}}</a>
+			<div>
+				<a href="https://github.com/AlexAdiacontiei/cross-shelf" data-i18n="source">{{source}}</a
+				><a
+					href="https://github.com/AlexAdiacontiei/cross-shelf/blob/main/LICENSE"
+					data-i18n="license"
+					>{{license}}</a
+				>
+			</div>
+			<p data-i18n="privacy">{{privacy}}</p>
+		</footer>
+		<noscript><p class="wrap" data-i18n="noScript">{{noScript}}</p></noscript>
+	</body>
+</html>

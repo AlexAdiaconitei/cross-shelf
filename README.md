@@ -5,138 +5,142 @@
   <img src="docs/assets/cross-shelf-horizontal-color.svg" alt="CrossShelf" width="360">
 </picture>
 
-**Tus bibliotecas de Steam, GOG y Epic en un solo sitio, y tus wishlists limpias de juegos que ya tienes.**
+**Your Steam, GOG and Epic libraries in one place, and wishlists clear of games you already own.**
 
 <p>
-  <a href="https://ko-fi.com/K3Q5236GOO"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Apóyame en Ko-fi"></a>
+  <a href="https://ko-fi.com/K3Q5236GOO"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi"></a>
 </p>
 
 [![Release](https://img.shields.io/github/v/release/AlexAdiaconitei/cross-shelf?style=flat-square&color=FBD530&labelColor=100F0D)](https://github.com/AlexAdiaconitei/cross-shelf/releases/latest)
-[![Windows](https://img.shields.io/badge/Windows-10%20%C2%B7%2011-100F0D?style=flat-square&logo=windows&logoColor=white)](#instalar)
+[![Windows](https://img.shields.io/badge/Windows-10%20%C2%B7%2011-100F0D?style=flat-square&logo=windows&logoColor=white)](#install)
 [![Tauri](https://img.shields.io/badge/Tauri-2-100F0D?style=flat-square&logo=tauri&logoColor=FFC131)](https://tauri.app)
-[![Licencia](https://img.shields.io/badge/licencia-MIT-100F0D?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-100F0D?style=flat-square)](LICENSE)
 
-[Qué hace](#qué-hace) · [Instalar](#instalar) · [Cómo se usa](#cómo-se-usa) · [Tiendas](#estado-de-cada-tienda) · [Privacidad](#privacidad) · [Desarrollo](#desarrollo)
+[What it does](#what-it-does) · [Install](#install) · [How to use it](#how-to-use-it) · [Stores](#store-support) · [Privacy](#privacy) · [Development](#development)
+
+**English** · [Español](README.es.md)
 
 </div>
 
-Compras en Steam, te regalan juegos en Epic, encuentras ofertas en GOG… y acabas con un juego en tu
-wishlist de una tienda que ya tienes en otra. CrossShelf lee tus tres bibliotecas, te enseña en qué
-tienda tienes cada juego y te ayuda a quitar de tus wishlists lo que ya es tuyo, siempre con la
-evidencia delante y nunca sin que lo confirmes.
+You buy on Steam, get free games on Epic, catch a sale on GOG… and end up with a game on one
+store's wishlist that you already own on another. CrossShelf reads your three libraries, shows which
+store you own each game on, and helps you remove from your wishlists what is already yours, always
+with the evidence in front of you and never without your confirmation.
 
-## Qué hace
+## What it does
 
-- **Una biblioteca para las tres tiendas.** Cada juego en una fila, con su carátula y una pestaña de
-  color por tienda: llena si es tuyo, con contorno si es de tu familia de Steam, punteada si está en
-  tu wishlist. Búsqueda, filtros por tienda, acceso y tipo, y una ficha con los productos de cada
-  tienda.
-- **Wishlists de Steam y GOG**, con prioridad, fecha y dónde tienes ya cada deseado.
-- **Revisar limpieza.** Cada deseado frente a lo que ya tienes y podría cubrirlo, con el motivo:
-  mismo ID de tienda, catálogo común o solo el título. Tú decides «Es el mismo», «Son diferentes» o
-  «Mantener». Nada se marca solo por parecerse.
-- **Lotes que revisas y confirmas.** La app quita los deseados elegidos y comprueba cada uno leyendo
-  la wishlist otra vez. Resultados guarda lo que pasó con cada entrada.
-- **Acceso familiar de Steam** marcado siempre como tal, con quién te lo comparte. No cuenta como
-  tuyo en la limpieza salvo que lo actives.
-- **Exportación** de biblioteca y wishlists a CSV o JSON.
+- **One library for three stores.** One row per game, with its cover and a coloured tab per store:
+  filled if you own it, outlined if it comes from your Steam family, dashed if it is on your
+  wishlist. Search, filters by store, access and type, and a sheet with each store's products.
+- **Steam and GOG wishlists**, with priority, date added and where you already own each wish.
+- **Review cleanup.** Each wish next to what you own that might cover it, with the reason: same
+  store ID, shared catalog or only the title. You decide «It is the same», «They are different» or
+  «Keep». Nothing is marked just because it looks alike.
+- **Batches you review and confirm.** The app removes the chosen wishes and checks each one by
+  reading the wishlist again. Results keeps what happened to every entry.
+- **Steam family access** always marked as such, with who shares it. It does not count as yours in
+  the cleanup unless you turn it on.
+- **Export** of library and wishlists to CSV or JSON.
+- **English and Spanish**, switchable in Settings.
 
 > [!NOTE]
-> CrossShelf no instala ni abre juegos, no compra y no transfiere licencias. Quitar un deseado no
-> borra ninguna licencia.
+> CrossShelf does not install or launch games, does not buy anything and does not transfer
+> licences. Removing a wish does not delete any licence.
 
-## Instalar
+## Install
 
-1. Descarga el instalador `CrossShelf_x.y.z_x64-setup.exe` de la
-   [última versión](https://github.com/AlexAdiaconitei/cross-shelf/releases/latest).
-2. Ábrelo. Se instala solo para tu usuario y no pide permisos de administrador.
-3. Si falta WebView2, el instalador lo descarga.
+1. Download the `CrossShelf_x.y.z_x64-setup.exe` installer from the
+   [latest release](https://github.com/AlexAdiaconitei/cross-shelf/releases/latest).
+2. Run it. It installs for your user only and does not ask for administrator rights.
+3. If WebView2 is missing, the installer downloads it.
 
 > [!WARNING]
-> El instalador no está firmado con un certificado de editor, así que Windows SmartScreen puede
-> avisar la primera vez. Pulsa **Más información** y luego **Ejecutar de todas formas**.
+> The installer is not signed with a publisher certificate, so Windows SmartScreen may warn you
+> the first time. Click **More info** and then **Run anyway**.
 
-Requisitos: Windows 10 22H2 u 11 de 64 bits. Cuando hay una versión nueva, la app la ofrece desde
-**Ajustes**.
+Requires Windows 10 22H2 or 11, 64-bit. When a new version is out, the app offers it from
+**Settings**.
 
-## Cómo se usa
+## How to use it
 
-1. **Conexiones.** Conecta Steam, GOG y Epic. Cada tienda abre su página oficial en su propia
-   ventana: inicias sesión allí y la app nunca ve tu contraseña.
-2. **Sincroniza** cada tienda. Verás cuántos juegos y deseados hay y de cuándo son los datos.
-3. **Biblioteca.** Busca cualquier juego para saber si lo tienes y dónde.
-4. **Revisar limpieza.** El botón amarillo te lleva a los deseados que quizá ya tienes. Decide cada
-   caso, marca los que quieras quitar y confirma el lote.
+1. **Connections.** Connect Steam, GOG and Epic. Each store opens its official page in its own
+   window: you sign in there and the app never sees your password.
+2. **Sync** each store. You will see how many games and wishes there are and how recent the data is.
+3. **Library.** Search any game to know whether you own it and where.
+4. **Review cleanup.** The yellow button takes you to the wishes you may already own. Decide each
+   case, tick the ones you want to remove and confirm the batch.
 
 > [!TIP]
-> La app está en inglés y en español: cambia el idioma en **Ajustes → Apariencia**. Ahí también
-> puedes ocultar las carátulas, y en **Limpieza de wishlists** contar el acceso familiar.
+> Change the language in **Settings → Appearance**, where you can also hide the covers. In
+> **Wishlist cleanup** you can count Steam family access as a reason to remove a wish.
 
-## Estado de cada tienda
+## Store support
 
-| Capacidad                | Steam        | GOG          | Epic                       |
-| ------------------------ | ------------ | ------------ | -------------------------- |
-| Conectar                 | Sí           | Sí           | Sí                         |
-| Biblioteca               | Sí           | Sí           | Sí                         |
-| Familia                  | Sí           | No aplica    | No aplica                  |
-| Wishlist                 | Sí           | Sí           | No: se abre la web de Epic |
-| Quitar o añadir deseados | Desde la app | Desde la app | No disponible              |
-| Carátulas                | Sí           | Sí           | Sí                         |
+| Capability           | Steam    | GOG            | Epic                       |
+| -------------------- | -------- | -------------- | -------------------------- |
+| Connect              | Yes      | Yes            | Yes                        |
+| Library              | Yes      | Yes            | Yes                        |
+| Family               | Yes      | Not applicable | Not applicable             |
+| Wishlist             | Yes      | Yes            | No: opens the Epic website |
+| Remove or add wishes | From app | From app       | Not available              |
+| Covers               | Yes      | Yes            | Yes                        |
 
-«Desde la app» significa que la app quita los deseados de un lote confirmado y comprueba cada uno
-leyendo la wishlist otra vez. Está validado con cuentas reales en Steam y GOG
-([registros](docs/validation/)).
+«From app» means the app removes the wishes of a confirmed batch and checks each one by reading the
+wishlist again. It is validated with real accounts on Steam and GOG
+([records](docs/validation/), in Spanish).
 
-## Privacidad
+## Privacy
 
-- Todo se guarda solo en tu equipo, en `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\`.
-- Las sesiones se guardan cifradas con la protección de datos de Windows.
-- No hay telemetría ni cuenta de CrossShelf. La app solo habla con Steam, GOG y Epic, y las
-  carátulas se cargan desde la web de cada tienda.
-- Los registros y las exportaciones no incluyen contraseñas, claves de sesión ni cookies.
+- Everything is stored only on your computer, in `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\`.
+- Sessions are stored encrypted with Windows data protection.
+- No telemetry and no CrossShelf account. The app only talks to Steam, GOG and Epic, and covers load
+  from each store's website.
+- Logs and exports never include passwords, session keys or cookies.
 
-## Desarrollo
+## Development
 
-Tauri 2 + SvelteKit estático + Svelte 5 + Rust. Requisitos: Windows 10 22H2 u 11 (x64), Node 24,
-pnpm 12 y Rust estable.
+Tauri 2 + static SvelteKit + Svelte 5 + Rust. Requires Windows 10 22H2 or 11 (x64), Node 24, pnpm 12
+and stable Rust.
 
 ```sh
 pnpm install
-pnpm tauri dev                          # la app completa
-pnpm lint && pnpm check && pnpm test    # lo que ejecuta la CI
+pnpm tauri dev                          # the whole app
+pnpm lint && pnpm check && pnpm test    # what CI runs
 cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test
 ```
 
-| Dónde                             | Qué                                                    |
-| --------------------------------- | ------------------------------------------------------ |
-| `docs/crossshelf-build-prompt.md` | Especificación completa                                |
-| `PRODUCT.md`, `DESIGN.md`         | Producto y sistema visual                              |
-| `CONTEXT.md`                      | Glosario del dominio                                   |
-| `docs/adr/`                       | Decisiones de arquitectura                             |
-| `docs/plans/`                     | Planes de lo próximo                                   |
-| `docs/validation/`                | Pruebas con cuentas reales                             |
-| `src/lib/bindings/`               | Tipos TypeScript generados desde Rust con `cargo test` |
+| Where                             | What                                                 |
+| --------------------------------- | ---------------------------------------------------- |
+| `src/lib/i18n/`                   | Interface text, English and Spanish                  |
+| `docs/crossshelf-build-prompt.md` | Full specification                                   |
+| `PRODUCT.md`, `DESIGN.md`         | Product and visual system                            |
+| `CONTEXT.md`                      | Domain glossary                                      |
+| `docs/adr/`                       | Architecture decisions                               |
+| `docs/plans/`                     | Plans for what comes next                            |
+| `docs/validation/`                | Tests with real accounts                             |
+| `src/lib/bindings/`               | TypeScript types generated from Rust by `cargo test` |
 
-Las versiones se publican al empujar una etiqueta `vX.Y.Z`: la CI comprueba que la versión coincide
-en todos los manifiestos, compila el instalador y deja un borrador de release con las notas de
-`CHANGELOG.md`.
+The project documentation under `docs/` is written in Spanish.
 
-## Sobre mí
+Versions are published by pushing a `vX.Y.Z` tag: CI checks that the version matches in every
+manifest, builds the installer and leaves a draft release with the notes from `CHANGELOG.md`.
+
+## About Me
 
 <img src="https://github.com/AlexAdiaconitei.png?size=160" width="80" align="left" alt="Alex Adiaconitei">
 
 **Alex Adiaconitei**
 
-Software engineer. En el trabajo hago backend con Java y Spring Boot; en casa construyo mis propias herramientas con TypeScript, Rust o lo que pida cada problema, y mantengo un VPS y un homelab con los que aprendo infraestructura.
+Software engineer. At work I do backend with Java and Spring Boot; at home I build my own tools in TypeScript, Rust or whatever each problem needs, and I run a VPS and a homelab to learn infrastructure.
 
 <br clear="left">
 
 - Software Engineer
 - TypeScript, Rust, Java, Python
-- Remoto
+- Remote
 
 <p>
   <a href="https://github.com/AlexAdiaconitei"><img src="https://img.shields.io/badge/GitHub-AlexAdiaconitei-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
   <a href="https://www.linkedin.com/in/alexadiaconitei/"><img src="https://img.shields.io/badge/LinkedIn-Alex%20Adiaconitei-0A66C2?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik01LjM0IDcuNzJIMS4xNVYyMWg0LjE5VjcuNzJaTTMuMjUgMWEyLjQzIDIuNDMgMCAxIDAgMCA0Ljg2IDIuNDMgMi40MyAwIDAgMCAwLTQuODZaTTIxLjg1IDEzLjM5YzAtNC0yLjE0LTUuODYtNS01Ljg2YTQuMzEgNC4zMSAwIDAgMC0zLjkxIDIuMTVWNy43Mkg4Ljc1VjIxaDQuMTl2LTYuNThjMC0xLjc0LjMzLTMuNDIgMi40OC0zLjQyIDIuMTIgMCAyLjE1IDEuOTggMi4xNSAzLjUzVjIxaDQuMjh2LTcuNjFaIi8%2BPC9zdmc%2B" alt="LinkedIn"></a>
-  <a href="https://ko-fi.com/K3Q5236GOO"><img src="https://img.shields.io/badge/Ko--fi-Ap%C3%B3yame-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Ko-fi"></a>
+  <a href="https://ko-fi.com/K3Q5236GOO"><img src="https://img.shields.io/badge/Ko--fi-Support%20me-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Ko-fi"></a>
 </p>
