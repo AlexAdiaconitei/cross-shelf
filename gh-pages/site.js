@@ -1,4 +1,4 @@
-import { latestRelease, releaseLinks, repository } from './release.js';
+import { latestInstaller, latestRelease, releaseLinks, repository } from './release.js';
 
 let dictionary;
 let release;
@@ -27,7 +27,7 @@ function translate() {
 		? `${release.version} · ${dictionary.windows}`
 		: dictionary.releaseFallback;
 	for (const node of document.querySelectorAll('[data-download-label]')) {
-		node.textContent = release ? dictionary.download : dictionary.viewDownloads;
+		node.textContent = dictionary.download;
 	}
 	showView(currentView);
 }
@@ -93,10 +93,10 @@ try {
 	});
 	if (response.ok) release = releaseLinks(await response.json());
 } catch {
-	/* No release yet, offline or rate limited: keep the working GitHub releases link. */
+	/* No release yet, offline or rate limited: the stable installer link still downloads. */
 }
 for (const link of document.querySelectorAll('[data-download]')) {
-	link.href = release?.download || latestRelease;
+	link.href = release?.download || latestInstaller;
 }
 document.querySelector('[data-release-notes]').href = release?.notes || latestRelease;
 if (dictionary) translate();

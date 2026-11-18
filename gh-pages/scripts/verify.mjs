@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { repository } from '../release.js';
+import { latestInstaller, repository } from '../release.js';
 
 const driver = process.env.CROSSSHELF_CDP_MODULE
 	? pathToFileURL(process.env.CROSSSHELF_CDP_MODULE)
@@ -159,7 +159,7 @@ try {
 		await page.goto(url);
 		assert.equal(
 			await page.eval(() => document.querySelector('[data-download]').href),
-			`https://github.com/${repository}/releases/latest`
+			latestInstaller
 		);
 	}
 	status = 200;
@@ -167,7 +167,7 @@ try {
 	await page.goto(url);
 	assert.equal(
 		await page.eval(() => document.querySelector('[data-download]').href),
-		`https://github.com/${repository}/releases/latest`
+		latestInstaller
 	);
 	assert.deepEqual(page.consoleErrors, []);
 	const noScript = await browser.newPage({ width: 360, height: 900 });
@@ -182,7 +182,7 @@ try {
 	}));
 	assert.ok(fallback.title.includes('All your games.'));
 	assert.equal(fallback.languageButtons, true);
-	assert.equal(fallback.link, `https://github.com/${repository}/releases/latest`);
+	assert.equal(fallback.link, latestInstaller);
 	console.log(
 		'PASS release success / 404 / rate limit / server failure / no EXE; language persistence; keyboard FAQ; base path; no-JS fallback'
 	);

@@ -60,8 +60,8 @@ refreshing the skill assets.
 
 ## Latest Windows installer
 
-The distribution repository is **`AlexAdiacontiei/cross-shelf`**, exactly as requested. This differs
-from the author’s GitHub handle, `AlexAdiaconitei`, which remains unchanged in the author links.
+The distribution repository is **`AlexAdiaconitei/cross-shelf`**, the same account as the author
+links.
 
 On each page visit, `site.js` requests the public
 [`releases/latest` API](https://docs.github.com/en/rest/releases/releases#get-the-latest-release).

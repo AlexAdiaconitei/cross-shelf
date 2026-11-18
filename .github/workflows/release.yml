@@ -112,3 +112,14 @@ jobs:
           prerelease: ${{ needs.validate.outputs.prerelease }}
           releaseBody: ${{ needs.validate.outputs.notes }}
           args: ${{ steps.updater.outputs.config }}
+
+      # The website links releases/latest/download/CrossShelf-setup.exe, a name that never changes.
+      - name: Upload the installer under a stable name
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: |
+          exe=$(ls src-tauri/target/release/bundle/nsis/*_x64-setup.exe | head -n 1)
+          cp "$exe" "$RUNNER_TEMP/CrossShelf-setup.exe"
+          gh release upload "$TAG" "$RUNNER_TEMP/CrossShelf-setup.exe" --clobber --repo "$GITHUB_REPOSITORY"

@@ -4,10 +4,25 @@ name: CI (Rust)
 # repository is public and the shared workflows are private. Runs on Windows: the backend links
 # the `windows` crate (DPAPI for secrets) and only builds there. No PostgreSQL: the app uses SQLite.
 
+# Not for changes that cannot affect the backend: the landing, docs and other workflows.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'gh-pages/**'
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/workflows/pages.yml'
+      - '.github/workflows/ci-node.yml'
+      - '.github/workflows/release.yml'
   pull_request:
+    paths-ignore:
+      - 'gh-pages/**'
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/workflows/pages.yml'
+      - '.github/workflows/ci-node.yml'
+      - '.github/workflows/release.yml'
 
 permissions:
   contents: read

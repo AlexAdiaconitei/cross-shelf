@@ -1,5 +1,11 @@
-export const repository = 'AlexAdiacontiei/cross-shelf';
+export const repository = 'AlexAdiaconitei/cross-shelf';
 export const latestRelease = `https://github.com/${repository}/releases/latest`;
+/**
+ * The latest installer under a name that never changes. The release workflow uploads a copy of
+ * the NSIS installer as CrossShelf-setup.exe, and GitHub redirects this URL to the newest one, so
+ * the button downloads directly even without JavaScript or when the API is unavailable.
+ */
+export const latestInstaller = `${latestRelease}/download/CrossShelf-setup.exe`;
 
 /** Only accept the current Windows x64 NSIS installer from this repository. */
 export function releaseLinks(release) {

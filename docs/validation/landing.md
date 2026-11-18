@@ -128,8 +128,9 @@ oficiales fijadas por SHA y solo se activa con `push` a `main` y cambios en `gh-
 El paquete publicado excluye README, pruebas y herramientas. Las releases no disparan Pages:
 el navegador resuelve el instalador actual en cada visita.
 
-El repositorio de distribución es `AlexAdiacontiei/cross-shelf`, exactamente el indicado en la
-tarea. Los enlaces personales del autor mantienen `AlexAdiaconitei`. El repositorio aún no existe:
+El repositorio de distribución es `AlexAdiaconitei/cross-shelf`, la misma cuenta que los enlaces del
+autor. (La tarea original lo escribía `AlexAdiacontiei`, una errata: esa cuenta no existe; corregido
+el 18 de noviembre de 2026.) El repositorio aún no existe:
 no se ha podido ejecutar el workflow remoto, comprobar permisos del entorno, validar la URL
 publicada ni descargar un instalador real. Hay que seleccionar GitHub Actions como fuente de
 Pages cuando se cree. No se ha creado, publicado ni enviado nada a GitHub.
