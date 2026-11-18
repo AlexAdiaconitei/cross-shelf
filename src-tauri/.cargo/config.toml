@@ -1,0 +1,6 @@
+# ts-rs writes the TypeScript types of the IPC contract into the front end on `cargo test`.
+# 64-bit IDs are String in Rust, so `number` here only covers counts and Unix timestamps.
+[env]
+TS_RS_EXPORT_DIR = { value = "../src/lib/bindings", relative = true }
+TS_RS_LARGE_INT = "number"
+TS_RS_IMPORT_EXTENSION = "ts"

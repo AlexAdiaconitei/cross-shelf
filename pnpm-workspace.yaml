@@ -1,0 +1,44 @@
+# Dependency policy shared by every repository (rules/dependencies.md). Do not relax it without
+# writing down why, next to the change.
+packages:
+  - '.'
+
+# Supply-chain rule: a version must have been public for 7 days (in minutes) before pnpm installs
+# it, transitive dependencies included. Most malicious releases are caught and pulled in that window.
+minimumReleaseAge: 10080
+# Refuse instead of silently falling back to an older version.
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+# Deliberate, dated exceptions, exact versions only, so the next release of the same package waits
+# its 7 days again:
+#   # 2026-10-01: AWS SDK taken the day after release for <reason>. Remove after 2026-10-08.
+#   - '@aws-sdk/client-s3@3.1144.0'
+minimumReleaseAgeExclude: []
+
+# Refuse a version published with weaker provenance than an earlier one (a hijacked maintainer
+# account publishing from a laptop instead of CI).
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 525600
+
+# No ^ or ~ when adding a dependency: every version change is a reviewed diff.
+saveExact: true
+savePrefix: ''
+engineStrict: true
+
+# Private packages. The token lives in the user-level ~/.npmrc (pnpm refuses credentials in the
+# project's .npmrc): //npm.pkg.github.com/:_authToken=<classic PAT with read:packages>
+registries:
+  '@alexadiaconitei': https://npm.pkg.github.com
+
+# Install scripts run only for the packages listed as true. Add one only after reading what its
+# script does; false silences the warning for a script that is not needed.
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+# Security overrides, each with the advisory and the date:
+#   # 2026-10-02: GHSA-pxg6-pf52-xh8x
+#   'cookie@<0.7.0': '0.7.2'
+overrides:
+  # 2026-10-29: GHSA-67mh-4wv8-2f99, legacy drizzle-kit loader.
+  'esbuild@<0.25.0': '0.25.12'

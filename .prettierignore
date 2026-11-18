@@ -1,0 +1,17 @@
+build/
+dist/
+.svelte-kit/
+coverage/
+node_modules/
+pnpm-lock.yaml
+drizzle/meta/
+static/
+src-tauri/target/
+src-tauri/gen/
+CHANGELOG.md
+.agents/
+.claude/skills/
+docs/crossshelf-build-prompt.md
+src/lib/bindings/
+THIRD_PARTY_NOTICES.md
+.impeccable/

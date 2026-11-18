@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "CrossShelf",
+	"version": "0.1.0",
+	"identifier": "com.alexadiaconitei.cross-shelf",
+	"build": {
+		"beforeDevCommand": "pnpm dev",
+		"devUrl": "http://localhost:1420",
+		"beforeBuildCommand": "pnpm build",
+		"frontendDist": "../build"
+	},
+	"app": {
+		"windows": [
+			{
+				"label": "main",
+				"title": "CrossShelf",
+				"width": 1100,
+				"height": 740,
+				"minWidth": 800,
+				"minHeight": 560
+			}
+		],
+		"security": {
+			"csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost"
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": ["nsis"],
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		],
+		"shortDescription": "Tus bibliotecas de Steam, GOG y Epic en un sitio",
+		"resources": {
+			"../THIRD_PARTY_NOTICES.md": "THIRD_PARTY_NOTICES.md",
+			"../LICENSE": "LICENSE.txt"
+		},
+		"windows": {
+			"nsis": {
+				"installMode": "currentUser",
+				"languages": ["Spanish"],
+				"displayLanguageSelector": false
+			},
+			"webviewInstallMode": {
+				"type": "downloadBootstrapper",
+				"silent": true
+			}
+		}
+	}
+}

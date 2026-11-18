@@ -1,0 +1,105 @@
+{
+	"$comment": "Written by `devkit new`; updated by `devkit drift`.",
+	"stack": "desktop-tauri",
+	"name": "CrossShelf",
+	"repo": "cross-shelf",
+	"integration": false,
+	"devkit": "a1551524b0b3f898245f5585509450b82d87c2ec",
+	"files": {
+		"scripts/smoke-startup.mjs": {
+			"from": "stacks/desktop-tauri/scripts/smoke-startup.mjs",
+			"template": "5a04d59b36135d5f",
+			"project": "5a04d59b36135d5f"
+		},
+		"scripts/updater-config.mjs": {
+			"from": "stacks/desktop-tauri/scripts/updater-config.mjs",
+			"template": "8703a0505b21baf1",
+			"project": "8703a0505b21baf1"
+		},
+		"vite.config.ts": {
+			"from": "stacks/desktop-tauri/vite.config.ts",
+			"template": "3c93696278daa34f",
+			"project": "3c93696278daa34f"
+		},
+		".prettierrc": {
+			"from": "stacks/web-fullstack/.prettierrc",
+			"template": "cba49aa3d04d2aa7",
+			"project": "cba49aa3d04d2aa7"
+		},
+		"eslint.config.js": {
+			"from": "stacks/web-fullstack/eslint.config.js",
+			"template": "9baae7e66f771154",
+			"project": "9baae7e66f771154"
+		},
+		"tsconfig.json": {
+			"from": "stacks/web-fullstack/tsconfig.json",
+			"template": "76ec7e4edecb7c18",
+			"project": "76ec7e4edecb7c18"
+		},
+		".editorconfig": {
+			"from": "config/.editorconfig",
+			"template": "07bcc2bbb6239732",
+			"project": "07bcc2bbb6239732"
+		},
+		".gitattributes": {
+			"from": "config/.gitattributes",
+			"template": "26dcfb84c9994e7c",
+			"project": "26dcfb84c9994e7c"
+		},
+		".npmrc": {
+			"from": "config/.npmrc",
+			"template": "a5e8660cb5ad6167",
+			"project": "a5e8660cb5ad6167"
+		},
+		".node-version": {
+			"from": "config/.node-version",
+			"template": "c2356069e9d1e79c",
+			"project": "c2356069e9d1e79c"
+		},
+		".prettierignore": {
+			"from": "config/.prettierignore",
+			"template": "0b7f95755c509a6d",
+			"project": "0b7f95755c509a6d"
+		},
+		"pnpm-workspace.yaml": {
+			"from": "config/pnpm-workspace.yaml",
+			"template": "8dfcc4517403f014",
+			"project": "8dfcc4517403f014"
+		},
+		"CLAUDE.md": {
+			"from": "agents/CLAUDE.md",
+			"template": "918b1c90559355ef",
+			"project": "918b1c90559355ef"
+		},
+		".claude/settings.json": {
+			"from": "claude-settings",
+			"template": "02f49137a97cda27",
+			"project": "02f49137a97cda27"
+		},
+		".github/workflows/ci-node.yml": {
+			"from": "github/workflows/ci-node.yml",
+			"template": "51e7c56393d61c8b",
+			"project": "51e7c56393d61c8b"
+		},
+		".github/workflows/ci-rust.yml": {
+			"from": "github/workflows/ci-rust.yml",
+			"template": "2928b4b22bba4712",
+			"project": "2928b4b22bba4712"
+		},
+		".github/workflows/release.yml": {
+			"from": "github/workflows/release-tauri.yml",
+			"template": "260d16f16aa07c23",
+			"project": "260d16f16aa07c23"
+		},
+		".github/dependabot.yml": {
+			"from": "github/dependabot.yml",
+			"template": "cbdec8556b96bedf",
+			"project": "cbdec8556b96bedf"
+		},
+		".github/pull_request_template.md": {
+			"from": "github/pull_request_template.md",
+			"template": "3d8af4ae4b3ef2d9",
+			"project": "3d8af4ae4b3ef2d9"
+		}
+	}
+}

@@ -1,0 +1,114 @@
+name: Release
+
+# Windows-only release (spec section 10, phase 0). The reusable devkit workflow builds Windows and
+# macOS without a platform input, so this project carries its own copy, reduced to Windows.
+# Result: a draft release with the NSIS installer and latest.json. The draft is published by hand
+# after trying the installer.
+#
+#   git tag -a v0.3.0 -m v0.3.0 && git push --follow-tags
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag to rebuild, for example v0.3.0'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.ref || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      prerelease: ${{ steps.release.outputs.prerelease }}
+      notes: ${{ steps.notes.outputs.notes }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      # package.json, src-tauri/tauri.conf.json and src-tauri/Cargo.toml must agree with the tag.
+      - id: release
+        uses: AlexAdiaconitei/actions/verify-release@v1.0.0
+        with:
+          ref: ${{ inputs.ref || '' }}
+      - id: notes
+        env:
+          NOTES_FILE: ${{ steps.release.outputs.notes_file }}
+        run: |
+          {
+            echo 'notes<<CHANGELOG_EOF'
+            cat "$NOTES_FILE"
+            echo 'CHANGELOG_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: validate
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - uses: AlexAdiaconitei/actions/setup-node-pnpm@v1.0.0
+        with:
+          cache: 'false'
+      - uses: dtolnay/rust-toolchain@stable # pin by SHA: pinact run
+
+      - run: pnpm lint
+      - run: pnpm check
+      - run: pnpm test
+      - name: Rust checks
+        working-directory: src-tauri
+        run: |
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      # Without signing secrets this writes nothing and the build ships without the updater.
+      - name: Configure the updater
+        id: updater
+        shell: bash
+        env:
+          TAURI_SIGNING_PUBLIC_KEY: ${{ secrets.TAURI_SIGNING_PUBLIC_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          node scripts/updater-config.mjs
+          if [ -f src-tauri/tauri.updater.conf.json ]; then
+            echo "config=--config src-tauri/tauri.updater.conf.json" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build without bundling, then start it once
+        shell: bash
+        env:
+          CONFIG: ${{ steps.updater.outputs.config }}
+        run: |
+          # shellcheck disable=SC2086
+          pnpm tauri build --no-bundle $CONFIG
+          node scripts/smoke-startup.mjs src-tauri/target/release/cross-shelf.exe
+
+      - uses: tauri-apps/tauri-action@v1 # pin by SHA: pinact run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ needs.validate.outputs.tag }}
+          releaseName: CrossShelf ${{ needs.validate.outputs.version }}
+          releaseDraft: true
+          prerelease: ${{ needs.validate.outputs.prerelease }}
+          releaseBody: ${{ needs.validate.outputs.notes }}
+          args: ${{ steps.updater.outputs.config }}

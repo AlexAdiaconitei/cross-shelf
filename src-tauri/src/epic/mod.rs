@@ -1,0 +1,12 @@
+//! Epic adapter. Login, token refresh and the `library-service` read were tested against a real
+//! account (docs/validation/phase-1.md); the launcher assets route is denied to this client and is
+//! not used. The catalog mapping is in `sync`. Protocol read from derrod/legendary
+//! 170964e75affc0c04be467ec2b12879376738ef5 (`legendary/api/egs.py`) and understood, not copied.
+//! The Epic wishlist is not supported: the user dropped it on 2026-11-17 after the spike
+//! could not read it reliably (see docs/validation/phase-1.md). The GUI says so plainly.
+
+pub mod api;
+pub mod commands;
+pub mod sync;
+#[cfg(windows)]
+pub mod webview;

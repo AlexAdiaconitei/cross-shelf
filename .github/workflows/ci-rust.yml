@@ -1,0 +1,33 @@
+name: CI (Rust)
+
+# Rust workspace: fmt, clippy, tests against PostgreSQL and cargo-deny. The job lives in
+# AlexAdiaconitei/actions (edited in devkit/actions).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-rust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    uses: AlexAdiaconitei/actions/.github/workflows/ci-rust.yml@v1.0.0
+    with:
+      working-directory: src-tauri
+
+  # The TypeScript types of the IPC contract are generated from Rust (ts-rs, on cargo test).
+  # A Rust change that is not followed by the regenerated files fails here.
+  bindings:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@stable # pin by SHA: pinact run
+      - run: cargo test --locked export_bindings
+        working-directory: src-tauri
+      - run: git diff --exit-code -- src/lib/bindings
