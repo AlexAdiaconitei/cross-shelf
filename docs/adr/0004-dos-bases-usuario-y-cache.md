@@ -34,7 +34,9 @@ los dos esquemas y falla si una tabla no está clasificada.
 ## Consecuencias
 
 - Una transacción que toque los dos ficheros no es atómica entre ellos (WAL). Ningún código lo hace
-  salvo la v8, que por eso vacía la caché antes de copiar y se puede repetir.
+  salvo la v8, que por eso vacía la caché antes de copiar y se puede repetir. Al guardar el tiempo
+  jugado, las fotos (usuario) y la fila de caché van en transacciones separadas: si la segunda
+  falla, la siguiente sincronización la rehace y no repite la foto.
 - Sin claves foráneas entre ficheros: las tablas del usuario apuntan a productos por
   (`store`, `native_id`) y sobreviven a que la caché se vacíe.
 - `sqlite_sequence` de la caché no se vacía: los lotes guardan el ID de la generación en que se

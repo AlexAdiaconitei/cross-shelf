@@ -2,6 +2,7 @@ import {
 	IconBooks,
 	IconHeart,
 	IconHistory,
+	IconLayoutKanban,
 	IconListCheck,
 	IconPlug,
 	IconSettings
@@ -14,7 +15,8 @@ export const navGroups = [
 		label: tr.shell.sections.coleccion,
 		items: [
 			{ href: '/', label: tr.nav.biblioteca, icon: IconBooks },
-			{ href: '/wishlists', label: tr.nav.wishlists, icon: IconHeart }
+			{ href: '/wishlists', label: tr.nav.wishlists, icon: IconHeart },
+			{ href: '/partidas', label: tr.nav.partidas, icon: IconLayoutKanban }
 		]
 	},
 	{

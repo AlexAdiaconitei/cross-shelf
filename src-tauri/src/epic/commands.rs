@@ -388,8 +388,32 @@ pub async fn epic_sync(
         error = first_error.map(|e| format!("catalog: {e}"));
         keep_raw("catalog", &catalog);
     }
+    // Play time: one request, only once validated with a real account (`super::PLAYTIME_VALIDATED`).
+    let played = match &records {
+        Ok(recs) if super::PLAYTIME_VALIDATED => {
+            match api::playtime_raw(&state.http, &t.access_token, &t.account_id).await {
+                Ok(p) => Some(super::sync::map_playtime(recs, &p)),
+                Err(e) => {
+                    log::warn!("epic playtime: {}", e.code());
+                    None
+                }
+            }
+        }
+        _ => None,
+    };
 
     let mut conn = lock()?;
+    if let Some(rows) = &played {
+        crate::playtime::record(
+            &mut conn,
+            super::sync::STORE,
+            &t.account_id,
+            rows,
+            true,
+            now,
+        )
+        .map_err(DiagError::internal)?;
+    }
     let report = match records {
         Ok(recs) => {
             let (products, rights) = super::sync::map_library(&recs, &catalog);
@@ -461,6 +485,60 @@ pub async fn epic_diag_shape(state: State<'_, EpicState>) -> Result<EpicShapes, 
             .await
             .map(|v| crate::shape::shape_report(&v))
             .map_err(|e| e.to_string()),
+    })
+}
+
+#[derive(Serialize)]
+pub struct EpicPlaytimeCheck {
+    /// Entries Epic returned.
+    pub entries: usize,
+    /// Entries whose artifact is a library item.
+    pub matched: usize,
+    pub shape: crate::shape::ShapeReport,
+    /// The most played library items, title and hours, to compare with the Epic launcher.
+    pub top: Vec<(Option<String>, f64)>,
+}
+
+/// Validation tool for Epic play time (`docs/validation/epic-playtime.md`): reads it once, says
+/// how much relates to the library and shows the five most played games so the user can compare
+/// them with the launcher. Nothing is stored. Shown only in the app, never logged.
+#[tauri::command]
+pub async fn epic_diag_playtime(
+    state: State<'_, EpicState>,
+    db: State<'_, crate::AppDb>,
+) -> Result<EpicPlaytimeCheck, DiagError> {
+    let t = state.fresh().await?;
+    let records = api::library_service_raw(&state.http, &t.access_token)
+        .await
+        .map_err(DiagError::from_epic)?;
+    let played = api::playtime_raw(&state.http, &t.access_token, &t.account_id)
+        .await
+        .map_err(DiagError::from_epic)?;
+    let mut rows = super::sync::map_playtime(&records, &played);
+    rows.sort_by_key(|r| std::cmp::Reverse(r.minutes));
+    let conn =
+        db.0.lock()
+            .map_err(|_| DiagError::internal("database lock poisoned"))?;
+    let top = rows
+        .iter()
+        .take(5)
+        .map(|r| {
+            let title = conn
+                .query_row(
+                    "SELECT title FROM product WHERE store = 'epic' AND native_id = ?1",
+                    [&r.native_id],
+                    |x| x.get::<_, Option<String>>(0),
+                )
+                .ok()
+                .flatten();
+            (title, r.minutes.unwrap_or(0) as f64 / 60.0)
+        })
+        .collect();
+    Ok(EpicPlaytimeCheck {
+        entries: played.len(),
+        matched: rows.len(),
+        shape: crate::shape::shape_report(&played),
+        top,
     })
 }
 

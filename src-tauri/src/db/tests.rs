@@ -34,7 +34,11 @@ fn pragma_i64(conn: &Connection, sql: &str) -> i64 {
 /// Every row of every user table, as text, to compare the user file before and after.
 fn dump_user(conn: &Connection) -> Vec<String> {
     let mut out = Vec::new();
-    for t in USER_TABLES {
+    let present = tables(conn, "main");
+    for t in USER_TABLES
+        .iter()
+        .filter(|t| present.iter().any(|p| p == *t))
+    {
         let mut st = conn
             .prepare(&format!("SELECT * FROM main.{t} ORDER BY 1"))
             .unwrap();
@@ -284,8 +288,14 @@ fn clearing_the_cache_leaves_the_user_file_as_it_was() {
         [],
     )
     .unwrap();
-    conn.execute("UPDATE connection SET last_sync_at = NULL", [])
-        .unwrap();
+    conn.execute_batch(
+        "UPDATE connection SET last_sync_at = NULL;
+         INSERT INTO play(store, native_id, state, position, since, note, updated_at)
+           VALUES ('steam', '10', 'playing', 1, 100, 'boss 3', 100);
+         INSERT INTO playtime_snapshot VALUES ('76561198000000001', 'steam', '10', 120, 100);
+         INSERT INTO suggestion_dismissed VALUES ('steam', '10', 'paused', 100);",
+    )
+    .unwrap();
     let before = dump_user(&conn);
     assert!(
         before.len() >= USER_TABLES.len(),
@@ -332,7 +342,8 @@ fn ids_above_js_safe_integer_roundtrip_as_text() {
 /// Tables scanned in full by a query plan.
 fn scans(conn: &Connection, sql: &str) -> Vec<String> {
     let mut st = conn.prepare(&format!("EXPLAIN QUERY PLAN {sql}")).unwrap();
-    st.query_map([], |r| r.get::<_, String>(3))
+    let nulls = vec![Value::Null; st.parameter_count()];
+    st.query_map(rusqlite::params_from_iter(nulls), |r| r.get::<_, String>(3))
         .unwrap()
         .map(Result::unwrap)
         .filter_map(|d| {
@@ -353,6 +364,8 @@ fn list_queries_only_scan_the_table_they_list() {
         ("list_wishlist", crate::queries::WISHLIST_SQL, &["w", "c"]),
         ("review holdings", crate::review::HOLDINGS_SQL, &["e", "cn"]),
         ("review wishes", crate::review::WISHES_SQL, &["w", "cn"]),
+        ("plays_list", crate::plays::LIST_SQL, &["y"]),
+        ("diary hours", crate::plays::diary::HOURS_SQL, &["t", "c"]),
     ];
     for (name, sql, allowed) in cases {
         let s = scans(&conn, sql);

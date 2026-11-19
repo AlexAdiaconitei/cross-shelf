@@ -99,6 +99,7 @@ export const es = {
 		limpieza: 'Revisar limpieza',
 		limpiezaShort: 'Limpieza',
 		resultados: 'Resultados',
+		partidas: 'Mis partidas',
 		ajustes: 'Ajustes'
 	},
 	shell: {
@@ -110,6 +111,92 @@ export const es = {
 		storeFilter: 'Filtrar la biblioteca por tienda',
 		syncFailed: 'falló la última sincronización',
 		toReview: (n: number) => (n === 1 ? '1 deseado por revisar' : `${n} deseados por revisar`)
+	},
+	plays: {
+		states: {
+			playing: 'Jugando',
+			backlog: 'Pendiente',
+			paused: 'En pausa',
+			completed: 'Completado',
+			dropped: 'Abandonado'
+		},
+		stateHints: {
+			playing: 'Lo que juegas ahora',
+			backlog: 'Esperando su turno',
+			paused: 'Lo dejaste para luego',
+			completed: 'Terminado',
+			dropped: 'No vas a volver'
+		},
+		tabs: { board: 'Tablero', list: 'Lista', diary: 'Diario' },
+		tabsLabel: 'Cómo ver Mis partidas',
+		add: 'Añadir un juego de tu biblioteca',
+		addTip: 'Intro: a Pendiente · Mayús+Intro: a Jugando',
+		addNone: (q: string) => `Nada en tu biblioteca con «${q}» que no esté ya aquí.`,
+		move: (title: string) => `Mover «${title}»`,
+		remove: 'Quitar de Mis partidas',
+		keyHint: 'Alt + flechas izquierda y derecha para cambiar de columna.',
+		dropHint: 'Arrastra aquí una tarjeta.',
+		empty: 'Aún no hay partidas',
+		emptyBody:
+			'Apunta aquí qué estás jugando, qué tienes pendiente y qué has terminado. Busca un juego arriba o abre su ficha en la Biblioteca y elige un estado. Da igual en qué tienda lo tengas.',
+		started: (ago: string) => `Empezado ${ago}`,
+		finished: (ago: string) => `Terminado ${ago}`,
+		inState: (state: string, ago: string) => `${state} · ${ago}`,
+		notInLibrary: 'Ya no está en tu biblioteca',
+		noTime: '—',
+		minutes: (n: number) => `${n} min`,
+		hours: (h: string) => `${h} h`,
+		today: 'hoy',
+		suggestions: (n: number) => (n === 1 ? '1 sugerencia' : `${n} sugerencias`),
+		suggestionsFrom: 'a partir de tu tiempo jugado',
+		toState: (state: string) => `A ${state}`,
+		dismiss: (title: string) => `Descartar la sugerencia de ${title}`,
+		reasons: {
+			played_recently: (ago: string) => `Jugado ${ago}`,
+			not_played: (ago: string) => `Sin jugar desde ${ago}`
+		},
+		diary: {
+			groups: {
+				week: 'Esta semana',
+				month: 'Este mes',
+				older: 'Hace tiempo',
+				none: 'Sin fecha de sesión'
+			},
+			weekHours: 'jugadas esta semana',
+			inProgress: 'en curso',
+			toConfirm: 'por confirmar',
+			source: 'Steam da la última sesión; Epic y GOG, solo el total.',
+			lastSession: 'Última sesión',
+			total: 'Total',
+			week: 'Semana',
+			state: 'Estado',
+			stateOf: (title: string) => `Estado de ${title}`,
+			noState: 'Sin estado',
+			confirm: (state: string, title: string) => `Confirmar ${state} para ${title}`,
+			guess: (state: string) => `¿${state}?`,
+			empty: 'El diario está vacío',
+			emptyBody:
+				'Aquí aparecen los juegos que tienen partida o horas jugadas, ordenados por la última vez que los jugaste. Sincroniza tus tiendas para traer las horas.'
+		},
+		sheet: {
+			time: 'Tiempo',
+			total: 'Total',
+			lastSession: 'Última sesión',
+			byStore: 'Por tienda',
+			notGiven: (store: string) => `${store} no lo da`,
+			loading: 'Cargando…',
+			error: (store: string) => `No se pudo consultar ${store}`,
+			hltb: 'Buscar en HowLongToBeat',
+			hltbHint: 'Abre su web en el navegador. La app no le pide nada.',
+			play: 'Partida',
+			noPlay: 'Sin partida',
+			note: 'Nota',
+			notePlaceholder: 'Dónde te quedaste, qué te falta…',
+			noteLeft: (n: number) => `Quedan ${n} caracteres`,
+			noteTooLong: 'La nota es demasiado larga.'
+		},
+		loadError: 'No se pudieron leer tus partidas.',
+		actionFailed: 'No se pudo guardar. Inténtalo otra vez.'
 	},
 	shelf: {
 		storesOf: (title: string) => `Tiendas de ${title}`,
@@ -542,6 +629,7 @@ export const es = {
 		sync: 'Sincronizar y guardar en la base',
 		types: 'Ver tipo y nombre de una muestra (tienda)',
 		catalog: 'Ver forma del catálogo de la biblioteca',
+		playtime: 'Comprobar el tiempo jugado (validación)',
 		disconnect: 'Desconectar en este equipo',
 		connected: 'Conectado',
 		notConnected: 'Sin conectar',

@@ -10,6 +10,8 @@ mod images;
 mod matching;
 mod ops;
 mod plans;
+mod plays;
+mod playtime;
 mod queries;
 mod raw;
 mod redact;
@@ -160,6 +162,15 @@ pub fn run() {
             app_commands::plan_reconcile,
             app_commands::plan_discard,
             app_commands::wishlist_write_test,
+            app_commands::plays_list,
+            app_commands::play_set,
+            app_commands::play_note,
+            app_commands::play_remove,
+            app_commands::suggestions_list,
+            app_commands::suggestion_dismiss,
+            app_commands::diary_list,
+            app_commands::playtime_of,
+            app_commands::playtime_stores,
             gog::commands::gog_status,
             gog::commands::gog_connect,
             gog::commands::gog_diag_run,
@@ -167,12 +178,15 @@ pub fn run() {
             gog::commands::gog_diag_shape,
             gog::commands::gog_sync,
             gog::commands::gog_disconnect,
+            gog::commands::gog_playtime,
+            gog::commands::gog_diag_playtime,
             epic::commands::epic_status,
             epic::commands::epic_connect,
             epic::commands::epic_diag_run,
             epic::commands::epic_diag_expire,
             epic::commands::epic_diag_shape,
             epic::commands::epic_diag_catalog,
+            epic::commands::epic_diag_playtime,
             epic::commands::epic_sync,
             app_commands::plan_execute,
             app_commands::plan_cancel,

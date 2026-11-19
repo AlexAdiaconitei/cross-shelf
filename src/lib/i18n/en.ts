@@ -100,6 +100,7 @@ export const en: Strings = {
 		limpieza: 'Review cleanup',
 		limpiezaShort: 'Cleanup',
 		resultados: 'Results',
+		partidas: 'Play log',
 		ajustes: 'Settings'
 	},
 	shell: {
@@ -111,6 +112,92 @@ export const en: Strings = {
 		storeFilter: 'Filter the library by store',
 		syncFailed: 'the last sync failed',
 		toReview: (n: number) => (n === 1 ? '1 wish to review' : `${n} wishes to review`)
+	},
+	plays: {
+		states: {
+			playing: 'Playing',
+			backlog: 'Backlog',
+			paused: 'Paused',
+			completed: 'Completed',
+			dropped: 'Dropped'
+		},
+		stateHints: {
+			playing: 'What you are playing now',
+			backlog: 'Waiting for its turn',
+			paused: 'Left for later',
+			completed: 'Finished',
+			dropped: 'Not going back to it'
+		},
+		tabs: { board: 'Board', list: 'List', diary: 'Diary' },
+		tabsLabel: 'How to see Play log',
+		add: 'Add a game from your library',
+		addTip: 'Enter: to Backlog · Shift+Enter: to Playing',
+		addNone: (q: string) => `Nothing in your library matches «${q}» that is not here already.`,
+		move: (title: string) => `Move «${title}»`,
+		remove: 'Remove from Play log',
+		keyHint: 'Alt + left and right arrows to change column.',
+		dropHint: 'Drag a card here.',
+		empty: 'No games here yet',
+		emptyBody:
+			'Note down what you are playing, what is waiting and what you have finished. Search for a game above or open its sheet in the Library and pick a state. It does not matter which store it is in.',
+		started: (ago: string) => `Started ${ago}`,
+		finished: (ago: string) => `Finished ${ago}`,
+		inState: (state: string, ago: string) => `${state} · ${ago}`,
+		notInLibrary: 'No longer in your library',
+		noTime: '—',
+		minutes: (n: number) => `${n} min`,
+		hours: (h: string) => `${h} h`,
+		today: 'today',
+		suggestions: (n: number) => (n === 1 ? '1 suggestion' : `${n} suggestions`),
+		suggestionsFrom: 'from your play time',
+		toState: (state: string) => `To ${state}`,
+		dismiss: (title: string) => `Dismiss the suggestion for ${title}`,
+		reasons: {
+			played_recently: (ago: string) => `Played ${ago}`,
+			not_played: (ago: string) => `Not played since ${ago}`
+		},
+		diary: {
+			groups: {
+				week: 'This week',
+				month: 'This month',
+				older: 'A while ago',
+				none: 'No session date'
+			},
+			weekHours: 'played this week',
+			inProgress: 'in progress',
+			toConfirm: 'to confirm',
+			source: 'Steam gives the last session; Epic and GOG, only the total.',
+			lastSession: 'Last session',
+			total: 'Total',
+			week: 'Week',
+			state: 'State',
+			stateOf: (title: string) => `State of ${title}`,
+			noState: 'No state',
+			confirm: (state: string, title: string) => `Confirm ${state} for ${title}`,
+			guess: (state: string) => `${state}?`,
+			empty: 'The diary is empty',
+			emptyBody:
+				'Games with a play or with hours played show up here, by the last time you played them. Sync your stores to bring in the hours.'
+		},
+		sheet: {
+			time: 'Time',
+			total: 'Total',
+			lastSession: 'Last session',
+			byStore: 'By store',
+			notGiven: (store: string) => `${store} does not give it`,
+			loading: 'Loading…',
+			error: (store: string) => `${store} could not be reached`,
+			hltb: 'Search on HowLongToBeat',
+			hltbHint: 'Opens its website in the browser. The app asks it nothing.',
+			play: 'Play',
+			noPlay: 'Not in Play log',
+			note: 'Note',
+			notePlaceholder: 'Where you left off, what is left…',
+			noteLeft: (n: number) => `${n} characters left`,
+			noteTooLong: 'The note is too long.'
+		},
+		loadError: 'Your play log could not be read.',
+		actionFailed: 'It could not be saved. Try again.'
 	},
 	shelf: {
 		storesOf: (title: string) => `Stores of ${title}`,
@@ -537,6 +624,7 @@ export const en: Strings = {
 		sync: 'Sync and save to the database',
 		types: 'Show type and name of a sample (store)',
 		catalog: 'Show the shape of the library catalog',
+		playtime: 'Check play time (validation)',
 		disconnect: 'Disconnect on this computer',
 		connected: 'Connected',
 		notConnected: 'Not connected',

@@ -524,3 +524,98 @@ pub async fn gog_sync(
         error,
     })
 }
+
+/// A GOG play time read is reused for this long before asking again (plan 0.3.0, 2.4).
+const PLAYTIME_REUSE_SECS: i64 = 3600;
+
+/// Minutes played of one GOG product, asked for when its sheet opens. `None` means GOG does not
+/// give it (not validated yet, or no Galaxy record). Only the product id crosses from the UI; the
+/// session stays here.
+#[tauri::command]
+pub async fn gog_playtime(
+    state: State<'_, GogState>,
+    db: State<'_, crate::AppDb>,
+    native_id: String,
+) -> Result<Option<i64>, DiagError> {
+    if !super::PLAYTIME_VALIDATED {
+        return Ok(None);
+    }
+    if native_id.is_empty() || !native_id.chars().all(|c| c.is_ascii_digit()) {
+        return Err(DiagError::internal("bad id"));
+    }
+    let Some((account, _)) = state.linked() else {
+        return Err(DiagError::not_connected());
+    };
+    let now = crate::now_secs() as i64;
+    let lock = || {
+        db.0.lock()
+            .map_err(|_| DiagError::internal("database lock poisoned"))
+    };
+    let cached = crate::playtime::recent(
+        &*lock()?,
+        "gog",
+        &account,
+        &native_id,
+        now,
+        PLAYTIME_REUSE_SECS,
+    )
+    .map_err(DiagError::internal)?;
+    if let Some(minutes) = cached {
+        return Ok(minutes);
+    }
+    let t = state.fresh().await?;
+    let minutes = library::fetch_playtime(&state.http, &t.user_id, &t.access_token, &native_id)
+        .await
+        .map_err(|e| {
+            log::warn!("gog playtime: {}", e.code());
+            DiagError::from_read(e)
+        })?;
+    let row = crate::playtime::PlaytimeRow {
+        native_id,
+        minutes,
+        last_played: None,
+    };
+    crate::playtime::record(&mut *lock()?, "gog", &t.user_id, &[row], false, now)
+        .map_err(DiagError::internal)?;
+    Ok(minutes)
+}
+
+#[derive(Serialize)]
+pub struct GogPlaytimeCheck {
+    /// Title and hours (or `None`: no Galaxy record) of a few owned games, to compare with Galaxy.
+    pub sample: Vec<(Option<String>, Option<f64>)>,
+}
+
+/// Validation tool for GOG play time (`docs/validation/gog-playtime.md`): asks for the time of the
+/// first five owned games, whatever `PLAYTIME_VALIDATED` says, and stores nothing.
+#[tauri::command]
+pub async fn gog_diag_playtime(
+    state: State<'_, GogState>,
+    db: State<'_, crate::AppDb>,
+) -> Result<GogPlaytimeCheck, DiagError> {
+    let t = state.fresh().await?;
+    let games: Vec<(String, Option<String>)> = {
+        let conn =
+            db.0.lock()
+                .map_err(|_| DiagError::internal("database lock poisoned"))?;
+        let mut st = conn
+            .prepare(
+                "SELECT e.native_id, p.title FROM entitlement e
+                 LEFT JOIN product p ON p.store = e.store AND p.native_id = e.native_id
+                 WHERE e.store = 'gog' AND e.account_id = ?1 AND e.class = 'owned'
+                 ORDER BY p.title LIMIT 5",
+            )
+            .map_err(DiagError::internal)?;
+        st.query_map([&t.user_id], |r| Ok((r.get(0)?, r.get(1)?)))
+            .and_then(Iterator::collect)
+            .map_err(DiagError::internal)?
+    };
+    let mut sample = Vec::new();
+    for (id, title) in games {
+        let minutes = library::fetch_playtime(&state.http, &t.user_id, &t.access_token, &id)
+            .await
+            .map_err(DiagError::from_read)?;
+        sample.push((title, minutes.map(|m| m as f64 / 60.0)));
+    }
+    Ok(GogPlaytimeCheck { sample })
+}

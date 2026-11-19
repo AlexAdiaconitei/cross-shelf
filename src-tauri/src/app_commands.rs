@@ -46,11 +46,29 @@ pub struct Settings {
     pub show_covers: bool,
     /// Interface language: `en` (default) or `es`.
     pub language: String,
+    /// Last tab of Mis partidas: `board` (default), `list` or `diary`.
+    pub plays_tab: String,
 }
 
 const KEY_FAMILY: &str = "include_family_in_cleanup";
 const KEY_COVERS: &str = "show_covers";
 const KEY_LANGUAGE: &str = "language";
+const KEY_PLAYS_TAB: &str = "plays_tab";
+
+/// Tabs of Mis partidas; anything else falls back to the board.
+pub const PLAYS_TABS: &[&str] = &["board", "list", "diary"];
+
+fn plays_tab_or_default(v: Option<String>) -> String {
+    v.filter(|t| PLAYS_TABS.contains(&t.as_str()))
+        .unwrap_or_else(|| "board".into())
+}
+
+fn get_text(c: &Connection, key: &str) -> Result<Option<String>, rusqlite::Error> {
+    c.query_row("SELECT value FROM setting WHERE key = ?1", [key], |r| {
+        r.get::<_, String>(0)
+    })
+    .optional()
+}
 
 /// Languages the interface ships with; anything else falls back to English.
 pub const LANGUAGES: &[&str] = &["en", "es"];
@@ -74,14 +92,8 @@ pub fn read_settings(c: &Connection) -> Result<Settings, rusqlite::Error> {
     Ok(Settings {
         include_family_in_cleanup: get_bool(c, KEY_FAMILY, false)?,
         show_covers: get_bool(c, KEY_COVERS, true)?,
-        language: language_or_default(
-            c.query_row(
-                "SELECT value FROM setting WHERE key = ?1",
-                [KEY_LANGUAGE],
-                |r| r.get::<_, String>(0),
-            )
-            .optional()?,
-        ),
+        language: language_or_default(get_text(c, KEY_LANGUAGE)?),
+        plays_tab: plays_tab_or_default(get_text(c, KEY_PLAYS_TAB)?),
     })
 }
 
@@ -100,6 +112,14 @@ pub fn write_settings(c: &Connection, s: &Settings) -> Result<(), rusqlite::Erro
         "INSERT INTO setting(key, value) VALUES (?1, ?2)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value",
         params![KEY_LANGUAGE, language_or_default(Some(s.language.clone()))],
+    )?;
+    c.execute(
+        "INSERT INTO setting(key, value) VALUES (?1, ?2)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        params![
+            KEY_PLAYS_TAB,
+            plays_tab_or_default(Some(s.plays_tab.clone()))
+        ],
     )?;
     Ok(())
 }
@@ -437,6 +457,124 @@ pub fn plan_discard(db: State<'_, AppDb>, batch_id: String) -> Result<(), String
     plan_call(&db, |c| crate::plans::discard(c, &batch_id))
 }
 
+fn play_call<T>(
+    db: &State<'_, AppDb>,
+    f: impl FnOnce(&mut Connection) -> Result<T, crate::plays::PlayError>,
+) -> Result<T, String> {
+    let mut conn = db.0.lock().map_err(|_| "internal".to_string())?;
+    f(&mut conn).map_err(|e| {
+        log::warn!("play refused: {}", e.code());
+        e.code().to_string()
+    })
+}
+
+/// Every play of Mis partidas, by state and in the user's order.
+#[tauri::command]
+pub fn plays_list(db: State<'_, AppDb>) -> Result<Vec<crate::plays::PlayView>, String> {
+    with_db(&db, crate::plays::list)
+}
+
+/// Creates or moves a play: to the top of `state`, or ahead of `before` in that state. Returns
+/// the whole list so the board redraws from one answer.
+#[tauri::command]
+pub fn play_set(
+    db: State<'_, AppDb>,
+    store: String,
+    native_id: String,
+    state: String,
+    before: Option<ProductId>,
+) -> Result<Vec<crate::plays::PlayView>, String> {
+    play_call(&db, |c| {
+        crate::plays::set(
+            c,
+            &store,
+            &native_id,
+            &state,
+            before
+                .as_ref()
+                .map(|b| (b.store.as_str(), b.native_id.as_str())),
+            crate::now_secs() as i64,
+        )?;
+        Ok(crate::plays::list(c)?)
+    })
+}
+
+#[tauri::command]
+pub fn play_note(
+    db: State<'_, AppDb>,
+    store: String,
+    native_id: String,
+    note: String,
+) -> Result<(), String> {
+    play_call(&db, |c| {
+        crate::plays::note(c, &store, &native_id, &note, crate::now_secs() as i64)
+    })
+}
+
+/// State changes the play time hints at, for the tray above the board. Nothing changes until the
+/// user accepts one (`play_set`) or dismisses it.
+#[tauri::command]
+pub fn suggestions_list(
+    db: State<'_, AppDb>,
+) -> Result<Vec<crate::plays::suggestions::Suggestion>, String> {
+    with_db(&db, |c| {
+        crate::plays::suggestions::suggestions(c, crate::now_secs() as i64)
+    })
+}
+
+/// The diary tab: games with a play or hours, by last activity, with the last week's hours.
+#[tauri::command]
+pub fn diary_list(db: State<'_, AppDb>) -> Result<Vec<crate::plays::diary::DiaryRow>, String> {
+    with_db(&db, |c| {
+        crate::plays::diary::diary(c, crate::now_secs() as i64)
+    })
+}
+
+/// Play time of the products of one game sheet, from the cache (Steam, and Epic once validated).
+/// GOG is asked for apart, by `gog_playtime`, when the sheet opens.
+#[tauri::command]
+pub fn playtime_of(
+    db: State<'_, AppDb>,
+    products: Vec<ProductId>,
+) -> Result<Vec<crate::playtime::ProductTime>, String> {
+    let keys: Vec<(&str, &str)> = products
+        .iter()
+        .map(|p| (p.store.as_str(), p.native_id.as_str()))
+        .collect();
+    with_db(&db, |c| crate::playtime::of_products(c, &keys))
+}
+
+/// Which stores give play time in this build. Epic and GOG only once validated with a real
+/// account (`docs/validation/`); the sheet says "<store> does not give it" otherwise.
+#[tauri::command]
+pub fn playtime_stores() -> Vec<String> {
+    let mut v = vec!["steam".to_owned()];
+    if crate::epic::PLAYTIME_VALIDATED {
+        v.push("epic".into());
+    }
+    if crate::gog::PLAYTIME_VALIDATED {
+        v.push("gog".into());
+    }
+    v
+}
+
+#[tauri::command]
+pub fn suggestion_dismiss(
+    db: State<'_, AppDb>,
+    store: String,
+    native_id: String,
+    target: String,
+) -> Result<(), String> {
+    play_call(&db, |c| {
+        crate::plays::suggestions::dismiss(c, &store, &native_id, &target, crate::now_secs() as i64)
+    })
+}
+
+#[tauri::command]
+pub fn play_remove(db: State<'_, AppDb>, store: String, native_id: String) -> Result<(), String> {
+    play_call(&db, |c| crate::plays::remove(c, &store, &native_id))
+}
+
 #[derive(Debug, Serialize, Clone, TS)]
 #[ts(export)]
 pub struct WriteTestResult {
@@ -534,6 +672,7 @@ mod tests {
                 include_family_in_cleanup: true,
                 show_covers: true,
                 language: "en".into(),
+                plays_tab: "board".into(),
             },
         )
         .unwrap();
@@ -550,6 +689,7 @@ mod tests {
                 include_family_in_cleanup: false,
                 show_covers: false,
                 language: "es".into(),
+                plays_tab: "board".into(),
             },
         )
         .unwrap();
@@ -557,6 +697,19 @@ mod tests {
         assert!(!s.show_covers);
         assert_eq!(s.language, "es");
         assert!(!s.include_family_in_cleanup);
+    }
+
+    #[test]
+    fn the_plays_tab_is_remembered_and_unknown_values_fall_back_to_the_board() {
+        let c = db();
+        assert_eq!(read_settings(&c).unwrap().plays_tab, "board");
+        let mut s = read_settings(&c).unwrap();
+        s.plays_tab = "diary".into();
+        write_settings(&c, &s).unwrap();
+        assert_eq!(read_settings(&c).unwrap().plays_tab, "diary");
+        s.plays_tab = "kanban".into();
+        write_settings(&c, &s).unwrap();
+        assert_eq!(read_settings(&c).unwrap().plays_tab, "board");
     }
 
     #[test]
@@ -569,6 +722,7 @@ mod tests {
                 include_family_in_cleanup: false,
                 show_covers: true,
                 language: "fr".into(),
+                plays_tab: "board".into(),
             },
         )
         .unwrap();

@@ -34,6 +34,9 @@ pub const USER_TABLES: &[&str] = &[
     "wishlist_keep",
     "action_batch",
     "batch_op",
+    "play",
+    "playtime_snapshot",
+    "suggestion_dismissed",
 ];
 
 /// Tables of the cache file: everything a sync can read again.
@@ -201,6 +204,36 @@ const USER_MIGRATIONS: &[&str] = &[
      DROP TABLE main.sync_generation;
      DROP TABLE main.product;
      DROP TABLE main.steam_family_member;",
+    // v9: what the user is playing (Mis partidas), play time history and dismissed suggestions.
+    // Keyed by product, with no foreign key to the cache: they survive clearing it.
+    "CREATE TABLE play (
+        store TEXT NOT NULL,
+        native_id TEXT NOT NULL,
+        state TEXT NOT NULL CHECK (state IN ('playing','backlog','paused','completed','dropped')),
+        position REAL NOT NULL,
+        since INTEGER NOT NULL,
+        started_at INTEGER,
+        finished_at INTEGER,
+        note TEXT NOT NULL DEFAULT '',
+        updated_at INTEGER NOT NULL,
+        PRIMARY KEY (store, native_id)
+     ) STRICT;
+     CREATE INDEX play_state ON play(state, position);
+     CREATE TABLE playtime_snapshot (
+        account_id TEXT NOT NULL,
+        store TEXT NOT NULL,
+        native_id TEXT NOT NULL,
+        minutes INTEGER NOT NULL,
+        observed_at INTEGER NOT NULL,
+        PRIMARY KEY (account_id, store, native_id, observed_at)
+     ) STRICT, WITHOUT ROWID;
+     CREATE TABLE suggestion_dismissed (
+        store TEXT NOT NULL,
+        native_id TEXT NOT NULL,
+        target TEXT NOT NULL,
+        dismissed_at INTEGER NOT NULL,
+        PRIMARY KEY (store, native_id, target)
+     ) STRICT, WITHOUT ROWID;",
 ];
 
 /// Ordered migrations of the cache file, numbered on their own from 1.

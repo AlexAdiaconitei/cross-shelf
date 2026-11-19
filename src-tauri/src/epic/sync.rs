@@ -138,6 +138,34 @@ pub fn catalog_requests(records: &[Value]) -> BTreeMap<String, Vec<String>> {
         .collect()
 }
 
+/// Play time from Epic's tracking, related to library items through `appName` (Epic calls it
+/// `artifactId` there). `totalTime` is in seconds. Epic gives no last session. Artifacts that are
+/// not in the library, and entries without a time, are left out: unknown, never 0.
+pub fn map_playtime(records: &[Value], played: &[Value]) -> Vec<crate::playtime::PlaytimeRow> {
+    let mut by_app: BTreeMap<&str, String> = BTreeMap::new();
+    for r in records {
+        if let (Some(app), Some(ns), Some(item)) = (
+            text(r, "appName"),
+            text(r, "namespace"),
+            text(r, "catalogItemId"),
+        ) {
+            by_app.entry(app).or_insert_with(|| native_id(ns, item));
+        }
+    }
+    played
+        .iter()
+        .filter_map(|p| {
+            let id = by_app.get(text(p, "artifactId")?)?;
+            let seconds = p.get("totalTime").and_then(Value::as_i64)?;
+            Some(crate::playtime::PlaytimeRow {
+                native_id: id.clone(),
+                minutes: Some(seconds.max(0) / 60),
+                last_played: None,
+            })
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -159,6 +187,46 @@ mod tests {
             v["mainGameItem"] = json!({"id": "base", "title": "Base game"});
         }
         v
+    }
+
+    fn record(ns: &str, item: &str, app: &str) -> Value {
+        json!({"namespace": ns, "catalogItemId": item, "appName": app, "recordType": "APPLICATION"})
+    }
+
+    #[test]
+    fn playtime_relates_artifacts_to_library_items_by_app_name() {
+        let records = [
+            record("ns1", "i1", "Alpha"),
+            record("ns1", "i1b", "Alpha"), // a second record of the same app: first one wins
+            record("ns2", "i2", "Beta"),
+            record("ns3", "i3", "Gamma"),
+        ];
+        let played = [
+            json!({"accountId": "a", "artifactId": "Alpha", "totalTime": 7265}),
+            json!({"accountId": "a", "artifactId": "Beta", "totalTime": 30}),
+            json!({"accountId": "a", "artifactId": "NotInLibrary", "totalTime": 999}),
+            json!({"accountId": "a", "artifactId": "Gamma"}),
+        ];
+        let rows = map_playtime(&records, &played);
+        let got: Vec<_> = rows
+            .iter()
+            .map(|r| (r.native_id.as_str(), r.minutes, r.last_played))
+            .collect();
+        assert_eq!(
+            got,
+            [("ns1:i1", Some(121), None), ("ns2:i2", Some(0), None)],
+            "seconds round down to minutes; unknown artifacts and missing times are left out"
+        );
+    }
+
+    #[test]
+    fn a_playtime_error_object_is_not_an_empty_list() {
+        use crate::epic::api::parse_playtime;
+        assert_eq!(parse_playtime("[]").unwrap().len(), 0);
+        assert!(
+            parse_playtime(r#"{"errorCode":"errors.com.epicgames.common.not_found"}"#).is_err()
+        );
+        assert!(parse_playtime("not json").is_err());
     }
 
     #[test]

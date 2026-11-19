@@ -9,6 +9,15 @@ import type { Settings } from '#lib/bindings/Settings.ts';
 import type { SyncStatus } from '#lib/bindings/SyncStatus.ts';
 import type { WishlistEntry } from '#lib/bindings/WishlistEntry.ts';
 import type { BatchView } from '#lib/bindings/BatchView.ts';
+import type { DiaryRow } from '#lib/bindings/DiaryRow.ts';
+import type { PlayView } from '#lib/bindings/PlayView.ts';
+import type { ProductId } from '#lib/bindings/ProductId.ts';
+import type { ProductTime } from '#lib/bindings/ProductTime.ts';
+import type { Suggestion } from '#lib/bindings/Suggestion.ts';
+
+/** States of a play, in board order. Same list as `plays::STATES` in Rust. */
+export const PLAY_STATES = ['playing', 'backlog', 'paused', 'completed', 'dropped'] as const;
+export type PlayState = (typeof PLAY_STATES)[number];
 
 export type Provider = 'steam' | 'gog' | 'epic';
 
@@ -50,5 +59,23 @@ export const ipc = {
 	/** Cancels what a confirmed batch has not sent yet. */
 	planCancel: (batchId: string) => invoke<BatchView>('plan_cancel', { batchId }),
 	/** Puts the failed entries of a finished batch back to pending; send them with planExecute. */
-	planRetry: (batchId: string) => invoke<BatchView>('plan_retry', { batchId })
+	planRetry: (batchId: string) => invoke<BatchView>('plan_retry', { batchId }),
+	plays: () => invoke<PlayView[]>('plays_list'),
+	/** Creates or moves a play: top of `state`, or just ahead of `before` in it. */
+	playSet: (store: string, nativeId: string, state: PlayState, before?: ProductId) =>
+		invoke<PlayView[]>('play_set', { store, nativeId, state, before: before ?? null }),
+	playNote: (store: string, nativeId: string, note: string) =>
+		invoke<void>('play_note', { store, nativeId, note }),
+	playRemove: (store: string, nativeId: string) => invoke<void>('play_remove', { store, nativeId }),
+	suggestions: () => invoke<Suggestion[]>('suggestions_list'),
+	diary: () => invoke<DiaryRow[]>('diary_list'),
+	/** Play time of a sheet's products from the cache. GOG is asked apart with `gogPlaytime`. */
+	playtimeOf: (products: ProductId[]) => invoke<ProductTime[]>('playtime_of', { products }),
+	/** Stores that give play time in this build (Epic and GOG only once validated). */
+	playtimeStores: () => invoke<string[]>('playtime_stores'),
+	/** "Descartar": the suggestion of `target` for this product does not come back. */
+	suggestionDismiss: (store: string, nativeId: string, target: 'playing' | 'paused') =>
+		invoke<void>('suggestion_dismiss', { store, nativeId, target }),
+	/** Minutes played of one GOG product, asked when its sheet opens; `null`: GOG does not give it. */
+	gogPlaytime: (nativeId: string) => invoke<number | null>('gog_playtime', { nativeId })
 };
