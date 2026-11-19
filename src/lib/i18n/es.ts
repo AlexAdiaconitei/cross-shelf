@@ -469,6 +469,7 @@ export const es = {
 		intro:
 			'Cada lote confirmado, con el resultado de cada entrada. Una entrada solo cuenta como quitada cuando la app vuelve a leer la wishlist y ya no está.',
 		empty: 'Todavía no hay lotes',
+		earlier: (n: number) => `Lotes anteriores (${n})`,
 		emptyBody: 'Crea uno desde Revisar limpieza.',
 		created: (d: string) => `Creado el ${d}`,
 		reread: 'Volver a leer',
@@ -571,6 +572,37 @@ export const es = {
 		body: 'Se construye en una fase posterior. Ahora mismo no hay ninguna función activa aquí.'
 	},
 	settings: {
+		mine: {
+			title: 'Mis datos',
+			hint: 'Tus partidas y notas, decisiones de coincidencia, «Mantener», sugerencias descartadas, historial de horas y ajustes: lo que las tiendas no pueden devolverte. No lleva tus conexiones ni los lotes de limpieza.',
+			export: 'Exportar mis datos',
+			import: 'Importar mis datos',
+			exported: 'Tus datos se han exportado.',
+			importTitle: '¿Sustituir tus datos por los de este fichero?',
+			importBody: (date: string) =>
+				`Fichero exportado el ${date}. Sustituye tus datos actuales, no los suma. Antes se guarda una copia de lo que tienes ahora en la carpeta de copias. Las conexiones y la biblioteca sincronizada no cambian.`,
+			counts: {
+				plays: (n: number) => (n === 1 ? '1 partida' : `${n} partidas`),
+				relations: (n: number) =>
+					n === 1 ? '1 decisión de coincidencia' : `${n} decisiones de coincidencia`,
+				keeps: (n: number) => (n === 1 ? '1 deseado a mantener' : `${n} deseados a mantener`),
+				dismissed: (n: number) =>
+					n === 1 ? '1 sugerencia descartada' : `${n} sugerencias descartadas`,
+				snapshots: (n: number) => (n === 1 ? '1 foto de horas' : `${n} fotos de horas`),
+				settings: (n: number) => (n === 1 ? '1 ajuste' : `${n} ajustes`)
+			},
+			confirm: 'Sustituir mis datos',
+			imported: 'Tus datos se han importado.',
+			errors: {
+				not_ours: 'Este fichero no es una exportación de datos de CrossShelf.',
+				too_new:
+					'Este fichero viene de una versión más nueva de CrossShelf. Actualiza la app primero.',
+				bad_path: 'La ruta no es válida.',
+				bad_extension: 'El fichero tiene que ser .json.',
+				io: 'No se pudo leer o escribir el fichero.',
+				internal: 'Algo falló dentro de la app. Tus datos no han cambiado.'
+			}
+		},
 		about: 'Acerca de',
 		version: 'Versión',
 		clearFailed:

@@ -1,7 +1,6 @@
 import {
 	IconBooks,
 	IconHeart,
-	IconHistory,
 	IconLayoutKanban,
 	IconListCheck,
 	IconPlug,
@@ -27,8 +26,7 @@ export const navGroups = [
 				label: tr.nav.limpieza,
 				short: tr.nav.limpiezaShort,
 				icon: IconListCheck
-			},
-			{ href: '/resultados', label: tr.nav.resultados, icon: IconHistory }
+			}
 		]
 	},
 	{

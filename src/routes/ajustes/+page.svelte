@@ -6,6 +6,7 @@
 	import type { Settings } from '#lib/bindings/Settings.ts';
 	import ExportButtons from '#lib/components/ExportButtons.svelte';
 	import Updates from '#lib/components/Updates.svelte';
+	import UserData from '#lib/components/UserData.svelte';
 	import { Button, Dialog, InfoTip } from '#lib/components/ui/index.ts';
 	import { ipc } from '#lib/ipc.ts';
 	import { shell } from '#lib/shell/state.svelte.ts';
@@ -129,6 +130,8 @@
 			<ExportButtons what="library" label={tr.library.export} />
 			<ExportButtons what="wishlist" label={tr.wishlist.export} />
 		</section>
+
+		<UserData />
 
 		<section aria-labelledby="data" class="grid gap-3">
 			<h2 id="data" class="font-medium">

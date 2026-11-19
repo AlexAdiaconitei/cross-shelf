@@ -465,6 +465,7 @@ export const en: Strings = {
 		intro:
 			'Each confirmed batch, with the result of every entry. An entry only counts as removed when the app reads the wishlist again and it is gone.',
 		empty: 'No batches yet',
+		earlier: (n: number) => `Earlier batches (${n})`,
 		emptyBody: 'Create one from Review cleanup.',
 		created: (d: string) => `Created on ${d}`,
 		reread: 'Read again',
@@ -567,6 +568,35 @@ export const en: Strings = {
 		body: 'It is built in a later phase. There is no active feature here right now.'
 	},
 	settings: {
+		mine: {
+			title: 'My data',
+			hint: 'Your plays and notes, matching decisions, «Keep», dismissed suggestions, play time history and settings: what the stores cannot give back. It does not carry your connections or cleanup batches.',
+			export: 'Export my data',
+			import: 'Import my data',
+			exported: 'Your data was exported.',
+			importTitle: 'Replace your data with this file?',
+			importBody: (date: string) =>
+				`File exported on ${date}. It replaces your current data, it does not add to it. A copy of what you have now is saved first in the backups folder. Connections and the synced library do not change.`,
+			counts: {
+				plays: (n: number) => (n === 1 ? '1 play' : `${n} plays`),
+				relations: (n: number) => (n === 1 ? '1 matching decision' : `${n} matching decisions`),
+				keeps: (n: number) => (n === 1 ? '1 wish to keep' : `${n} wishes to keep`),
+				dismissed: (n: number) =>
+					n === 1 ? '1 dismissed suggestion' : `${n} dismissed suggestions`,
+				snapshots: (n: number) => (n === 1 ? '1 play time snapshot' : `${n} play time snapshots`),
+				settings: (n: number) => (n === 1 ? '1 setting' : `${n} settings`)
+			},
+			confirm: 'Replace my data',
+			imported: 'Your data was imported.',
+			errors: {
+				not_ours: 'This file is not a CrossShelf data export.',
+				too_new: 'This file comes from a newer version of CrossShelf. Update the app first.',
+				bad_path: 'The path is not valid.',
+				bad_extension: 'The file must be .json.',
+				io: 'The file could not be read or written.',
+				internal: 'Something failed inside the app. Your data did not change.'
+			}
+		},
 		about: 'About',
 		version: 'Version',
 		clearFailed: 'The data could not be deleted. Close and reopen the app and try again.',

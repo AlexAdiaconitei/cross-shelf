@@ -184,6 +184,78 @@ pub fn export_data(
     Ok(table.rows.len())
 }
 
+/// Largest user data file read on import: far above any real one, and a guard against a wrong pick.
+const USERDATA_MAX_BYTES: u64 = 64 * 1024 * 1024;
+
+fn userdata_call<T>(r: Result<T, crate::userdata::UserDataError>) -> Result<T, String> {
+    r.map_err(|e| {
+        log::warn!("user data refused: {}", e.code());
+        e.code().to_string()
+    })
+}
+
+/// Reads and parses a user data file the user picked in the open dialog.
+fn userdata_read(path: &str) -> Result<crate::userdata::UserData, String> {
+    let path = std::path::Path::new(path);
+    if !path.is_absolute() || path.extension().is_none_or(|e| e != "json") {
+        return Err("bad_path".into());
+    }
+    let size = std::fs::metadata(path).map_err(|_| "io")?.len();
+    if size > USERDATA_MAX_BYTES {
+        return Err("not_ours".into());
+    }
+    let text = std::fs::read_to_string(path).map_err(|_| "not_ours")?;
+    userdata_call(crate::userdata::parse(&text))
+}
+
+/// Ajustes › My data › Export: writes the user data file to a path picked in the save dialog.
+#[tauri::command]
+pub fn userdata_export(
+    db: State<'_, AppDb>,
+    path: String,
+) -> Result<crate::userdata::UserDataSummary, String> {
+    let path = std::path::PathBuf::from(path);
+    crate::export::check_destination(&path, "json").map_err(|e| e.to_string())?;
+    let data = {
+        let conn = db.0.lock().map_err(|_| "internal".to_string())?;
+        userdata_call(crate::userdata::export(&conn, crate::now_secs() as i64))?
+    };
+    let body = serde_json::to_string_pretty(&data).map_err(|_| "internal".to_string())?;
+    crate::export::write_atomic(&path, &body).map_err(|e| e.to_string())?;
+    log::info!("user data exported");
+    Ok(crate::userdata::summary(&data))
+}
+
+/// What a user data file would bring in, shown before the user confirms the import.
+#[tauri::command]
+pub fn userdata_preview(path: String) -> Result<crate::userdata::UserDataSummary, String> {
+    Ok(crate::userdata::summary(&userdata_read(&path)?))
+}
+
+/// Replaces the user data with the file's, after copying the user file to the backups folder.
+#[tauri::command]
+pub fn userdata_import(
+    app: AppHandle,
+    db: State<'_, AppDb>,
+    path: String,
+) -> Result<crate::userdata::UserDataSummary, String> {
+    let data = userdata_read(&path)?;
+    let backups = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|_| "internal".to_string())?
+        .join("backups");
+    let mut conn = db.0.lock().map_err(|_| "internal".to_string())?;
+    let (summary, _) = userdata_call(crate::userdata::import_with_backup(
+        &mut conn,
+        &data,
+        &backups,
+        crate::now_secs() as i64,
+    ))?;
+    log::info!("user data imported");
+    Ok(summary)
+}
+
 /// Opens the app's local data folder in the file explorer.
 #[tauri::command]
 pub fn data_open_folder(app: AppHandle) -> Result<(), String> {

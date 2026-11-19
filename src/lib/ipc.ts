@@ -7,6 +7,7 @@ import type { ExportWhat } from '#lib/bindings/ExportWhat.ts';
 import type { LibraryEntry } from '#lib/bindings/LibraryEntry.ts';
 import type { Settings } from '#lib/bindings/Settings.ts';
 import type { SyncStatus } from '#lib/bindings/SyncStatus.ts';
+import type { UserDataSummary } from '#lib/bindings/UserDataSummary.ts';
 import type { WishlistEntry } from '#lib/bindings/WishlistEntry.ts';
 import type { BatchView } from '#lib/bindings/BatchView.ts';
 import type { DiaryRow } from '#lib/bindings/DiaryRow.ts';
@@ -46,6 +47,11 @@ export const ipc = {
 	exportData: (what: ExportWhat, format: ExportFormat, path: string) =>
 		invoke<number>('export_data', { what, format, path }),
 	openDataFolder: () => invoke<void>('data_open_folder'),
+	/** Ajustes › My data. Never carries connections, secrets or cleanup batches. */
+	userdataExport: (path: string) => invoke<UserDataSummary>('userdata_export', { path }),
+	userdataPreview: (path: string) => invoke<UserDataSummary>('userdata_preview', { path }),
+	/** Replaces the user data with the file's, after a copy of the current one. */
+	userdataImport: (path: string) => invoke<UserDataSummary>('userdata_import', { path }),
 	clearCache: () => invoke<void>('data_clear_cache'),
 	plans: () => invoke<BatchView[]>('plans_list'),
 	planCreate: (store: string, accountId: string, nativeIds: string[]) =>

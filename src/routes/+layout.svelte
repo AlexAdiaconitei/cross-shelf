@@ -50,8 +50,12 @@
 		saveSidebarOpen(open);
 	}
 
+	/** Resultados has no item of its own: it lives under Revisar limpieza (plan 0.3.0, 2.7). */
 	const isCurrent = (href: string) =>
-		href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href);
+		href === '/'
+			? page.url.pathname === '/'
+			: page.url.pathname.startsWith(href) ||
+				(href === '/limpieza' && page.url.pathname.startsWith('/resultados'));
 
 	/** One block per store: library size and whether its data can be trusted as shown. */
 	const storeBlocks = $derived(

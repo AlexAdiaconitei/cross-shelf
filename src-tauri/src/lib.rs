@@ -20,6 +20,7 @@ mod secrets;
 mod shape;
 mod steam;
 mod sync;
+mod userdata;
 mod writers;
 
 use std::sync::Mutex;
@@ -152,6 +153,9 @@ pub fn run() {
             app_commands::settings_set,
             app_commands::export_data,
             app_commands::data_open_folder,
+            app_commands::userdata_export,
+            app_commands::userdata_preview,
+            app_commands::userdata_import,
             app_commands::data_clear_cache,
             app_commands::review_list,
             app_commands::review_decide,
