@@ -341,9 +341,14 @@ pub fn open(path: &Path) -> Result<Connection, DbError> {
     conn.pragma_update(None, "temp_store", "MEMORY")?;
     // User writes are rare and irreplaceable; the cache trades that for speed on big syncs.
     conn.pragma_update(Some("main"), "synchronous", "FULL")?;
-    attach_cache(&mut conn, &cache_path(path))?;
+    let rebuilt = attach_cache(&mut conn, &cache_path(path))?;
     let from = version(&conn, "main")?;
     migrate(&mut conn, Some(path))?;
+    if rebuilt {
+        // The stores read as never synced, so the views ask for a sync instead of showing an
+        // empty library as if it were up to date.
+        conn.execute("UPDATE main.connection SET last_sync_at = NULL", [])?;
+    }
     if from > 0 && from < SPLIT_VERSION {
         // Give back the space the synced tables took in the user file, once.
         conn.execute_batch("VACUUM main;")?;
@@ -351,14 +356,15 @@ pub fn open(path: &Path) -> Result<Connection, DbError> {
     Ok(conn)
 }
 
-fn attach_cache(conn: &mut Connection, path: &Path) -> Result<(), DbError> {
+/// Attaches the cache file. Returns true when it had to be set aside and rebuilt empty.
+fn attach_cache(conn: &mut Connection, path: &Path) -> Result<bool, DbError> {
     match try_attach(conn, path) {
-        Ok(()) => Ok(()),
+        Ok(()) => Ok(false),
         Err(e) => {
             log::warn!("cache database unusable, rebuilding it: {e}");
             let _ = conn.execute_batch("DETACH DATABASE cache;");
             set_aside(path)?;
-            try_attach(conn, path)
+            try_attach(conn, path).map(|()| true)
         }
     }
 }

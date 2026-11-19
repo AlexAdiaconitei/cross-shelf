@@ -377,7 +377,14 @@ pub fn import_with_backup(
     now: i64,
 ) -> Result<(UserDataSummary, PathBuf), UserDataError> {
     std::fs::create_dir_all(backups)?;
-    let copy = backups.join(format!("crossshelf-before-import-{now:012}.db"));
+    // `VACUUM INTO` refuses an existing file: a second import in the same second gets a suffix.
+    let copy = (0..)
+        .map(|n| match n {
+            0 => backups.join(format!("crossshelf-before-import-{now:012}.db")),
+            n => backups.join(format!("crossshelf-before-import-{now:012}-{n}.db")),
+        })
+        .find(|p| !p.exists())
+        .unwrap_or_default();
     c.execute("VACUUM main INTO ?1", [copy.to_string_lossy().as_ref()])?;
     Ok((import(c, d)?, copy))
 }

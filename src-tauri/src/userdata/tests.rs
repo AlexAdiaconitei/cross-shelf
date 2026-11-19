@@ -181,3 +181,15 @@ fn importing_copies_the_user_file_first() {
         .unwrap();
     assert_eq!(n, 1, "the copy holds the data from before the import");
 }
+
+#[test]
+fn two_imports_in_the_same_second_both_keep_their_copy() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut c = crate::db::open(&dir.path().join("t.db")).unwrap();
+    let data = export(&filled(), 1).unwrap();
+    let backups = dir.path().join("backups");
+    let a = import_with_backup(&mut c, &data, &backups, 500).unwrap().1;
+    let b = import_with_backup(&mut c, &data, &backups, 500).unwrap().1;
+    assert_ne!(a, b);
+    assert!(a.exists() && b.exists());
+}

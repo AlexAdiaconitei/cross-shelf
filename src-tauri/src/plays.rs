@@ -130,15 +130,39 @@ fn check(store: &str, state: &str) -> Result<(), PlayError> {
     Ok(())
 }
 
-/// Creates a play or moves it: to the top of `state`, or just ahead of `before` (store, id) when that card is
-/// in `state`. Dates follow the move: entering `playing` sets `started_at` once, entering
-/// `completed` sets `finished_at`, leaving it clears it; `since` changes only with the state.
+/// Where a card goes inside its state.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Place<'a> {
+    Top,
+    /// Just ahead of this card (store, id); the top when it is not in the state.
+    Before(&'a str, &'a str),
+    End,
+}
+
+/// Creates a play or moves it: to the top of `state`, or just ahead of `before` (store, id) when
+/// that card is in `state`. The tests' shorthand for [`set_at`].
+#[cfg(test)]
 pub fn set(
     c: &mut Connection,
     store: &str,
     native_id: &str,
     state: &str,
     before: Option<(&str, &str)>,
+    now: i64,
+) -> Result<(), PlayError> {
+    let place = before.map_or(Place::Top, |(s, i)| Place::Before(s, i));
+    set_at(c, store, native_id, state, place, now)
+}
+
+/// Creates a play or moves it to `place` in `state`. Dates follow the move: entering `playing`
+/// sets `started_at` once, entering `completed` sets `finished_at`, leaving it clears it; `since`
+/// changes only with the state.
+pub fn set_at(
+    c: &mut Connection,
+    store: &str,
+    native_id: &str,
+    state: &str,
+    place: Place<'_>,
     now: i64,
 ) -> Result<(), PlayError> {
     check(store, state)?;
@@ -177,13 +201,19 @@ pub fn set(
             Ok((r.get(0)?, r.get(1)?, r.get(2)?))
         })?
         .collect::<Result<_, _>>()?;
-    let at = before
-        .and_then(|(bs, bi)| others.iter().position(|(s, id, _)| s == bs && id == bi))
-        .unwrap_or(0);
+    let at = match place {
+        Place::Top => 0,
+        Place::Before(bs, bi) => others
+            .iter()
+            .position(|(s, id, _)| s == bs && id == bi)
+            .unwrap_or(0),
+        Place::End => others.len(),
+    };
     let position = match (at.checked_sub(1).map(|i| others[i].2), others.get(at)) {
         (Some(prev), Some((_, _, next))) => (prev + next) / 2.0,
         (None, Some((_, _, next))) => next - 1.0,
-        (_, None) => 1.0,
+        (Some(prev), None) => prev + 1.0,
+        (None, None) => 1.0,
     };
 
     tx.execute(

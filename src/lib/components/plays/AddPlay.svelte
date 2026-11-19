@@ -25,6 +25,8 @@
 	} = $props();
 
 	let q = $state('');
+	// The highlighted row. Only real pointer movement changes it: a list that opens under a
+	// resting pointer must not steal the row Enter would add.
 	let active = $state(0);
 	const matches = $derived(addable(library, plays, q));
 
@@ -76,7 +78,7 @@
 						type="button"
 						tabindex="-1"
 						onclick={() => add(m, 'backlog')}
-						onmouseenter={() => (active = i)}
+						onmousemove={() => (active = i)}
 					>
 						<Cover title={m.title ?? m.native_id} store={m.store as Store} src={m.image_url} />
 						<span class="t">{m.title ?? tr.library.untitled(m.native_id)}</span>
@@ -116,7 +118,7 @@
 		list-style: none;
 		background: var(--color-page);
 		border: 2px solid var(--color-border-strong);
-		box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+		box-shadow: var(--shadow-overlay);
 	}
 	.pop button {
 		width: 100%;

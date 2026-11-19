@@ -37,10 +37,17 @@ with the evidence in front of you and never without your confirmation.
   store ID, shared catalog or only the title. You decide «It is the same», «They are different» or
   «Keep». Nothing is marked just because it looks alike.
 - **Batches you review and confirm.** The app removes the chosen wishes and checks each one by
-  reading the wishlist again. Results keeps what happened to every entry.
+  reading the wishlist again. Earlier batches, reached from Review cleanup, keep what happened to
+  every entry.
+- **Play log.** Note what you are playing, what is waiting and what you have finished, on a board,
+  a list or a diary ordered by when you last played. Hours and last session come from Steam; from
+  the play time, the app suggests moving a game, and nothing changes without your click.
+- **Time in each game sheet**, per store, with a link to search the game on HowLongToBeat. The app
+  never asks HowLongToBeat anything.
 - **Steam family access** always marked as such, with who shares it. It does not count as yours in
   the cleanup unless you turn it on.
-- **Export** of library and wishlists to CSV or JSON.
+- **Export** of library and wishlists to CSV or JSON, and **My data** (plays, notes, decisions,
+  settings) to a file you can import on another computer.
 - **English and Spanish**, switchable in Settings.
 
 > [!NOTE]
@@ -84,14 +91,18 @@ Requires Windows 10 22H2 or 11, 64-bit. When a new version is out, the app offer
 | Wishlist             | Yes      | Yes            | No: opens the Epic website |
 | Remove or add wishes | From app | From app       | Not available              |
 | Covers               | Yes      | Yes            | Yes                        |
+| Play time            | Yes      | Not yet        | Not yet                    |
 
 «From app» means the app removes the wishes of a confirmed batch and checks each one by reading the
 wishlist again. It is validated with real accounts on Steam and GOG
-([records](docs/validation/), in Spanish).
+([records](docs/validation/), in Spanish). Play time from GOG and Epic is built but waits for the
+same check with real accounts; until then the sheet says the store does not give it.
 
 ## Privacy
 
-- Everything is stored only on your computer, in `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\`.
+- Everything is stored only on your computer, in `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\`:
+  your own data in `crossshelf.db` (copied every day to `backups\`, the last seven kept) and what
+  the stores send in `crossshelf-cache.db`, which a sync rebuilds.
 - Sessions are stored encrypted with Windows data protection.
 - No telemetry and no CrossShelf account. The app only talks to Steam, GOG and Epic, and covers load
   from each store's website.

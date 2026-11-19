@@ -64,7 +64,9 @@
 				? s.loading
 				: l.state === 'error'
 					? s.error(storeName(l.store))
-					: s.notGiven(storeName(l.store));
+					: l.state === 'none'
+						? s.noHours(storeName(l.store))
+						: s.notGiven(storeName(l.store));
 </script>
 
 <section class="time" aria-label={s.time}>
@@ -76,12 +78,14 @@
 		<dd>{total.last === null ? tr.plays.noTime : ago(total.last, now)}</dd>
 		<dt>{s.byStore}</dt>
 		<dd>
-			{#each lines as l, i (l.store)}{#if i > 0}<span class="sep" aria-hidden="true">
-						·
-					</span>{/if}<span class:muted={l.state !== 'time'} class:err={l.state === 'error'}
-					>{#if l.state === 'time'}{storeName(l.store)}
-					{/if}{lineText(l)}</span
-				>{/each}
+			<!-- One line per store, as flex items: the formatter cannot eat the spaces between them. -->
+			<ul class="stores">
+				{#each lines as l (l.store)}
+					<li class:muted={l.state !== 'time'} class:err={l.state === 'error'}>
+						{l.state === 'time' ? `${storeName(l.store)} ${lineText(l)}` : lineText(l)}
+					</li>
+				{/each}
+			</ul>
 		</dd>
 	</dl>
 	<div class="hltb">
@@ -134,7 +138,17 @@
 	.err {
 		color: var(--color-warning);
 	}
-	.sep {
+	.stores {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 6px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.stores li + li::before {
+		content: '·';
+		margin-right: 6px;
 		color: var(--color-muted);
 	}
 	.hltb {

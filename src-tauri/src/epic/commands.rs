@@ -496,7 +496,7 @@ pub struct EpicPlaytimeCheck {
     pub matched: usize,
     pub shape: crate::shape::ShapeReport,
     /// The most played library items, title and hours, to compare with the Epic launcher.
-    pub top: Vec<(Option<String>, f64)>,
+    pub top: Vec<(Option<String>, Option<f64>)>,
 }
 
 /// Validation tool for Epic play time (`docs/validation/epic-playtime.md`): reads it once, says
@@ -531,7 +531,7 @@ pub async fn epic_diag_playtime(
                 )
                 .ok()
                 .flatten();
-            (title, r.minutes.unwrap_or(0) as f64 / 60.0)
+            (title, r.minutes.map(|m| m as f64 / 60.0))
         })
         .collect();
     Ok(EpicPlaytimeCheck {

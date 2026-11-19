@@ -63,6 +63,7 @@
 
 <style>
 	.card {
+		min-width: 0;
 		background: var(--color-page);
 		border: 1px solid var(--color-border);
 		cursor: grab;

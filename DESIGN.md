@@ -45,7 +45,17 @@ Claro y oscuro siguen al sistema; `[data-theme]` fuerza uno. En oscuro, Epic pas
   de tienda comparten alto (34 px) y borde. Los select tienen un ancho máximo.
 - **InfoTip**: la información secundaria (origen de los datos, explicaciones, ayudas) va detrás
   de un icono con tooltip; en ámbar cuando avisa de algo. En pantalla solo queda lo que se usa.
-- **Ficha lateral** (`DetailPanel`): la misma en Biblioteca y Wishlists.
+- **Ficha lateral** (`DetailPanel`): la misma en Biblioteca, Wishlists y Mis partidas. Debajo de la
+  ficha técnica, el campo «Partida» (estado y nota) y el bloque «Tiempo» (total, última sesión,
+  horas por tienda y «Buscar en HowLongToBeat»). Lo que una tienda no da se dice («GOG no lo da»),
+  nunca se pinta como 0.
+- **Tarjeta de partida**: carátula mediana, título, horas y última sesión en negrita tabular
+  («13 h · hace 3 días»), línea de fecha, nota, pestañas de tienda pequeñas y menú «Mover a…».
+  Sin barras de progreso.
+- **Bandeja de sugerencias**: caja con borde de 2 px sobre `next-wash`, plegable, encima del
+  tablero. Cada sugerencia con su botón amarillo («A Jugando») y descartar. Es el siguiente paso.
+- **Estado deducido** (Diario): botón punteado sobre `next-wash` con «¿Jugando?»; el estado de una
+  partida es un select con borde de tinta.
 - **Logo**: kit de marca en `src/lib/assets/brand/`; `small-on-dark` en el raíl plegado y
   `horizontal-on-dark` abierto. Iconos de la app desde `cross-shelf-tauri/` del kit.
 - Iconos: Tabler, trazo 1,75.
@@ -60,6 +70,14 @@ Claro y oscuro siguen al sistema; `[data-theme]` fuerza uno. En oscuro, Epic pas
 - Biblioteca: tabla densa y virtualizada; al elegir una fila se abre la ficha técnica a la derecha
   (440 px). La tabla esconde columnas por anchura de su contenedor, no de la ventana.
 - Revisar limpieza: deseado y lo que ya tienes en dos mitades, sello de veredicto, lote fijo abajo.
+  Resultados no tiene entrada propia en la barra: se llega desde «Lotes anteriores (N)» en la
+  cabecera de Revisar limpieza, que queda marcada mientras se está en Resultados.
+- Mis partidas: pestañas Tablero · Lista · Diario. El tablero tiene cinco columnas iguales,
+  «Jugando» con cabecera en tinta; cada columna hace scroll por dentro. Al arrastrar, la columna
+  destino se recuadra y una línea de tinta de 3 px marca dónde cae la tarjeta (debajo de la última si
+  se suelta en el hueco). Por debajo de 880 px de
+  ancho útil, el tablero se ve como lista. El Diario agrupa por última actividad (esta semana,
+  este mes, hace tiempo, sin fecha) con «+X h» de la semana en verde.
 
 ## Movimiento
 

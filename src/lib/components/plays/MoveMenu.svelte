@@ -34,6 +34,8 @@
 
 <style>
 	.mv {
+		flex: 0 1 120px;
+		min-width: 0;
 		height: 28px;
 		max-width: 120px;
 		padding: 0 4px;

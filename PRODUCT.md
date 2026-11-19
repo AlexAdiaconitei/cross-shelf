@@ -32,11 +32,13 @@ confirmado. Distingue propiedad, acceso familiar de Steam y accesos temporales.
 ## Operating Context
 
 - Primera pantalla al abrir: la biblioteca unificada con buscador.
-- Vistas: Biblioteca, Wishlists, Revisar limpieza, Resultados, Conexiones, Ajustes
+- Vistas: Biblioteca, Wishlists, Mis partidas, Revisar limpieza (con Resultados dentro),
+  Conexiones, Ajustes
   (`docs/crossshelf-build-prompt.md` §9.1).
 - Bibliotecas de miles de entradas; lista virtualizada.
-- Feature futura, no implementada: vista para marcar juegos en curso, pendientes y completados
-  (forma abierta: kanban o listas). El layout debe dejarle sitio.
+- Mis partidas (0.3.0): tablero, lista y diario para marcar juegos en curso, pendientes y
+  completados, con tiempo jugado y sugerencias que la persona acepta o descarta. HowLongToBeat solo
+  como enlace.
 
 ## Capabilities and Constraints
 

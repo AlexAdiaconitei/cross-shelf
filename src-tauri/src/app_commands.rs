@@ -202,9 +202,9 @@ fn userdata_read(path: &str) -> Result<crate::userdata::UserData, String> {
     }
     let size = std::fs::metadata(path).map_err(|_| "io")?.len();
     if size > USERDATA_MAX_BYTES {
-        return Err("not_ours".into());
+        return Err("too_big".into());
     }
-    let text = std::fs::read_to_string(path).map_err(|_| "not_ours")?;
+    let text = std::fs::read_to_string(path).map_err(|_| "io")?;
     userdata_call(crate::userdata::parse(&text))
 }
 
@@ -546,8 +546,9 @@ pub fn plays_list(db: State<'_, AppDb>) -> Result<Vec<crate::plays::PlayView>, S
     with_db(&db, crate::plays::list)
 }
 
-/// Creates or moves a play: to the top of `state`, or ahead of `before` in that state. Returns
-/// the whole list so the board redraws from one answer.
+/// Creates or moves a play: to the top of `state`, ahead of `before` in that state, or to its
+/// end when `end` is set (a drop below the last card). Returns the whole list so the board
+/// redraws from one answer.
 #[tauri::command]
 pub fn play_set(
     db: State<'_, AppDb>,
@@ -555,16 +556,21 @@ pub fn play_set(
     native_id: String,
     state: String,
     before: Option<ProductId>,
+    end: Option<bool>,
 ) -> Result<Vec<crate::plays::PlayView>, String> {
+    use crate::plays::Place;
+    let place = match (&before, end) {
+        (Some(b), _) => Place::Before(&b.store, &b.native_id),
+        (None, Some(true)) => Place::End,
+        (None, _) => Place::Top,
+    };
     play_call(&db, |c| {
-        crate::plays::set(
+        crate::plays::set_at(
             c,
             &store,
             &native_id,
             &state,
-            before
-                .as_ref()
-                .map(|b| (b.store.as_str(), b.native_id.as_str())),
+            place,
             crate::now_secs() as i64,
         )?;
         Ok(crate::plays::list(c)?)

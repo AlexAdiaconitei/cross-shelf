@@ -29,7 +29,8 @@ requests need HTTP.
   cut-corner store tabs, Steam cyan, GOG magenta and yellow primary action.
 - The hero introduces the unified game library (“All your games. One library.”); wishlist cleanup
   is presented as an additional feature.
-- The screenshot selector shows the library, wishlist review and connections. All screenshots
+- The screenshot selector shows the library, wishlist review, connections and the Play log board.
+  A section of its own presents Play log with the diary screenshot. All screenshots
   render the actual Svelte UI with real games and official cover artwork, using simulated accounts,
   ownership and wishlists. They do not use the local
   application database, store sessions or personal library. Each image has an example-data banner.
@@ -122,7 +123,7 @@ pnpm exec prettier --write gh-pages/assets
 
 Set `APP_URL` if Vite uses a different address. The capture script injects an allowlisted,
 read-only mock of the Tauri IPC into an isolated browser profile. Unrecognised commands fail;
-the Rust backend is never started. It captures library, game detail, review and connections at
+the Rust backend is never started. It captures library, game detail, review, connections and Play log (board and diary) at
 1440 × 900 in both languages, and extracts the app’s store logos and Tabler navigation icons.
 The real titles, Steam product pages and artwork URLs are recorded in
 [`scripts/games.json`](scripts/games.json). The script downloads the portrait artwork from Steam’s

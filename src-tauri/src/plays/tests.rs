@@ -239,3 +239,20 @@ fn before_names_a_card_by_store_and_id() {
         .collect();
     assert_eq!(keys, ["gog:1", "steam:2", "steam:1"]);
 }
+
+#[test]
+fn a_card_can_go_to_the_end_of_its_state() {
+    let mut c = db();
+    put(&mut c, "1", "backlog", None, 10);
+    put(&mut c, "2", "backlog", None, 11);
+    set_at(&mut c, "steam", "3", "backlog", Place::End, 12).unwrap();
+    assert_eq!(order(&c, "backlog"), ["2", "1", "3"]);
+    set_at(&mut c, "steam", "2", "backlog", Place::End, 13).unwrap();
+    assert_eq!(order(&c, "backlog"), ["1", "3", "2"]);
+    set_at(&mut c, "steam", "4", "paused", Place::End, 14).unwrap();
+    assert_eq!(
+        order(&c, "paused"),
+        ["4"],
+        "the end of an empty state is its top"
+    );
+}

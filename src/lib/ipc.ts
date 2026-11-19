@@ -67,9 +67,9 @@ export const ipc = {
 	/** Puts the failed entries of a finished batch back to pending; send them with planExecute. */
 	planRetry: (batchId: string) => invoke<BatchView>('plan_retry', { batchId }),
 	plays: () => invoke<PlayView[]>('plays_list'),
-	/** Creates or moves a play: top of `state`, or just ahead of `before` in it. */
-	playSet: (store: string, nativeId: string, state: PlayState, before?: ProductId) =>
-		invoke<PlayView[]>('play_set', { store, nativeId, state, before: before ?? null }),
+	/** Creates or moves a play: top of `state`, just ahead of `before` in it, or its end. */
+	playSet: (store: string, nativeId: string, state: PlayState, before?: ProductId, end = false) =>
+		invoke<PlayView[]>('play_set', { store, nativeId, state, before: before ?? null, end }),
 	playNote: (store: string, nativeId: string, note: string) =>
 		invoke<void>('play_note', { store, nativeId, note }),
 	playRemove: (store: string, nativeId: string) => invoke<void>('play_remove', { store, nativeId }),

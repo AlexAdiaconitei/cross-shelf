@@ -10,6 +10,7 @@ import {
 	diaryGroup,
 	diaryGroups,
 	diarySummary,
+	dropPlace,
 	hltbUrl,
 	hours,
 	playsTab,
@@ -161,6 +162,9 @@ describe('diarySummary', () => {
 		]);
 		expect(s).toEqual({ weekMinutes: 90, inProgress: 2, toConfirm: 1 });
 	});
+	it('does not claim zero hours this week when no week is known', () => {
+		expect(diarySummary([row('1', 'playing', null, null)]).weekMinutes).toBeNull();
+	});
 	it('groups rows by last activity, in group order, leaving empty groups out', () => {
 		const old = { ...row('5', null, null, null), last_activity: NOW - 40 * DAY };
 		const none = { ...row('6', null, null, null), last_activity: null };
@@ -197,6 +201,18 @@ describe('sheet time', () => {
 			{ store: 'gog', state: 'not_given', minutes: null }
 		]);
 	});
+	it('tells a store that gives hours but has none for this game apart from one that never does', () => {
+		const lines = storeTimes(
+			[
+				{ store: 'steam', native_id: 'family' },
+				{ store: 'epic', native_id: 'e' }
+			],
+			[t('steam', 'family', null)],
+			['steam'],
+			{}
+		);
+		expect(lines.map((l) => l.state)).toEqual(['none', 'not_given']);
+	});
 	it('shows GOG loading, failing or answering once it is validated', () => {
 		const p = [{ store: 'gog', native_id: 'g' }];
 		expect(storeTimes(p, [], ['gog'], {})[0]!.state).toBe('loading');
@@ -227,5 +243,23 @@ describe('sheet time', () => {
 		expect(hltbUrl('Hades II: Deluxe & Co')).toBe(
 			'https://howlongtobeat.com/?q=Hades%20II%3A%20Deluxe%20%26%20Co'
 		);
+	});
+});
+
+describe('dropPlace', () => {
+	const col = ['a', 'b', 'c'];
+	it('drops ahead of a card from its upper half and behind it from its lower half', () => {
+		expect(dropPlace(col, 1, false, 'x')).toEqual({ before: 'b' });
+		expect(dropPlace(col, 1, true, 'x')).toEqual({ before: 'c' });
+	});
+	it('drops at the end below the last card or below every card', () => {
+		expect(dropPlace(col, 2, true, 'x')).toEqual({ end: true });
+		expect(dropPlace(col, null, true, 'x')).toEqual({ end: true });
+		expect(dropPlace([], null, true, 'x')).toEqual({ end: true });
+	});
+	it('skips the dragged card itself, so dropping a card next to itself keeps its place', () => {
+		expect(dropPlace(col, 0, true, 'b')).toEqual({ before: 'c' });
+		expect(dropPlace(col, 1, false, 'b')).toEqual({ before: 'c' });
+		expect(dropPlace(col, 1, true, 'c')).toEqual({ end: true });
 	});
 });

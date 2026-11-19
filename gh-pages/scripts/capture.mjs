@@ -136,6 +136,66 @@ const connections = stores.map((provider) => ({
 					: wishlist.filter((w) => w.store === provider).length
 	}))
 }));
+// Play log: dates relative to the moment of the capture, so «3 days ago» stays true on the image.
+const today = Math.floor(Date.now() / 1000);
+const day = 86400;
+const heldStore = (i) => (i < 5 || i === 7 || i === 10 ? 'steam' : stores[i % 3]);
+const hoursOf = (i) =>
+	({ 0: 0, 1: 5380, 2: 640, 3: 8200, 4: 1210, 6: 2410, 10: 380, 12: 3900 })[i] ?? null;
+const daysAgo = { 1: 4, 2: 45, 3: 90, 4: 2, 6: 1, 10: 6, 12: 20 };
+const lastOf = (i) => (daysAgo[i] === undefined ? null : today - day * daysAgo[i]);
+const playRows = [
+	[6, 'playing', 'Path of Pain left'],
+	[1, 'playing', ''],
+	[8, 'backlog', ''],
+	[0, 'backlog', ''],
+	[2, 'paused', 'Back after the holidays'],
+	[12, 'completed', ''],
+	[3, 'completed', ''],
+	[5, 'dropped', '']
+];
+const plays = playRows.map(([i, state, note], position) => ({
+	product: product(titles[i], i, heldStore(i)),
+	state,
+	position,
+	since: today - day * (10 + position * 7),
+	started_at: state === 'backlog' ? null : today - day * (40 + position * 9),
+	finished_at: state === 'completed' ? today - day * (20 + position) : null,
+	note,
+	in_library: true,
+	minutes: hoursOf(i),
+	last_activity: lastOf(i)
+}));
+const suggestions = [4, 10].map((i) => ({
+	product: product(titles[i], i, heldStore(i)),
+	target: 'playing',
+	reason: 'played_recently',
+	current: null,
+	last_activity: lastOf(i)
+}));
+const weekOf = { 6: 380, 1: 240, 4: 150, 10: 90 };
+const diary = [...playRows.map(([i]) => i), 4, 10]
+	.map((i) => {
+		const play = plays.find((p) => p.product.title === titles[i]);
+		return {
+			product: product(titles[i], i, heldStore(i)),
+			minutes: hoursOf(i),
+			last_activity: lastOf(i),
+			week_minutes: weekOf[i] ?? null,
+			state: play?.state ?? null,
+			deduced: play ? null : 'playing'
+		};
+	})
+	.sort((a, b) => (b.last_activity ?? 0) - (a.last_activity ?? 0));
+const playtime = library.map((e) => {
+	const i = titles.indexOf(e.title);
+	return {
+		store: e.store,
+		native_id: e.native_id,
+		minutes: e.store === 'steam' ? hoursOf(i) : null,
+		last_played: e.store === 'steam' ? lastOf(i) : null
+	};
+});
 const browser = await Browser.launch();
 try {
 	for (const language of ['en', 'es']) {
@@ -149,7 +209,17 @@ try {
 			review_list: review,
 			connections_list: connections,
 			plans_list: [],
-			settings_get: { language, include_family_in_cleanup: false, show_covers: true },
+			settings_get: {
+				language,
+				include_family_in_cleanup: false,
+				show_covers: true,
+				plays_tab: 'board'
+			},
+			plays_list: plays,
+			suggestions_list: suggestions,
+			diary_list: diary,
+			playtime_of: playtime,
+			playtime_stores: ['steam'],
 			sync_status_list: stores.map((store) => ({
 				store,
 				account_id: `example-${store}`,
@@ -164,9 +234,16 @@ try {
 			window.__SCREENSHOT_BANNER__ = ${JSON.stringify({ en: en.landing.exampleBanner, es: es.landing.exampleBanner })};
 			localStorage.setItem('crossshelf.lang', ${JSON.stringify(language)});
 			localStorage.setItem('crossshelf.sidebar', 'open');
-			window.__TAURI_INTERNALS__ = { invoke: async (command) => {
-				const data = ${JSON.stringify(fixtures)};
+			window.__FIXTURES__ = ${JSON.stringify(fixtures)};
+			window.__TAURI_INTERNALS__ = { invoke: async (command, args) => {
+				const data = window.__FIXTURES__;
 				if (!(command in data)) throw new Error('Screenshot fixture does not support: ' + command);
+				// Like the backend: one answer per product asked, nothing else.
+				if (command === 'playtime_of')
+					return args.products.map((p) =>
+						data.playtime_of.find((t) => t.store === p.store && t.native_id === p.native_id) ??
+						{ ...p, minutes: null, last_played: null }
+					);
 				return structuredClone(data[command]);
 			} };
 		`
@@ -179,13 +256,16 @@ try {
 					if (document.getElementById('splash')) return false;
 					if (path === '/') return !!document.querySelector('.shelf-row');
 					if (path === '/conexiones') return document.querySelectorAll('.ficha').length === 3;
+					if (path === '/partidas') return !!document.querySelector('.board .card');
 					return document.querySelector('main')?.textContent.includes('Hades');
 				}, route);
 				if (ready) break;
 				await new Promise((resolve) => setTimeout(resolve, 200));
 			}
 			if (!ready)
-				throw new Error(`App did not finish rendering ${route}: ${page.consoleErrors.join('\n')}`);
+				throw new Error(
+					`App did not finish rendering ${route}: ${page.consoleErrors.join('\n')} ${await page.eval(() => document.body.innerText.slice(0, 300))}`
+				);
 			await page.eval(async () => {
 				await document.fonts.ready;
 				const banner = document.createElement('div');
@@ -198,6 +278,11 @@ try {
 				document.body.append(banner);
 			});
 			if (name === 'detail') await page.eval(() => document.querySelector('.shelf-row').click());
+			if (name === 'diary') {
+				// The third tab of Play log; its label is translated, its position is not.
+				await page.eval(() => document.querySelectorAll('.toolbar .segmented .control')[2].click());
+				await new Promise((resolve) => setTimeout(resolve, 400));
+			}
 			await page.eval(async () => {
 				await Promise.all([...document.images].map((image) => image.decode()));
 				await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -230,6 +315,8 @@ try {
 		await shot('detail', '/');
 		await shot('review', '/limpieza');
 		await shot('connections', '/conexiones');
+		await shot('plays', '/partidas');
+		await shot('diary', '/partidas');
 	}
 } finally {
 	await browser.close();

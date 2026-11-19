@@ -11,8 +11,20 @@ the matching `## [X.Y.Z]` section, and CI refuses a tag without one.
 
 ### Added
 
-- Bilingual GitHub Pages landing in `gh-pages/`, with English by default, the app's design and icons, real game artwork in simulated libraries, attribution notices and an author profile. The hero links directly to the latest Windows installer and its release notes when available.
+- Bilingual GitHub Pages landing in `gh-pages/`, with English by default, the app's design and icons, real game artwork in simulated libraries, attribution notices and an author profile. The hero links directly to the latest Windows installer and its release notes when available. A Play log section and screenshots of its board and diary show what you are playing, with hours from Steam.
 - Independent Pages deployment only for changes inside `gh-pages/` on `main`, plus local preview, screenshot generation, browser checks and an English maintenance README.
+- Play log, a new view in the sidebar: note what you are playing, what is waiting, what you paused, finished or dropped, for any game of your library in any store. See it as a board, a list or a diary. Move games by dragging them, with a line that shows where each card will land, with the menu on each card or with Alt + arrow keys. Add a game by searching your library, or from its sheet. The view you chose is remembered.
+- Play time from Steam: each game's hours and last session, read in the same sync with no extra request. Cards and the diary show them; the diary adds what you played this week. Play time from Epic and GOG is built but stays off until it is checked with real accounts; until then the game sheet says «Epic does not give it» and «GOG does not give it».
+- Suggestions above the board, from your play time: a game you played in the last two weeks can go to Playing, and one you have not touched in a month can go to Paused. Nothing moves until you accept; a dismissed suggestion does not come back.
+- A Time block in each game sheet with the total, the last session and the hours per store, and a link to search the game on HowLongToBeat. The app does not ask HowLongToBeat anything.
+- A Play field in the game sheet (Library, Wishlists and Play log) with the state and a short note, and a tag with the state on Library rows.
+- Settings → My data: export your plays, notes, matching decisions, «Keep», dismissed suggestions, play time history and settings to a JSON file, and import it on another computer. Importing replaces your data after saving a copy of it. Connections, sessions and cleanup batches are never exported.
+- A daily copy of your own data, keeping the last seven, in the `backups` folder.
+
+### Changed
+
+- Your own data and what the stores send now live in two files. Updating moves the synced data to the new cache file by itself: there is no need to sync again. Deleting the synced data in Settings no longer touches anything you decided.
+- Results leaves the sidebar. Reach it from Review cleanup («Earlier batches»), or after confirming a batch, and go back with «Review cleanup».
 
 ## [0.2.0] - 2026-11-18
 

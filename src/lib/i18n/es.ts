@@ -33,6 +33,7 @@ export const es = {
 		viewLibrary: 'Biblioteca',
 		viewReview: 'Revisar wishlists',
 		viewConnections: 'Conexiones',
+		viewPlays: 'Mis partidas',
 		previewLabel: 'Elegir una captura de la app',
 		libraryAlt:
 			'Biblioteca de demostración de CrossShelf: juegos reales agrupados entre Steam, GOG y Epic, con propiedad simulada y acceso familiar por separado.',
@@ -43,6 +44,10 @@ export const es = {
 		libraryCaption: 'Busca una vez. Ve cada tienda, tus copias y el acceso familiar de Steam.',
 		reviewCaption: 'Compara el deseado con tu copia. Revisa la edición y elige qué mantener.',
 		connectionsCaption: 'Conecta en la página oficial de cada tienda y sincroniza desde la app.',
+		playsAlt:
+			'Tablero de Mis partidas de ejemplo: juegos reales en las columnas Jugando, Pendiente, En pausa, Completado y Abandonado, con horas simuladas y una bandeja de sugerencias encima.',
+		playsCaption:
+			'Tablero, lista o diario. Arrastra cada juego a su columna; las horas vienen de Steam.',
 		owned: 'Propio',
 		family: 'Acceso familiar',
 		wished: 'En la wishlist',
@@ -52,6 +57,12 @@ export const es = {
 		cleanupPoint: 'Nada sale de una wishlist hasta que revisas y confirmas el lote.',
 		cleanupAlt:
 			'Revisión de demostración de CrossShelf con juegos reales, deseados y copias propias simulados y la opción de mantener un deseado.',
+		playTitle: 'Sabe a qué estás jugando.',
+		playBody:
+			'Apunta qué juegas, qué tienes pendiente y qué has terminado, esté en la tienda que esté. El diario ordena tus juegos por la última vez que jugaste y suma las horas de la semana.',
+		playPoint: 'Las sugerencias salen de tu tiempo jugado, y nada se mueve sin tu clic.',
+		diaryAlt:
+			'Diario de ejemplo: juegos reales agrupados por última sesión, con horas simuladas, las horas de esta semana y estados por confirmar.',
 		howTitle: 'De tres tiendas a una vista.',
 		howBody: 'Sin API keys ni terminal. Instala la app y usa las cuentas que ya tienes.',
 		stepConnect: 'Conecta tus tiendas',
@@ -66,11 +77,12 @@ export const es = {
 		localTitle: 'Tu colección vive en tu PC.',
 		localBody:
 			'Sin cuenta de CrossShelf ni telemetría. Tu biblioteca se queda en tu equipo y las sesiones se guardan cifradas con la protección de datos de Windows.',
-		localDetail: 'Exporta tu biblioteca y tus wishlists a CSV o JSON cuando quieras.',
+		localDetail:
+			'Exporta tu biblioteca y tus wishlists a CSV o JSON, y tus partidas y decisiones a un fichero que puedes importar en otro equipo.',
 		faqTitle: 'Antes de instalar.',
 		faqStores: '¿Qué funciona con cada tienda?',
 		faqStoresBody:
-			'Lee tus bibliotecas de Steam, GOG y Epic y el acceso familiar de Steam. Lee y limpia las wishlists de Steam y GOG. Para la wishlist de Epic, la app abre la web de la tienda; la lectura y la eliminación no están disponibles en la app.',
+			'Lee tus bibliotecas de Steam, GOG y Epic y el acceso familiar de Steam. Lee y limpia las wishlists de Steam y GOG. Para la wishlist de Epic, la app abre la web de la tienda; la lectura y la eliminación no están disponibles en la app. Las horas jugadas vienen de Steam; las de GOG y Epic llegarán cuando se validen con cuentas reales.',
 		faqFamily: '¿El acceso familiar cuenta como tener un juego?',
 		faqFamilyBody:
 			'Se marca por separado y no cuenta para la limpieza por defecto. Puedes incluirlo en Ajustes, donde sigue siendo un motivo aparte para revisar un deseado.',
@@ -184,6 +196,7 @@ export const es = {
 			lastSession: 'Última sesión',
 			byStore: 'Por tienda',
 			notGiven: (store: string) => `${store} no lo da`,
+			noHours: (store: string) => `${store}: sin horas todavía`,
 			loading: 'Cargando…',
 			error: (store: string) => `No se pudo consultar ${store}`,
 			hltb: 'Buscar en HowLongToBeat',
@@ -600,6 +613,7 @@ export const es = {
 				bad_path: 'La ruta no es válida.',
 				bad_extension: 'El fichero tiene que ser .json.',
 				io: 'No se pudo leer o escribir el fichero.',
+				too_big: 'El fichero es demasiado grande para ser una exportación de CrossShelf.',
 				internal: 'Algo falló dentro de la app. Tus datos no han cambiado.'
 			}
 		},

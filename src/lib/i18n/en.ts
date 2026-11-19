@@ -34,6 +34,7 @@ export const en: Strings = {
 		viewLibrary: 'Library',
 		viewReview: 'Wishlist review',
 		viewConnections: 'Connections',
+		viewPlays: 'Play log',
 		previewLabel: 'Choose an app screenshot',
 		libraryAlt:
 			'CrossShelf demo library: real games grouped across Steam, GOG and Epic, with simulated ownership and Steam family access shown separately.',
@@ -44,6 +45,9 @@ export const en: Strings = {
 		libraryCaption: 'Search once. See every store, your own copies and Steam family access.',
 		reviewCaption: 'Compare the wish with your copy. Check the edition and choose what to keep.',
 		connectionsCaption: 'Connect on each store’s official sign-in page, then sync from the app.',
+		playsAlt:
+			'Example Play log board: real games in Playing, Backlog, Paused, Completed and Dropped columns, with simulated hours and a tray of suggestions above.',
+		playsCaption: 'Board, list or diary. Drag each game to its column; hours come from Steam.',
 		owned: 'Owned',
 		family: 'Family access',
 		wished: 'Wishlisted',
@@ -53,6 +57,12 @@ export const en: Strings = {
 		cleanupPoint: 'Nothing leaves a wishlist until you review and confirm the batch.',
 		cleanupAlt:
 			'CrossShelf demo review showing real games with simulated wishlist entries, owned copies and the option to keep a wish.',
+		playTitle: 'Know what you are playing.',
+		playBody:
+			'Note what you are playing, what is waiting and what you have finished, whichever store it is in. The diary orders your games by the last time you played and adds up the week’s hours.',
+		playPoint: 'Suggestions come from your play time, and nothing moves until you click.',
+		diaryAlt:
+			'Example diary: real games grouped by last session, with simulated hours, this week’s hours and states to confirm.',
 		howTitle: 'From scattered to sorted.',
 		howBody: 'No API keys or terminal. Install the app and use the accounts you already have.',
 		stepConnect: 'Connect your stores',
@@ -67,11 +77,12 @@ export const en: Strings = {
 		localTitle: 'Your shelf lives on your PC.',
 		localBody:
 			'No CrossShelf account. No telemetry. Your library stays on your computer, and saved sessions are encrypted with Windows data protection.',
-		localDetail: 'Export your library and wishlists to CSV or JSON whenever you want.',
+		localDetail:
+			'Export your library and wishlists to CSV or JSON, and your plays and decisions to a file you can import on another computer.',
 		faqTitle: 'Before you install.',
 		faqStores: 'What works with each store?',
 		faqStoresBody:
-			'Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean Steam and GOG wishlists. For Epic wishlists, the app opens the store website; reading and removal are not available in the app.',
+			'Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean Steam and GOG wishlists. For Epic wishlists, the app opens the store website; reading and removal are not available in the app. Hours played come from Steam; GOG and Epic hours will follow once they are checked with real accounts.',
 		faqFamily: 'Does family access count as owning a game?',
 		faqFamilyBody:
 			'Family access is labelled separately and excluded from cleanup by default. You can include it in Settings, where it remains a separate reason to review a wish.',
@@ -185,6 +196,7 @@ export const en: Strings = {
 			lastSession: 'Last session',
 			byStore: 'By store',
 			notGiven: (store: string) => `${store} does not give it`,
+			noHours: (store: string) => `${store}: no hours yet`,
 			loading: 'Loading…',
 			error: (store: string) => `${store} could not be reached`,
 			hltb: 'Search on HowLongToBeat',
@@ -594,6 +606,7 @@ export const en: Strings = {
 				bad_path: 'The path is not valid.',
 				bad_extension: 'The file must be .json.',
 				io: 'The file could not be read or written.',
+				too_big: 'The file is too big to be a CrossShelf export.',
 				internal: 'Something failed inside the app. Your data did not change.'
 			}
 		},

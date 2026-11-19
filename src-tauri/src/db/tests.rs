@@ -430,6 +430,12 @@ fn real_v7_database_migrates_without_losing_rows() {
         crate::queries::list_library(&conn).unwrap().len(),
         library_before
     );
+    // Plan 0.3.0, 4.4: measure before optimising further (warm runs, after one cold).
+    let started = std::time::Instant::now();
+    for _ in 0..5 {
+        crate::queries::list_library(&conn).unwrap();
+    }
+    println!("list_library: {:?} per call", started.elapsed() / 5);
     drop(conn); // checkpoints the WAL, so the size below is the vacuumed one
     let user_size = std::fs::metadata(&p).unwrap().len();
     assert!(user_size < before_size, "the user file gave back the space");
@@ -496,4 +502,27 @@ fn only_the_seven_newest_backups_are_kept() {
     );
     assert!(!left.iter().any(|n| n.contains(&(DAY * 2).to_string())));
     assert!(left.iter().any(|n| n.contains(&(DAY * 9).to_string())));
+}
+
+#[test]
+fn a_rebuilt_cache_makes_every_store_ask_for_a_sync() {
+    let dir = tempfile::tempdir().unwrap();
+    let p = dir.path().join("t.db");
+    {
+        let c = open(&p).unwrap();
+        c.execute(
+            "INSERT INTO connection(provider, account_id, last_sync_at) VALUES ('gog', 'g', '100')",
+            [],
+        )
+        .unwrap();
+    }
+    std::fs::write(cache_path(&p), b"broken").unwrap();
+    for suffix in ["-wal", "-shm"] {
+        let _ = std::fs::remove_file(format!("{}{suffix}", cache_path(&p).display()));
+    }
+    let conn = open(&p).unwrap();
+    let last: Option<String> = conn
+        .query_row("SELECT last_sync_at FROM connection", [], |r| r.get(0))
+        .unwrap();
+    assert_eq!(last, None, "the last sync date described the lost cache");
 }

@@ -107,7 +107,10 @@ export function diaryGroups(
 /** The diary header: hours this week, games in progress (set or deduced), states to confirm. */
 export function diarySummary(rows: DiaryRow[]) {
 	return {
-		weekMinutes: rows.reduce((a, r) => a + (r.week_minutes ?? 0), 0),
+		// Null when no game has a read from a week ago: unknown is not zero.
+		weekMinutes: rows.some((r) => r.week_minutes !== null)
+			? rows.reduce((a, r) => a + (r.week_minutes ?? 0), 0)
+			: null,
 		inProgress: rows.filter((r) => (r.state ?? r.deduced) === 'playing').length,
 		toConfirm: rows.filter((r) => !r.state && r.deduced).length
 	};
@@ -116,7 +119,8 @@ export function diarySummary(rows: DiaryRow[]) {
 /** One store's line in the sheet's «Time» block. */
 export type StoreTime = {
 	store: string;
-	state: 'time' | 'not_given' | 'loading' | 'error';
+	/** `none`: the store gives hours, but has none for this game (not synced, family access). */
+	state: 'time' | 'none' | 'not_given' | 'loading' | 'error';
 	minutes: number | null;
 };
 
@@ -145,7 +149,10 @@ export function storeTimes(
 				else if (a !== null) line = { ...line, state: 'time', minutes: a };
 			} else {
 				const m = times.find((t) => t.store === p.store && t.native_id === p.native_id)?.minutes;
-				if (m !== null && m !== undefined) line = { ...line, state: 'time', minutes: m };
+				line =
+					m !== null && m !== undefined
+						? { ...line, state: 'time', minutes: m }
+						: { ...line, state: 'none' };
 			}
 		}
 		byStore.set(p.store, line);
@@ -169,3 +176,20 @@ export function sheetTotal(lines: StoreTime[], times: ProductTime[]) {
 /** HowLongToBeat search for a title. Only a link: the app never asks HowLongToBeat anything. */
 export const hltbUrl = (title: string) =>
 	`https://howlongtobeat.com/?q=${encodeURIComponent(title)}`;
+
+/**
+ * Where a dragged card lands in a column of card keys: ahead of the card under the pointer from
+ * its upper half, behind it from its lower half, at the end below every card (`over` null). The
+ * dragged card is skipped, so dropping it next to itself keeps its place.
+ */
+export function dropPlace(
+	keys: string[],
+	over: number | null,
+	lowerHalf: boolean,
+	dragged: string
+): { before: string } | { end: true } {
+	let i = over === null ? keys.length : over + (lowerHalf ? 1 : 0);
+	while (keys[i] === dragged) i++;
+	const before = keys[i];
+	return before === undefined ? { end: true } : { before };
+}

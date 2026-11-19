@@ -38,10 +38,17 @@ evidencia delante y nunca sin que lo confirmes.
   mismo ID de tienda, catálogo común o solo el título. Tú decides «Es el mismo», «Son diferentes» o
   «Mantener». Nada se marca solo por parecerse.
 - **Lotes que revisas y confirmas.** La app quita los deseados elegidos y comprueba cada uno leyendo
-  la wishlist otra vez. Resultados guarda lo que pasó con cada entrada.
+  la wishlist otra vez. Los lotes anteriores, desde Revisar limpieza, guardan lo que pasó con cada
+  entrada.
+- **Mis partidas.** Apunta qué estás jugando, qué tienes pendiente y qué has terminado, en tablero,
+  lista o un diario ordenado por la última vez que jugaste. Las horas y la última sesión vienen de
+  Steam; con el tiempo jugado, la app sugiere mover un juego, y nada cambia sin tu clic.
+- **Tiempo en la ficha** de cada juego, por tienda, con un enlace para buscarlo en HowLongToBeat. La
+  app nunca le pide nada a HowLongToBeat.
 - **Acceso familiar de Steam** marcado siempre como tal, con quién te lo comparte. No cuenta como
   tuyo en la limpieza salvo que lo actives.
-- **Exportación** de biblioteca y wishlists a CSV o JSON.
+- **Exportación** de biblioteca y wishlists a CSV o JSON, y de **Mis datos** (partidas, notas,
+  decisiones, ajustes) a un fichero que puedes importar en otro equipo.
 
 > [!NOTE]
 > CrossShelf no instala ni abre juegos, no compra y no transfiere licencias. Quitar un deseado no
@@ -84,14 +91,18 @@ Requisitos: Windows 10 22H2 u 11 de 64 bits. Cuando hay una versión nueva, la a
 | Wishlist                 | Sí           | Sí           | No: se abre la web de Epic |
 | Quitar o añadir deseados | Desde la app | Desde la app | No disponible              |
 | Carátulas                | Sí           | Sí           | Sí                         |
+| Tiempo jugado            | Sí           | Aún no       | Aún no                     |
 
 «Desde la app» significa que la app quita los deseados de un lote confirmado y comprueba cada uno
 leyendo la wishlist otra vez. Está validado con cuentas reales en Steam y GOG
-([registros](docs/validation/)).
+([registros](docs/validation/)). El tiempo jugado de GOG y Epic está hecho, pero espera la misma
+comprobación con cuentas reales; hasta entonces la ficha dice que la tienda no lo da.
 
 ## Privacidad
 
-- Todo se guarda solo en tu equipo, en `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\`.
+- Todo se guarda solo en tu equipo, en `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\`: tus
+  datos en `crossshelf.db` (con una copia diaria en `backups\`, se guardan las siete últimas) y lo
+  que mandan las tiendas en `crossshelf-cache.db`, que se rehace sincronizando.
 - Las sesiones se guardan cifradas con la protección de datos de Windows.
 - No hay telemetría ni cuenta de CrossShelf. La app solo habla con Steam, GOG y Epic, y las
   carátulas se cargan desde la web de cada tienda.

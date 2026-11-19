@@ -90,13 +90,16 @@
 			await refreshSuggestions();
 		});
 
-	const move = (p: PlayView, state: string, before?: PlayView) =>
+	/** Moves a card: to the top of `state`, ahead of `before`, or to the end of the column. */
+	const move = (p: PlayView, state: string, place: { before?: PlayView; end?: boolean } = {}) =>
 		act(async () => {
+			const b = place.before?.product;
 			plays = await ipc.playSet(
 				p.product.store,
 				p.product.native_id,
 				state as PlayState,
-				before && { store: before.product.store, native_id: before.product.native_id }
+				b && { store: b.store, native_id: b.native_id },
+				place.end
 			);
 			await refreshSuggestions();
 		});
