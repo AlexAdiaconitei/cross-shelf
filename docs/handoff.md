@@ -144,8 +144,9 @@ pnpm lint && pnpm check && pnpm test
 cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test
 ```
 
-Datos en `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\` (`crossshelf.db`, `secrets\*.bin` cifrados
-con DPAPI, `webview\<tienda>\`). Diagnóstico: Ajustes → Diagnóstico de conexiones.
+Datos en `%LOCALAPPDATA%\com.alexadiaconitei.cross-shelf\` (`crossshelf.db` con los datos del
+usuario, `crossshelf-cache.db` con lo sincronizado, ADR 0004; `secrets\*.bin` cifrados con DPAPI,
+`webview\<tienda>\`). Diagnóstico: Ajustes → Diagnóstico de conexiones.
 
 ## 9. Mapa de ficheros
 

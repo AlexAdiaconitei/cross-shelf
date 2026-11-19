@@ -61,11 +61,14 @@ pub fn mark_disconnected(conn: &Connection, provider: &str) -> Result<(), rusqli
     Ok(())
 }
 
+/// Marks the end of a store's sync. Every sync command ends here, so this is also where SQLite
+/// gets to refresh its statistics after a large write.
 pub fn touch_sync(conn: &Connection, provider: &str, now: i64) -> Result<(), rusqlite::Error> {
     conn.execute(
         "UPDATE connection SET last_sync_at = ?2 WHERE provider = ?1",
         params![provider, now.to_string()],
     )?;
+    crate::db::optimize(conn);
     Ok(())
 }
 

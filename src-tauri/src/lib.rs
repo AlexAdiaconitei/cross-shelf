@@ -118,6 +118,12 @@ pub fn run() {
             }
             let dir = app.path().app_local_data_dir()?;
             let conn = db::open(&dir.join("crossshelf.db"))?;
+            // A missed copy must not keep the app from starting; the next launch tries again.
+            match db::daily_backup(&conn, &dir.join("backups"), now_secs() as i64) {
+                Ok(Some(_)) => log::info!("daily backup of user data written"),
+                Ok(None) => {}
+                Err(e) => log::warn!("daily backup failed: {e}"),
+            }
             app.manage(AppDb(Mutex::new(conn)));
             let ua = format!("CrossShelf/{}", app.package_info().version);
             app.manage(gog::commands::GogState::new(
@@ -180,6 +186,14 @@ pub fn run() {
             steam::commands::steam_sync,
             steam::commands::steam_disconnect
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let tauri::RunEvent::Exit = event
+                && let Some(db) = app.try_state::<AppDb>()
+                && let Ok(conn) = db.0.lock()
+            {
+                db::optimize(&conn);
+            }
+        });
 }

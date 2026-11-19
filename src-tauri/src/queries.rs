@@ -34,21 +34,30 @@ pub struct LibraryEntry {
     pub access: Vec<Access>,
 }
 
+pub(crate) const LIBRARY_SQL: &str = "SELECT e.store, e.account_id, e.native_id, p.title, COALESCE(p.kind,'unknown'),
+                COALESCE(p.windows,'unknown'), p.url, e.class, e.owners, e.exclude_reason, e.observed_at,
+                p.image_url
+         FROM entitlement e
+         JOIN connection c ON c.provider = e.store AND c.account_id = e.account_id
+         LEFT JOIN product p ON p.store = e.store AND p.native_id = e.native_id
+         ORDER BY e.store, e.account_id, e.native_id, e.class";
+
+pub(crate) const WISHLIST_SQL: &str = "SELECT w.store, w.account_id, w.native_id, p.title, p.url, w.priority, w.added_at, w.confirmed,
+                EXISTS(SELECT 1 FROM entitlement e WHERE e.account_id = w.account_id
+                       AND e.store = w.store AND e.native_id = w.native_id AND e.class = 'owned'),
+                p.image_url
+         FROM wishlist_entry w
+         JOIN connection c ON c.provider = w.store AND c.account_id = w.account_id
+         LEFT JOIN product p ON p.store = w.store AND p.native_id = w.native_id
+         ORDER BY w.store, w.priority IS NULL, w.priority, w.native_id";
+
 /// Every product with at least one right, grouped, ordered by title then id.
 pub fn list_library(conn: &Connection) -> Result<Vec<LibraryEntry>, rusqlite::Error> {
     let names: BTreeMap<String, String> = conn
         .prepare("SELECT steamid, name FROM steam_family_member")?
         .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?
         .collect::<Result<_, _>>()?;
-    let mut st = conn.prepare(
-        "SELECT e.store, e.account_id, e.native_id, p.title, COALESCE(p.kind,'unknown'),
-                COALESCE(p.windows,'unknown'), p.url, e.class, e.owners, e.exclude_reason, e.observed_at,
-                p.image_url
-         FROM entitlement e
-         JOIN connection c ON c.provider = e.store AND c.account_id = e.account_id
-         LEFT JOIN product p ON p.store = e.store AND p.native_id = e.native_id
-         ORDER BY e.store, e.account_id, e.native_id, e.class",
-    )?;
+    let mut st = conn.prepare(LIBRARY_SQL)?;
     let rows = st.query_map([], |r| {
         let owners: String = r.get(8)?;
         Ok((
@@ -126,16 +135,7 @@ pub struct WishlistEntry {
 }
 
 pub fn list_wishlist(conn: &Connection) -> Result<Vec<WishlistEntry>, rusqlite::Error> {
-    let mut st = conn.prepare(
-        "SELECT w.store, w.account_id, w.native_id, p.title, p.url, w.priority, w.added_at, w.confirmed,
-                EXISTS(SELECT 1 FROM entitlement e WHERE e.account_id = w.account_id
-                       AND e.store = w.store AND e.native_id = w.native_id AND e.class = 'owned'),
-                p.image_url
-         FROM wishlist_entry w
-         JOIN connection c ON c.provider = w.store AND c.account_id = w.account_id
-         LEFT JOIN product p ON p.store = w.store AND p.native_id = w.native_id
-         ORDER BY w.store, w.priority IS NULL, w.priority, w.native_id",
-    )?;
+    let mut st = conn.prepare(WISHLIST_SQL)?;
     let rows = st.query_map([], |r| {
         Ok(WishlistEntry {
             store: r.get(0)?,

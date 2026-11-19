@@ -174,18 +174,10 @@ pub fn data_open_folder(app: AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
-/// Deletes the synced copies (libraries, wishlists, products, sync history). Connections, their
-/// secrets and the user's own decisions stay: the next sync reads everything again.
+/// Empties the cache file (libraries, wishlists, products, play time, sync history). Connections,
+/// their secrets and everything the user decided stay: the next sync reads everything again.
 pub fn clear_synced(c: &Connection) -> Result<(), rusqlite::Error> {
-    c.execute_batch(
-        "BEGIN;
-         DELETE FROM entitlement;
-         DELETE FROM wishlist_entry;
-         DELETE FROM product;
-         DELETE FROM sync_generation;
-         UPDATE connection SET last_sync_at = NULL;
-         COMMIT;",
-    )
+    crate::db::clear_cache(c)
 }
 
 #[tauri::command]

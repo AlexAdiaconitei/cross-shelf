@@ -146,14 +146,25 @@ fn to_product(p: &ProductRef) -> Option<Product> {
     })
 }
 
-fn load_holdings(c: &Connection) -> rusqlite::Result<Vec<Held>> {
-    let mut st = c.prepare(
-        "SELECT e.store, e.native_id, p.title, COALESCE(p.kind,'unknown'), COALESCE(p.windows,'unknown'),
+pub(crate) const HOLDINGS_SQL: &str = "SELECT e.store, e.native_id, p.title, COALESCE(p.kind,'unknown'), COALESCE(p.windows,'unknown'),
                 p.url, e.class, e.owners, p.image_url
          FROM entitlement e
          JOIN connection cn ON cn.provider = e.store AND cn.account_id = e.account_id
-         LEFT JOIN product p ON p.store = e.store AND p.native_id = e.native_id",
-    )?;
+         LEFT JOIN product p ON p.store = e.store AND p.native_id = e.native_id";
+
+pub(crate) const WISHES_SQL: &str =
+    "SELECT w.account_id, w.store, w.native_id, p.title, COALESCE(p.kind,'unknown'),
+                COALESCE(p.windows,'unknown'), p.url, w.priority, w.added_at, w.observed_at,
+                k.native_id IS NOT NULL, k.reason, p.image_url
+         FROM wishlist_entry w
+         JOIN connection cn ON cn.provider = w.store AND cn.account_id = w.account_id
+         LEFT JOIN product p ON p.store = w.store AND p.native_id = w.native_id
+         LEFT JOIN wishlist_keep k ON k.account_id = w.account_id AND k.store = w.store
+                                   AND k.native_id = w.native_id
+         ORDER BY w.store, w.priority IS NULL, w.priority, w.native_id";
+
+fn load_holdings(c: &Connection) -> rusqlite::Result<Vec<Held>> {
+    let mut st = c.prepare(HOLDINGS_SQL)?;
     let rows = st.query_map([], |r| {
         let store: String = r.get(0)?;
         let id: String = r.get(1)?;
@@ -265,17 +276,7 @@ pub fn build(c: &Connection, include_family: bool) -> rusqlite::Result<Vec<Revie
         by_key.entry(h.product.key.clone()).or_default().push(i);
     }
 
-    let mut st = c.prepare(
-        "SELECT w.account_id, w.store, w.native_id, p.title, COALESCE(p.kind,'unknown'),
-                COALESCE(p.windows,'unknown'), p.url, w.priority, w.added_at, w.observed_at,
-                k.native_id IS NOT NULL, k.reason, p.image_url
-         FROM wishlist_entry w
-         JOIN connection cn ON cn.provider = w.store AND cn.account_id = w.account_id
-         LEFT JOIN product p ON p.store = w.store AND p.native_id = w.native_id
-         LEFT JOIN wishlist_keep k ON k.account_id = w.account_id AND k.store = w.store
-                                   AND k.native_id = w.native_id
-         ORDER BY w.store, w.priority IS NULL, w.priority, w.native_id",
-    )?;
+    let mut st = c.prepare(WISHES_SQL)?;
     let wishes = st
         .query_map([], |r| {
             let store: String = r.get(1)?;
