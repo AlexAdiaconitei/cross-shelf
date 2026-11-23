@@ -62,6 +62,25 @@ pub fn map_owned(games: &[Value]) -> (Vec<ProductRow>, Vec<EntitlementRow>) {
     (products, rights)
 }
 
+/// Play time of owned games, from the same `GetOwnedGames` answer: no extra request.
+/// `playtime_forever` is in minutes; `rtime_last_played` in Unix seconds, 0 when never played.
+/// A missing `playtime_forever` stays unknown, never 0.
+pub fn map_playtime(games: &[Value]) -> Vec<crate::playtime::PlaytimeRow> {
+    games
+        .iter()
+        .filter_map(|g| {
+            Some(crate::playtime::PlaytimeRow {
+                native_id: id_text(g.get("appid"))?,
+                minutes: g.get("playtime_forever").and_then(Value::as_i64),
+                last_played: g
+                    .get("rtime_last_played")
+                    .and_then(Value::as_i64)
+                    .filter(|t| *t > 0),
+            })
+        })
+        .collect()
+}
+
 /// Family-shared rights: only apps that someone other than `me` owns. Own copies stay `owned`.
 /// `exclude_reason` is kept as text, known or not.
 pub fn map_family(apps: &[Value], me: &str) -> (Vec<ProductRow>, Vec<EntitlementRow>) {
@@ -187,6 +206,31 @@ mod tests {
     use serde_json::json;
 
     const ME: &str = "76561198000000001";
+
+    fn fixture_games() -> Vec<Value> {
+        let v: Value =
+            serde_json::from_str(include_str!("../../fixtures/steam-owned-games.json")).unwrap();
+        crate::steam::api::owned_games_list(&v).unwrap()
+    }
+
+    #[test]
+    fn owned_games_give_minutes_and_last_played_and_tell_never_from_unknown() {
+        let rows = map_playtime(&fixture_games());
+        let got: Vec<_> = rows
+            .iter()
+            .map(|r| (r.native_id.as_str(), r.minutes, r.last_played))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                ("10", Some(754), Some(1794700000)),
+                ("20", Some(0), None),
+                ("30", Some(61), Some(1690000000)),
+                ("40", None, None),
+            ],
+            "0 minutes is a known zero; a missing field is unknown; rtime 0 is never played"
+        );
+    }
 
     #[test]
     fn owned_games_keep_names_and_leave_the_type_unknown() {

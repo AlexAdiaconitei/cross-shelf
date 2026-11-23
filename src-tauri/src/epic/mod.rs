@@ -5,6 +5,11 @@
 //! The Epic wishlist is not supported: the user dropped it on 2026-11-17 after the spike
 //! could not read it reliably (see docs/validation/phase-1.md). The GUI says so plainly.
 
+/// Play time is read on each sync only once `docs/validation/epic-playtime.md` records it working
+/// with a real account (AGENTS.md: no capability without its record). Until then the app says
+/// "Epic does not give it" and `epic_diag_playtime` is the way to validate it.
+pub const PLAYTIME_VALIDATED: bool = false;
+
 pub mod api;
 pub mod commands;
 pub mod sync;

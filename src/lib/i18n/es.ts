@@ -21,7 +21,7 @@ export const es = {
 		windows: 'Windows 10 / 11 · 64 bits',
 		free: 'Gratis y de código abierto',
 		heroAlt:
-			'Biblioteca de demostración de CrossShelf con Celeste y otros juegos reales, pestañas de tienda y la ficha de un juego.',
+			'Biblioteca de demostración de CrossShelf con juegos reales y la ficha de Cyberpunk 2077: su estado en Mis partidas, una nota y las horas jugadas en cada tienda.',
 		example: 'Juegos reales · biblioteca y cuentas simuladas',
 		exampleBanner: 'DATOS DE EJEMPLO · JUEGOS REALES · BIBLIOTECA SIMULADA',
 		artworkDisclaimer:
@@ -33,6 +33,7 @@ export const es = {
 		viewLibrary: 'Biblioteca',
 		viewReview: 'Revisar wishlists',
 		viewConnections: 'Conexiones',
+		viewPlays: 'Mis partidas',
 		previewLabel: 'Elegir una captura de la app',
 		libraryAlt:
 			'Biblioteca de demostración de CrossShelf: juegos reales agrupados entre Steam, GOG y Epic, con propiedad simulada y acceso familiar por separado.',
@@ -43,6 +44,10 @@ export const es = {
 		libraryCaption: 'Busca una vez. Ve cada tienda, tus copias y el acceso familiar de Steam.',
 		reviewCaption: 'Compara el deseado con tu copia. Revisa la edición y elige qué mantener.',
 		connectionsCaption: 'Conecta en la página oficial de cada tienda y sincroniza desde la app.',
+		playsAlt:
+			'Tablero de Mis partidas de ejemplo: juegos reales en las columnas Jugando, Pendiente, En pausa, Completado y Abandonado, con horas simuladas y una bandeja de sugerencias encima.',
+		playsCaption:
+			'Tablero, lista o diario. Arrastra cada juego a su columna; las horas vienen de Steam.',
 		owned: 'Propio',
 		family: 'Acceso familiar',
 		wished: 'En la wishlist',
@@ -52,6 +57,12 @@ export const es = {
 		cleanupPoint: 'Nada sale de una wishlist hasta que revisas y confirmas el lote.',
 		cleanupAlt:
 			'Revisión de demostración de CrossShelf con juegos reales, deseados y copias propias simulados y la opción de mantener un deseado.',
+		playTitle: 'Sabe a qué estás jugando.',
+		playBody:
+			'Apunta qué juegas, qué tienes pendiente y qué has terminado, esté en la tienda que esté. El diario ordena tus juegos por la última vez que jugaste y suma las horas de la semana.',
+		playPoint: 'Las sugerencias salen de tu tiempo jugado, y nada se mueve sin tu clic.',
+		diaryAlt:
+			'Diario de ejemplo: juegos reales agrupados por última sesión, con horas simuladas, las horas de esta semana y estados por confirmar.',
 		howTitle: 'De tres tiendas a una vista.',
 		howBody: 'Sin API keys ni terminal. Instala la app y usa las cuentas que ya tienes.',
 		stepConnect: 'Conecta tus tiendas',
@@ -66,11 +77,12 @@ export const es = {
 		localTitle: 'Tu colección vive en tu PC.',
 		localBody:
 			'Sin cuenta de CrossShelf ni telemetría. Tu biblioteca se queda en tu equipo y las sesiones se guardan cifradas con la protección de datos de Windows.',
-		localDetail: 'Exporta tu biblioteca y tus wishlists a CSV o JSON cuando quieras.',
+		localDetail:
+			'Exporta tu biblioteca y tus wishlists a CSV o JSON, y tus partidas y decisiones a un fichero que puedes importar en otro equipo.',
 		faqTitle: 'Antes de instalar.',
 		faqStores: '¿Qué funciona con cada tienda?',
 		faqStoresBody:
-			'Lee tus bibliotecas de Steam, GOG y Epic y el acceso familiar de Steam. Lee y limpia las wishlists de Steam y GOG. Para la wishlist de Epic, la app abre la web de la tienda; la lectura y la eliminación no están disponibles en la app.',
+			'Lee tus bibliotecas de Steam, GOG y Epic y el acceso familiar de Steam. Lee y limpia las wishlists de Steam y GOG. Para la wishlist de Epic, la app abre la web de la tienda; la lectura y la eliminación no están disponibles en la app. Las horas jugadas vienen de Steam.',
 		faqFamily: '¿El acceso familiar cuenta como tener un juego?',
 		faqFamilyBody:
 			'Se marca por separado y no cuenta para la limpieza por defecto. Puedes incluirlo en Ajustes, donde sigue siendo un motivo aparte para revisar un deseado.',
@@ -99,6 +111,7 @@ export const es = {
 		limpieza: 'Revisar limpieza',
 		limpiezaShort: 'Limpieza',
 		resultados: 'Resultados',
+		partidas: 'Mis partidas',
 		ajustes: 'Ajustes'
 	},
 	shell: {
@@ -110,6 +123,93 @@ export const es = {
 		storeFilter: 'Filtrar la biblioteca por tienda',
 		syncFailed: 'falló la última sincronización',
 		toReview: (n: number) => (n === 1 ? '1 deseado por revisar' : `${n} deseados por revisar`)
+	},
+	plays: {
+		states: {
+			playing: 'Jugando',
+			backlog: 'Pendiente',
+			paused: 'En pausa',
+			completed: 'Completado',
+			dropped: 'Abandonado'
+		},
+		stateHints: {
+			playing: 'Lo que juegas ahora',
+			backlog: 'Esperando su turno',
+			paused: 'Lo dejaste para luego',
+			completed: 'Terminado',
+			dropped: 'No vas a volver'
+		},
+		tabs: { board: 'Tablero', list: 'Lista', diary: 'Diario' },
+		tabsLabel: 'Cómo ver Mis partidas',
+		add: 'Añadir un juego de tu biblioteca',
+		addTip: 'Intro: a Pendiente · Mayús+Intro: a Jugando',
+		addNone: (q: string) => `Nada en tu biblioteca con «${q}» que no esté ya aquí.`,
+		move: (title: string) => `Mover «${title}»`,
+		remove: 'Quitar de Mis partidas',
+		keyHint: 'Alt + flechas izquierda y derecha para cambiar de columna.',
+		dropHint: 'Arrastra aquí una tarjeta.',
+		empty: 'Aún no hay partidas',
+		emptyBody:
+			'Apunta aquí qué estás jugando, qué tienes pendiente y qué has terminado. Busca un juego arriba o abre su ficha en la Biblioteca y elige un estado. Da igual en qué tienda lo tengas.',
+		started: (ago: string) => `Empezado ${ago}`,
+		finished: (ago: string) => `Terminado ${ago}`,
+		inState: (state: string, ago: string) => `${state} · ${ago}`,
+		notInLibrary: 'Ya no está en tu biblioteca',
+		noTime: '—',
+		minutes: (n: number) => `${n} min`,
+		hours: (h: string) => `${h} h`,
+		today: 'hoy',
+		suggestions: (n: number) => (n === 1 ? '1 sugerencia' : `${n} sugerencias`),
+		suggestionsFrom: 'a partir de tu tiempo jugado',
+		toState: (state: string) => `A ${state}`,
+		dismiss: (title: string) => `Descartar la sugerencia de ${title}`,
+		reasons: {
+			played_recently: (ago: string) => `Jugado ${ago}`,
+			not_played: (ago: string) => `Sin jugar desde ${ago}`
+		},
+		diary: {
+			groups: {
+				week: 'Esta semana',
+				month: 'Este mes',
+				older: 'Hace tiempo',
+				none: 'Sin fecha de sesión'
+			},
+			weekHours: 'jugadas esta semana',
+			inProgress: 'en curso',
+			toConfirm: 'por confirmar',
+			source: 'Steam da la última sesión; Epic y GOG, solo el total.',
+			lastSession: 'Última sesión',
+			total: 'Total',
+			week: 'Semana',
+			state: 'Estado',
+			stateOf: (title: string) => `Estado de ${title}`,
+			noState: 'Sin estado',
+			confirm: (state: string, title: string) => `Confirmar ${state} para ${title}`,
+			guess: (state: string) => `¿${state}?`,
+			empty: 'El diario está vacío',
+			emptyBody:
+				'Aquí aparecen los juegos que tienen partida o horas jugadas, ordenados por la última vez que los jugaste. Sincroniza tus tiendas para traer las horas.'
+		},
+		sheet: {
+			time: 'Tiempo',
+			total: 'Total',
+			lastSession: 'Última sesión',
+			byStore: 'Por tienda',
+			notGiven: (store: string) => `${store} no lo da`,
+			noHours: (store: string) => `${store}: sin horas todavía`,
+			loading: 'Cargando…',
+			error: (store: string) => `No se pudo consultar ${store}`,
+			hltb: 'Buscar en HowLongToBeat',
+			hltbHint: 'Abre su web en el navegador. La app no le pide nada.',
+			play: 'Partida',
+			noPlay: 'Sin partida',
+			note: 'Nota',
+			notePlaceholder: 'Dónde te quedaste, qué te falta…',
+			noteLeft: (n: number) => `Quedan ${n} caracteres`,
+			noteTooLong: 'La nota es demasiado larga.'
+		},
+		loadError: 'No se pudieron leer tus partidas.',
+		actionFailed: 'No se pudo guardar. Inténtalo otra vez.'
 	},
 	shelf: {
 		storesOf: (title: string) => `Tiendas de ${title}`,
@@ -382,6 +482,7 @@ export const es = {
 		intro:
 			'Cada lote confirmado, con el resultado de cada entrada. Una entrada solo cuenta como quitada cuando la app vuelve a leer la wishlist y ya no está.',
 		empty: 'Todavía no hay lotes',
+		earlier: (n: number) => `Lotes anteriores (${n})`,
 		emptyBody: 'Crea uno desde Revisar limpieza.',
 		created: (d: string) => `Creado el ${d}`,
 		reread: 'Volver a leer',
@@ -484,6 +585,38 @@ export const es = {
 		body: 'Se construye en una fase posterior. Ahora mismo no hay ninguna función activa aquí.'
 	},
 	settings: {
+		mine: {
+			title: 'Mis datos',
+			hint: 'Tus partidas y notas, decisiones de coincidencia, «Mantener», sugerencias descartadas, historial de horas y ajustes: lo que las tiendas no pueden devolverte. No lleva tus conexiones ni los lotes de limpieza.',
+			export: 'Exportar mis datos',
+			import: 'Importar mis datos',
+			exported: 'Tus datos se han exportado.',
+			importTitle: '¿Sustituir tus datos por los de este fichero?',
+			importBody: (date: string) =>
+				`Fichero exportado el ${date}. Sustituye tus datos actuales, no los suma. Antes se guarda una copia de lo que tienes ahora en la carpeta de copias. Las conexiones y la biblioteca sincronizada no cambian.`,
+			counts: {
+				plays: (n: number) => (n === 1 ? '1 partida' : `${n} partidas`),
+				relations: (n: number) =>
+					n === 1 ? '1 decisión de coincidencia' : `${n} decisiones de coincidencia`,
+				keeps: (n: number) => (n === 1 ? '1 deseado a mantener' : `${n} deseados a mantener`),
+				dismissed: (n: number) =>
+					n === 1 ? '1 sugerencia descartada' : `${n} sugerencias descartadas`,
+				snapshots: (n: number) => (n === 1 ? '1 foto de horas' : `${n} fotos de horas`),
+				settings: (n: number) => (n === 1 ? '1 ajuste' : `${n} ajustes`)
+			},
+			confirm: 'Sustituir mis datos',
+			imported: 'Tus datos se han importado.',
+			errors: {
+				not_ours: 'Este fichero no es una exportación de datos de CrossShelf.',
+				too_new:
+					'Este fichero viene de una versión más nueva de CrossShelf. Actualiza la app primero.',
+				bad_path: 'La ruta no es válida.',
+				bad_extension: 'El fichero tiene que ser .json.',
+				io: 'No se pudo leer o escribir el fichero.',
+				too_big: 'El fichero es demasiado grande para ser una exportación de CrossShelf.',
+				internal: 'Algo falló dentro de la app. Tus datos no han cambiado.'
+			}
+		},
 		about: 'Acerca de',
 		version: 'Versión',
 		clearFailed:
@@ -542,6 +675,7 @@ export const es = {
 		sync: 'Sincronizar y guardar en la base',
 		types: 'Ver tipo y nombre de una muestra (tienda)',
 		catalog: 'Ver forma del catálogo de la biblioteca',
+		playtime: 'Comprobar el tiempo jugado (validación)',
 		disconnect: 'Desconectar en este equipo',
 		connected: 'Conectado',
 		notConnected: 'Sin conectar',

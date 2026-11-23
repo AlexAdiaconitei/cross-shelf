@@ -334,6 +334,33 @@ async fn get_body(http: &reqwest::Client, url: String, bearer: &str) -> Result<S
     Ok(resp.text().await?)
 }
 
+/// Play time Epic tracked for the account: `[{accountId, artifactId, totalTime}]`, seconds.
+/// Route read from the GOG Galaxy Epic plugin (FriendsOfGalaxy/galaxy-integration-epic); it is
+/// not documented by Epic. Unvalidated until `docs/validation/epic-playtime.md` exists, so the
+/// sync only calls it when [`super::PLAYTIME_VALIDATED`] is set.
+pub async fn playtime_raw(
+    http: &reqwest::Client,
+    bearer: &str,
+    account_id: &str,
+) -> Result<Vec<serde_json::Value>, EpicError> {
+    let mut url =
+        Url::parse("https://library-service.live.use1a.on.epicgames.com/").expect("static url");
+    url.path_segments_mut()
+        .map_err(|_| EpicError::Shape("url"))?
+        .extend([
+            "library", "api", "public", "playtime", "account", account_id, "all",
+        ]);
+    parse_playtime(&get_body(http, url.to_string(), bearer).await?)
+}
+
+/// The play time list. An object (an error) is not an empty list.
+pub fn parse_playtime(body: &str) -> Result<Vec<serde_json::Value>, EpicError> {
+    match serde_json::from_str::<serde_json::Value>(body) {
+        Ok(serde_json::Value::Array(a)) => Ok(a),
+        _ => Err(EpicError::Shape("playtime")),
+    }
+}
+
 pub async fn fetch_assets(http: &reqwest::Client, bearer: &str) -> Result<Vec<Asset>, EpicError> {
     let url = format!("https://{LAUNCHER_HOST}/launcher/api/public/assets/Windows?label={LABEL}");
     parse_assets(&get_body(http, url, bearer).await?)

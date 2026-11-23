@@ -8,6 +8,11 @@
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import Cover from '#lib/components/store/Cover.svelte';
 	import DetailPanel from '#lib/components/store/DetailPanel.svelte';
+	import GameTime from '#lib/components/plays/GameTime.svelte';
+	import PlayField from '#lib/components/plays/PlayField.svelte';
+	import type { PlayView } from '#lib/bindings/PlayView.ts';
+	import type { PlayState } from '#lib/ipc.ts';
+	import { keyOf } from '#lib/plays/model.ts';
 	import StoreLogo from '#lib/components/store/StoreLogo.svelte';
 	import StoreTabs from '#lib/components/store/StoreTabs.svelte';
 	import { InfoTip, button, chip } from '#lib/components/ui/index.ts';
@@ -42,6 +47,7 @@
 
 	let entries = $state<Entry[]>([]);
 	let wishlist = $state<WishlistEntry[]>([]);
+	let plays = $state<PlayView[]>([]);
 	let status = $state<SyncStatus[]>([]);
 	let loaded = $state(false);
 	let loadFailed = $state(false);
@@ -103,6 +109,11 @@
 		];
 	}
 
+	/** State of the play on any product of a row, for the tag next to its title. */
+	const playState = $derived(new Map(plays.map((p) => [keyOf(p.product), p.state as PlayState])));
+	const playOf = (r: Shelf) =>
+		r.products.map((p) => playState.get(keyOf(p))).find((s) => s !== undefined);
+
 	const accessName = (cls: string) => tr.review.access[cls as keyof typeof tr.review.access] ?? cls;
 
 	const detailProducts = (r: Shelf) => [
@@ -121,6 +132,7 @@
 				ipc.syncStatus(),
 				ipc.wishlist().catch(() => [])
 			]);
+			plays = await ipc.plays().catch(() => []);
 		} catch {
 			loadFailed = true;
 		} finally {
@@ -296,7 +308,11 @@
 										onclick={() => (selected = selected === r.key ? null : r.key)}
 									>
 										<Cover title={r.title} store={firstStore(r)} src={coverOf(r)} />
-										<span class="shelf-title">{r.title}</span>
+										<span class="shelf-title"
+											>{r.title}{#if playOf(r)}{@const st = playOf(r)!}<span class="play-tag {st}"
+													>{tr.plays.states[st]}</span
+												>{/if}</span
+										>
 										<span class="shelf-muted wide-only">{kindName(r.kind)}</span>
 										<span class="shelf-muted wide-only"
 											>{accessLine(r)}{#if r.wishedElsewhere}<b class="text-text">
@@ -337,6 +353,8 @@
 					<dd>{s.sharedWith(sel.familyNames, sel.familyOwners.length)}</dd>
 				{/if}
 			{/snippet}
+			<PlayField products={sel.products} onchange={(p) => (plays = p)} />
+			<GameTime title={sel.title} products={sel.products} />
 			{#snippet actions()}
 				{#if sel.wishedElsewhere}
 					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}>{s.reviewThis}</a>
@@ -404,6 +422,20 @@
 	}
 	.empty p {
 		margin: 0;
+	}
+	.play-tag {
+		margin-left: 8px;
+		padding: 1px 6px;
+		border: 1px solid var(--color-border-strong);
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		vertical-align: 1px;
+	}
+	.play-tag.playing {
+		background: var(--color-accent);
+		color: var(--color-on-accent);
 	}
 	.foot {
 		padding: 12px 32px;

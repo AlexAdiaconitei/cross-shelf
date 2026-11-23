@@ -31,6 +31,7 @@
 		products,
 		onclose,
 		spec,
+		children,
 		actions
 	}: {
 		title: string;
@@ -41,6 +42,8 @@
 		products: DetailProduct[];
 		onclose: () => void;
 		spec?: Snippet;
+		/** Blocks between the spec and the products: play state, time. */
+		children?: Snippet;
 		actions?: Snippet;
 	} = $props();
 
@@ -67,6 +70,7 @@
 		</div>
 	</div>
 	{#if spec}<dl class="spec selectable">{@render spec()}</dl>{/if}
+	{@render children?.()}
 	<p class="label">{s.products}</p>
 	<ul class="prods">
 		{#each products as p (p.store + p.native_id)}

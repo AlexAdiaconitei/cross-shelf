@@ -107,7 +107,7 @@
 						height="900"
 						fetchpriority="high"
 						data-i18n-alt="heroAlt"
-						alt="CrossShelf demo library with Celeste and other real games, store tabs and a game detail panel."
+						alt="CrossShelf demo library with real games and the sheet of Cyberpunk 2077: its state in the Play log, a note and the hours played in each store."
 					/>
 					<figcaption data-i18n="example">Real games · simulated library and accounts</figcaption>
 				</figure>
@@ -159,6 +159,15 @@
 						>
 							Connections
 						</button>
+						<button
+							type="button"
+							data-view="plays"
+							aria-pressed="false"
+							data-i18n="viewPlays"
+							hidden
+						>
+							Play log
+						</button>
 					</div>
 					<div class="legend">
 						<span><i class="legend-tab solid"></i><span data-i18n="owned">Owned</span></span>
@@ -206,6 +215,31 @@
 						/>
 						<figcaption data-i18n="example">Real games · simulated library and accounts</figcaption>
 					</figure>
+				</section>
+				<section class="cleanup playlog wrap section">
+					<figure class="review-crop">
+						<img
+							data-language-image="diary"
+							src="./assets/screenshots/diary-en.webp"
+							width="1440"
+							height="900"
+							loading="lazy"
+							data-i18n-alt="diaryAlt"
+							alt="Example diary: real games grouped by last session, with simulated hours, this week’s hours and states to confirm."
+						/>
+						<figcaption data-i18n="example">Real games · simulated library and accounts</figcaption>
+					</figure>
+					<div class="cleanup-copy">
+						<h2 data-i18n="playTitle">Know what you are playing.</h2>
+						<p data-i18n="playBody">
+							Note what you are playing, what is waiting and what you have finished, whichever store
+							it is in. The diary orders your games by the last time you played and adds up the
+							week’s hours.
+						</p>
+						<p class="firm" data-i18n="playPoint">
+							Suggestions come from your play time, and nothing moves until you click.
+						</p>
+					</div>
 				</section>
 				<section id="how" class="how wrap section">
 					<div>
@@ -257,7 +291,8 @@
 							sessions are encrypted with Windows data protection.
 						</p>
 						<p class="secondary" data-i18n="localDetail">
-							Export your library and wishlists to CSV or JSON whenever you want.
+							Export your library and wishlists to CSV or JSON, and your plays and decisions to a
+							file you can import on another computer.
 						</p>
 					</div>
 				</div>
@@ -271,7 +306,7 @@
 							<p data-i18n="faqStoresBody">
 								Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean
 								Steam and GOG wishlists. For Epic wishlists, the app opens the store website;
-								reading and removal are not available in the app.
+								reading and removal are not available in the app. Hours played come from Steam.
 							</p>
 						</details>
 						<details>

@@ -18,7 +18,10 @@
 			id: 'gog',
 			name: tr.diag.gog,
 			expire: true,
-			extras: [{ label: tr.diag.sync, command: 'gog_sync' }]
+			extras: [
+				{ label: tr.diag.sync, command: 'gog_sync' },
+				{ label: tr.diag.playtime, command: 'gog_diag_playtime' }
+			]
 		},
 		{
 			id: 'steam',
@@ -33,7 +36,10 @@
 			id: 'epic',
 			name: tr.diag.epic,
 			expire: true,
-			extras: [{ label: tr.diag.catalog, command: 'epic_diag_catalog' }]
+			extras: [
+				{ label: tr.diag.catalog, command: 'epic_diag_catalog' },
+				{ label: tr.diag.playtime, command: 'epic_diag_playtime' }
+			]
 		}
 	];
 

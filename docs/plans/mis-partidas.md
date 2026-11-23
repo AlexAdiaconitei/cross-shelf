@@ -1,6 +1,9 @@
 # Plan: Mis partidas
 
-Estado: **listo para implementar** en la versión 0.3.0. Diseño validado en el prototipo de la rama
+> Ampliado por `docs/plans/0.3.0.md` (tiempo jugado, Diario, sugerencias, dos bases de datos). Donde
+> discrepen, manda ese plan; en particular, la tabla `play` va en la migración de usuario **v9**.
+
+Estado: **implementado** en la versión 0.3.0 (ver `docs/plans/0.3.0.md`). Diseño validado en el prototipo de la rama
 `prototype/ui-ficha` (`src/lib/prototype/Partidas.svelte`, variante D). Las decisiones marcadas
 como confirmadas las tomó el usuario el 18 de noviembre de 2026.
 

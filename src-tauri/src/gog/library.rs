@@ -35,6 +35,38 @@ impl ReadError {
     }
 }
 
+/// Play time Galaxy recorded for one game: `time_sum` of
+/// `gameplay.gog.com/games/{id}/users/{uid}/sessions`. Read from Heroic Games Launcher
+/// (`src/backend/storeManagers/gog/games.ts`); GOG does not document it. Unit taken as minutes
+/// until `docs/validation/gog-playtime.md` confirms it.
+pub fn parse_sessions(body: &str) -> Result<i64, ReadError> {
+    serde_json::from_str::<serde_json::Value>(body)
+        .ok()
+        .and_then(|v| v.get("time_sum").and_then(serde_json::Value::as_i64))
+        .ok_or(ReadError::Shape("sessions"))
+}
+
+/// Minutes played of one product, or `None` when GOG has no record of it (404: never played
+/// through Galaxy).
+pub async fn fetch_playtime(
+    http: &reqwest::Client,
+    user_id: &str,
+    bearer: &str,
+    product_id: &str,
+) -> Result<Option<i64>, ReadError> {
+    let mut url = url::Url::parse("https://gameplay.gog.com/").expect("static url");
+    url.path_segments_mut()
+        .map_err(|_| ReadError::Shape("url"))?
+        .extend(["games", product_id, "users", user_id, "sessions"]);
+    let resp = http.get(url).bearer_auth(bearer).send().await?;
+    match resp.status().as_u16() {
+        200 => parse_sessions(&resp.text().await?).map(Some),
+        404 => Ok(None),
+        s @ (401 | 403) => Err(ReadError::Unauthorized(s)),
+        s => Err(ReadError::Http(s)),
+    }
+}
+
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct LibraryItem {
     pub external_id: String,
@@ -267,6 +299,17 @@ pub async fn fetch_username(http: &reqwest::Client, bearer: &str) -> Result<Stri
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sessions_give_the_total_time_and_an_error_is_not_zero() {
+        assert_eq!(
+            parse_sessions(r#"{"time_sum":754,"sessions":[]}"#).unwrap(),
+            754
+        );
+        assert_eq!(parse_sessions(r#"{"time_sum":0}"#).unwrap(), 0);
+        assert!(parse_sessions(r#"{"error":"x"}"#).is_err());
+        assert!(parse_sessions("<html>").is_err());
+    }
 
     #[test]
     fn raw_wishlist_entries_keep_each_value() {

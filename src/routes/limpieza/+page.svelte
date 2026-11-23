@@ -8,10 +8,10 @@
 	import type { Decision } from '#lib/bindings/Decision.ts';
 	import type { MatchView } from '#lib/bindings/MatchView.ts';
 	import type { ReviewItem } from '#lib/bindings/ReviewItem.ts';
-	import { IconSearch } from '@tabler/icons-svelte';
+	import { IconHistory, IconSearch } from '@tabler/icons-svelte';
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import Cover from '#lib/components/store/Cover.svelte';
-	import { Button, Dialog, InfoTip, chip } from '#lib/components/ui/index.ts';
+	import { Button, Dialog, InfoTip, button, chip } from '#lib/components/ui/index.ts';
 	import type { Store } from '#lib/library/shelf.ts';
 	import { asCommandError, ipc } from '#lib/ipc.ts';
 	import { day, kindName, storeName } from '#lib/format.ts';
@@ -222,11 +222,27 @@
 	// Inline separator kept as data: the formatter trims the space before a literal «·».
 	const sep = ' · ';
 
-	onMount(load);
+	/** Earlier batches, for the secondary link to Resultados. Hidden while there are none. */
+	let batchCount = $state(0);
+
+	onMount(() => {
+		void load();
+		ipc
+			.plans()
+			.then((b) => (batchCount = b.length))
+			.catch(() => {});
+	});
 </script>
 
 <PageHeader title={tr.nav.limpieza}>
 	{#snippet info()}<InfoTip label={tr.nav.limpieza} lines={[r.intro]} />{/snippet}
+	{#snippet action()}
+		{#if batchCount > 0}
+			<a href={resolve('/resultados')} class={button({ tone: 'ghost', size: 'sm' })}
+				><IconHistory size={16} stroke={1.75} />{tr.results.earlier(batchCount)}</a
+			>
+		{/if}
+	{/snippet}
 </PageHeader>
 
 <div class="wrap">

@@ -12,4 +12,8 @@ show_covers: boolean,
 /**
  * Interface language: `en` (default) or `es`.
  */
-language: string, };
+language: string, 
+/**
+ * Last tab of Mis partidas: `board` (default), `list` or `diary`.
+ */
+plays_tab: string, };

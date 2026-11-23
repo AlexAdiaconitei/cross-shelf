@@ -503,9 +503,18 @@ pub async fn steam_sync(
         keep_raw("library", g);
     }
     let mut detail_ids = appids(owned.as_deref().unwrap_or_default());
+    let played = owned.as_deref().ok().map(super::sync::map_playtime);
     let owned = owned.map(|g| super::sync::map_owned(&g));
     let (library, library_items) =
         store_rights(&db, &me, Resource::Library, owned, &mut errors, now)?;
+    // Play time comes in the same answer; a failed library read leaves the last one.
+    if let Some(rows) = played {
+        let mut conn =
+            db.0.lock()
+                .map_err(|_| DiagError::internal("database lock poisoned"))?;
+        crate::playtime::record(&mut conn, super::sync::STORE, &me, &rows, true, now)
+            .map_err(DiagError::internal)?;
+    }
 
     // Not belonging to any group is a normal, confirmed state (spec 6.2): it clears family rights.
     let family_read = match api::family_group(&state.http, &session).await {

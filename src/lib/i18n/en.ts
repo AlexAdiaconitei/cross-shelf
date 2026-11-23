@@ -22,7 +22,7 @@ export const en: Strings = {
 		windows: 'Windows 10 / 11 · 64-bit',
 		free: 'Free & open source',
 		heroAlt:
-			'CrossShelf demo library with Celeste and other real games, store tabs and a game detail panel.',
+			'CrossShelf demo library with real games and the sheet of Cyberpunk 2077: its state in the Play log, a note and the hours played in each store.',
 		example: 'Real games · simulated library and accounts',
 		exampleBanner: 'DEMO DATA · REAL GAMES · SIMULATED LIBRARY',
 		artworkDisclaimer:
@@ -34,6 +34,7 @@ export const en: Strings = {
 		viewLibrary: 'Library',
 		viewReview: 'Wishlist review',
 		viewConnections: 'Connections',
+		viewPlays: 'Play log',
 		previewLabel: 'Choose an app screenshot',
 		libraryAlt:
 			'CrossShelf demo library: real games grouped across Steam, GOG and Epic, with simulated ownership and Steam family access shown separately.',
@@ -44,6 +45,9 @@ export const en: Strings = {
 		libraryCaption: 'Search once. See every store, your own copies and Steam family access.',
 		reviewCaption: 'Compare the wish with your copy. Check the edition and choose what to keep.',
 		connectionsCaption: 'Connect on each store’s official sign-in page, then sync from the app.',
+		playsAlt:
+			'Example Play log board: real games in Playing, Backlog, Paused, Completed and Dropped columns, with simulated hours and a tray of suggestions above.',
+		playsCaption: 'Board, list or diary. Drag each game to its column; hours come from Steam.',
 		owned: 'Owned',
 		family: 'Family access',
 		wished: 'Wishlisted',
@@ -53,6 +57,12 @@ export const en: Strings = {
 		cleanupPoint: 'Nothing leaves a wishlist until you review and confirm the batch.',
 		cleanupAlt:
 			'CrossShelf demo review showing real games with simulated wishlist entries, owned copies and the option to keep a wish.',
+		playTitle: 'Know what you are playing.',
+		playBody:
+			'Note what you are playing, what is waiting and what you have finished, whichever store it is in. The diary orders your games by the last time you played and adds up the week’s hours.',
+		playPoint: 'Suggestions come from your play time, and nothing moves until you click.',
+		diaryAlt:
+			'Example diary: real games grouped by last session, with simulated hours, this week’s hours and states to confirm.',
 		howTitle: 'From scattered to sorted.',
 		howBody: 'No API keys or terminal. Install the app and use the accounts you already have.',
 		stepConnect: 'Connect your stores',
@@ -67,11 +77,12 @@ export const en: Strings = {
 		localTitle: 'Your shelf lives on your PC.',
 		localBody:
 			'No CrossShelf account. No telemetry. Your library stays on your computer, and saved sessions are encrypted with Windows data protection.',
-		localDetail: 'Export your library and wishlists to CSV or JSON whenever you want.',
+		localDetail:
+			'Export your library and wishlists to CSV or JSON, and your plays and decisions to a file you can import on another computer.',
 		faqTitle: 'Before you install.',
 		faqStores: 'What works with each store?',
 		faqStoresBody:
-			'Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean Steam and GOG wishlists. For Epic wishlists, the app opens the store website; reading and removal are not available in the app.',
+			'Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean Steam and GOG wishlists. For Epic wishlists, the app opens the store website; reading and removal are not available in the app. Hours played come from Steam.',
 		faqFamily: 'Does family access count as owning a game?',
 		faqFamilyBody:
 			'Family access is labelled separately and excluded from cleanup by default. You can include it in Settings, where it remains a separate reason to review a wish.',
@@ -100,6 +111,7 @@ export const en: Strings = {
 		limpieza: 'Review cleanup',
 		limpiezaShort: 'Cleanup',
 		resultados: 'Results',
+		partidas: 'Play log',
 		ajustes: 'Settings'
 	},
 	shell: {
@@ -111,6 +123,93 @@ export const en: Strings = {
 		storeFilter: 'Filter the library by store',
 		syncFailed: 'the last sync failed',
 		toReview: (n: number) => (n === 1 ? '1 wish to review' : `${n} wishes to review`)
+	},
+	plays: {
+		states: {
+			playing: 'Playing',
+			backlog: 'Backlog',
+			paused: 'Paused',
+			completed: 'Completed',
+			dropped: 'Dropped'
+		},
+		stateHints: {
+			playing: 'What you are playing now',
+			backlog: 'Waiting for its turn',
+			paused: 'Left for later',
+			completed: 'Finished',
+			dropped: 'Not going back to it'
+		},
+		tabs: { board: 'Board', list: 'List', diary: 'Diary' },
+		tabsLabel: 'How to see Play log',
+		add: 'Add a game from your library',
+		addTip: 'Enter: to Backlog · Shift+Enter: to Playing',
+		addNone: (q: string) => `Nothing in your library matches «${q}» that is not here already.`,
+		move: (title: string) => `Move «${title}»`,
+		remove: 'Remove from Play log',
+		keyHint: 'Alt + left and right arrows to change column.',
+		dropHint: 'Drag a card here.',
+		empty: 'No games here yet',
+		emptyBody:
+			'Note down what you are playing, what is waiting and what you have finished. Search for a game above or open its sheet in the Library and pick a state. It does not matter which store it is in.',
+		started: (ago: string) => `Started ${ago}`,
+		finished: (ago: string) => `Finished ${ago}`,
+		inState: (state: string, ago: string) => `${state} · ${ago}`,
+		notInLibrary: 'No longer in your library',
+		noTime: '—',
+		minutes: (n: number) => `${n} min`,
+		hours: (h: string) => `${h} h`,
+		today: 'today',
+		suggestions: (n: number) => (n === 1 ? '1 suggestion' : `${n} suggestions`),
+		suggestionsFrom: 'from your play time',
+		toState: (state: string) => `To ${state}`,
+		dismiss: (title: string) => `Dismiss the suggestion for ${title}`,
+		reasons: {
+			played_recently: (ago: string) => `Played ${ago}`,
+			not_played: (ago: string) => `Not played since ${ago}`
+		},
+		diary: {
+			groups: {
+				week: 'This week',
+				month: 'This month',
+				older: 'A while ago',
+				none: 'No session date'
+			},
+			weekHours: 'played this week',
+			inProgress: 'in progress',
+			toConfirm: 'to confirm',
+			source: 'Steam gives the last session; Epic and GOG, only the total.',
+			lastSession: 'Last session',
+			total: 'Total',
+			week: 'Week',
+			state: 'State',
+			stateOf: (title: string) => `State of ${title}`,
+			noState: 'No state',
+			confirm: (state: string, title: string) => `Confirm ${state} for ${title}`,
+			guess: (state: string) => `${state}?`,
+			empty: 'The diary is empty',
+			emptyBody:
+				'Games with a play or with hours played show up here, by the last time you played them. Sync your stores to bring in the hours.'
+		},
+		sheet: {
+			time: 'Time',
+			total: 'Total',
+			lastSession: 'Last session',
+			byStore: 'By store',
+			notGiven: (store: string) => `${store} does not give it`,
+			noHours: (store: string) => `${store}: no hours yet`,
+			loading: 'Loading…',
+			error: (store: string) => `${store} could not be reached`,
+			hltb: 'Search on HowLongToBeat',
+			hltbHint: 'Opens its website in the browser. The app asks it nothing.',
+			play: 'Play',
+			noPlay: 'Not in Play log',
+			note: 'Note',
+			notePlaceholder: 'Where you left off, what is left…',
+			noteLeft: (n: number) => `${n} characters left`,
+			noteTooLong: 'The note is too long.'
+		},
+		loadError: 'Your play log could not be read.',
+		actionFailed: 'It could not be saved. Try again.'
 	},
 	shelf: {
 		storesOf: (title: string) => `Stores of ${title}`,
@@ -378,6 +477,7 @@ export const en: Strings = {
 		intro:
 			'Each confirmed batch, with the result of every entry. An entry only counts as removed when the app reads the wishlist again and it is gone.',
 		empty: 'No batches yet',
+		earlier: (n: number) => `Earlier batches (${n})`,
 		emptyBody: 'Create one from Review cleanup.',
 		created: (d: string) => `Created on ${d}`,
 		reread: 'Read again',
@@ -480,6 +580,36 @@ export const en: Strings = {
 		body: 'It is built in a later phase. There is no active feature here right now.'
 	},
 	settings: {
+		mine: {
+			title: 'My data',
+			hint: 'Your plays and notes, matching decisions, «Keep», dismissed suggestions, play time history and settings: what the stores cannot give back. It does not carry your connections or cleanup batches.',
+			export: 'Export my data',
+			import: 'Import my data',
+			exported: 'Your data was exported.',
+			importTitle: 'Replace your data with this file?',
+			importBody: (date: string) =>
+				`File exported on ${date}. It replaces your current data, it does not add to it. A copy of what you have now is saved first in the backups folder. Connections and the synced library do not change.`,
+			counts: {
+				plays: (n: number) => (n === 1 ? '1 play' : `${n} plays`),
+				relations: (n: number) => (n === 1 ? '1 matching decision' : `${n} matching decisions`),
+				keeps: (n: number) => (n === 1 ? '1 wish to keep' : `${n} wishes to keep`),
+				dismissed: (n: number) =>
+					n === 1 ? '1 dismissed suggestion' : `${n} dismissed suggestions`,
+				snapshots: (n: number) => (n === 1 ? '1 play time snapshot' : `${n} play time snapshots`),
+				settings: (n: number) => (n === 1 ? '1 setting' : `${n} settings`)
+			},
+			confirm: 'Replace my data',
+			imported: 'Your data was imported.',
+			errors: {
+				not_ours: 'This file is not a CrossShelf data export.',
+				too_new: 'This file comes from a newer version of CrossShelf. Update the app first.',
+				bad_path: 'The path is not valid.',
+				bad_extension: 'The file must be .json.',
+				io: 'The file could not be read or written.',
+				too_big: 'The file is too big to be a CrossShelf export.',
+				internal: 'Something failed inside the app. Your data did not change.'
+			}
+		},
 		about: 'About',
 		version: 'Version',
 		clearFailed: 'The data could not be deleted. Close and reopen the app and try again.',
@@ -537,6 +667,7 @@ export const en: Strings = {
 		sync: 'Sync and save to the database',
 		types: 'Show type and name of a sample (store)',
 		catalog: 'Show the shape of the library catalog',
+		playtime: 'Check play time (validation)',
 		disconnect: 'Disconnect on this computer',
 		connected: 'Connected',
 		notConnected: 'Not connected',

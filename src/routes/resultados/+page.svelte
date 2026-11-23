@@ -1,9 +1,11 @@
 <script lang="ts">
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
+	import { IconArrowLeft } from '@tabler/icons-svelte';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import type { BatchView } from '#lib/bindings/BatchView.ts';
-	import { Button, InfoTip } from '#lib/components/ui/index.ts';
+	import { Button, InfoTip, button } from '#lib/components/ui/index.ts';
 	import { errorText, productUrl, storeName, when } from '#lib/format.ts';
 	import { asCommandError, ipc } from '#lib/ipc.ts';
 	import { tr } from '#lib/i18n/index.ts';
@@ -101,6 +103,11 @@
 
 <PageHeader title={tr.nav.resultados}>
 	{#snippet info()}<InfoTip label={tr.nav.resultados} lines={[r.intro]} />{/snippet}
+	{#snippet action()}
+		<a href={resolve('/limpieza')} class={button({ tone: 'ghost', size: 'sm' })}
+			><IconArrowLeft size={16} stroke={1.75} />{tr.nav.limpieza}</a
+		>
+	{/snippet}
 </PageHeader>
 <div class="page-body">
 	{#if loadFailed}

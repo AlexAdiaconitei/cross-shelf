@@ -10,6 +10,8 @@ mod images;
 mod matching;
 mod ops;
 mod plans;
+mod plays;
+mod playtime;
 mod queries;
 mod raw;
 mod redact;
@@ -18,6 +20,7 @@ mod secrets;
 mod shape;
 mod steam;
 mod sync;
+mod userdata;
 mod writers;
 
 use std::sync::Mutex;
@@ -118,6 +121,12 @@ pub fn run() {
             }
             let dir = app.path().app_local_data_dir()?;
             let conn = db::open(&dir.join("crossshelf.db"))?;
+            // A missed copy must not keep the app from starting; the next launch tries again.
+            match db::daily_backup(&conn, &dir.join("backups"), now_secs() as i64) {
+                Ok(Some(_)) => log::info!("daily backup of user data written"),
+                Ok(None) => {}
+                Err(e) => log::warn!("daily backup failed: {e}"),
+            }
             app.manage(AppDb(Mutex::new(conn)));
             let ua = format!("CrossShelf/{}", app.package_info().version);
             app.manage(gog::commands::GogState::new(
@@ -144,6 +153,9 @@ pub fn run() {
             app_commands::settings_set,
             app_commands::export_data,
             app_commands::data_open_folder,
+            app_commands::userdata_export,
+            app_commands::userdata_preview,
+            app_commands::userdata_import,
             app_commands::data_clear_cache,
             app_commands::review_list,
             app_commands::review_decide,
@@ -154,6 +166,15 @@ pub fn run() {
             app_commands::plan_reconcile,
             app_commands::plan_discard,
             app_commands::wishlist_write_test,
+            app_commands::plays_list,
+            app_commands::play_set,
+            app_commands::play_note,
+            app_commands::play_remove,
+            app_commands::suggestions_list,
+            app_commands::suggestion_dismiss,
+            app_commands::diary_list,
+            app_commands::playtime_of,
+            app_commands::playtime_stores,
             gog::commands::gog_status,
             gog::commands::gog_connect,
             gog::commands::gog_diag_run,
@@ -161,12 +182,15 @@ pub fn run() {
             gog::commands::gog_diag_shape,
             gog::commands::gog_sync,
             gog::commands::gog_disconnect,
+            gog::commands::gog_playtime,
+            gog::commands::gog_diag_playtime,
             epic::commands::epic_status,
             epic::commands::epic_connect,
             epic::commands::epic_diag_run,
             epic::commands::epic_diag_expire,
             epic::commands::epic_diag_shape,
             epic::commands::epic_diag_catalog,
+            epic::commands::epic_diag_playtime,
             epic::commands::epic_sync,
             app_commands::plan_execute,
             app_commands::plan_cancel,
@@ -180,6 +204,14 @@ pub fn run() {
             steam::commands::steam_sync,
             steam::commands::steam_disconnect
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let tauri::RunEvent::Exit = event
+                && let Some(db) = app.try_state::<AppDb>()
+                && let Ok(conn) = db.0.lock()
+            {
+                db::optimize(&conn);
+            }
+        });
 }

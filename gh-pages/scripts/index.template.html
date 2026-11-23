@@ -142,6 +142,15 @@
 						>
 							{{viewConnections}}
 						</button>
+						<button
+							type="button"
+							data-view="plays"
+							aria-pressed="false"
+							data-i18n="viewPlays"
+							hidden
+						>
+							{{viewPlays}}
+						</button>
 					</div>
 					<div class="legend">
 						<span><i class="legend-tab solid"></i><span data-i18n="owned">{{owned}}</span></span>
@@ -184,6 +193,25 @@
 						/>
 						<figcaption data-i18n="example">{{example}}</figcaption>
 					</figure>
+				</section>
+				<section class="cleanup playlog wrap section">
+					<figure class="review-crop">
+						<img
+							data-language-image="diary"
+							src="./assets/screenshots/diary-en.webp"
+							width="1440"
+							height="900"
+							loading="lazy"
+							data-i18n-alt="diaryAlt"
+							alt="{{diaryAlt}}"
+						/>
+						<figcaption data-i18n="example">{{example}}</figcaption>
+					</figure>
+					<div class="cleanup-copy">
+						<h2 data-i18n="playTitle">{{playTitle}}</h2>
+						<p data-i18n="playBody">{{playBody}}</p>
+						<p class="firm" data-i18n="playPoint">{{playPoint}}</p>
+					</div>
 				</section>
 				<section id="how" class="how wrap section">
 					<div>

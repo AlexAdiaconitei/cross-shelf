@@ -15,6 +15,7 @@
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import Cover from '#lib/components/store/Cover.svelte';
 	import DetailPanel from '#lib/components/store/DetailPanel.svelte';
+	import PlayField from '#lib/components/plays/PlayField.svelte';
 	import StoreLogo from '#lib/components/store/StoreLogo.svelte';
 	import StoreTabs from '#lib/components/store/StoreTabs.svelte';
 	import { InfoTip, button } from '#lib/components/ui/index.ts';
@@ -344,6 +345,7 @@
 				{#if flags(sel).length}<dt>{w$.status}</dt>
 					<dd>{flags(sel).join('. ')}</dd>{/if}
 			{/snippet}
+			<PlayField products={[sel]} />
 			{#snippet actions()}
 				{#if ownedElsewhere(sel)}
 					<a href={resolve('/limpieza')} class={button({ tone: 'next' })}>{tr.shelf.reviewThis}</a>
