@@ -22,7 +22,7 @@ export const en: Strings = {
 		windows: 'Windows 10 / 11 · 64-bit',
 		free: 'Free & open source',
 		heroAlt:
-			'CrossShelf demo library with Celeste and other real games, store tabs and a game detail panel.',
+			'CrossShelf demo library with real games and the sheet of Cyberpunk 2077: its state in the Play log, a note and the hours played in each store.',
 		example: 'Real games · simulated library and accounts',
 		exampleBanner: 'DEMO DATA · REAL GAMES · SIMULATED LIBRARY',
 		artworkDisclaimer:
@@ -82,7 +82,7 @@ export const en: Strings = {
 		faqTitle: 'Before you install.',
 		faqStores: 'What works with each store?',
 		faqStoresBody:
-			'Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean Steam and GOG wishlists. For Epic wishlists, the app opens the store website; reading and removal are not available in the app. Hours played come from Steam; GOG and Epic hours will follow once they are checked with real accounts.',
+			'Read your Steam, GOG and Epic libraries, plus Steam family access. Read and clean Steam and GOG wishlists. For Epic wishlists, the app opens the store website; reading and removal are not available in the app. Hours played come from Steam.',
 		faqFamily: 'Does family access count as owning a game?',
 		faqFamilyBody:
 			'Family access is labelled separately and excluded from cleanup by default. You can include it in Settings, where it remains a separate reason to review a wish.',

@@ -146,7 +146,7 @@ const daysAgo = { 1: 4, 2: 45, 3: 90, 4: 2, 6: 1, 10: 6, 12: 20 };
 const lastOf = (i) => (daysAgo[i] === undefined ? null : today - day * daysAgo[i]);
 const playRows = [
 	[6, 'playing', 'Path of Pain left'],
-	[1, 'playing', ''],
+	[1, 'playing', 'Phantom Liberty next'],
 	[8, 'backlog', ''],
 	[0, 'backlog', ''],
 	[2, 'paused', 'Back after the holidays'],
@@ -166,6 +166,11 @@ const plays = playRows.map(([i, state, note], position) => ({
 	minutes: hoursOf(i),
 	last_activity: lastOf(i)
 }));
+const notesEs = {
+	'Path of Pain left': 'Me falta el Camino del Dolor',
+	'Phantom Liberty next': 'Luego, Phantom Liberty',
+	'Back after the holidays': 'Vuelvo después de las fiestas'
+};
 const suggestions = [4, 10].map((i) => ({
 	product: product(titles[i], i, heldStore(i)),
 	target: 'playing',
@@ -215,7 +220,10 @@ try {
 				show_covers: true,
 				plays_tab: 'board'
 			},
-			plays_list: plays,
+			plays_list: plays.map((p) => ({
+				...p,
+				note: language === 'es' ? (notesEs[p.note] ?? p.note) : p.note
+			})),
 			suggestions_list: suggestions,
 			diary_list: diary,
 			playtime_of: playtime,
@@ -277,7 +285,8 @@ try {
 					'position:fixed;bottom:0;left:0;right:0;background:#100f0d;color:white;padding:6px 16px;font:12px Arial;text-align:center;z-index:9999;letter-spacing:1px';
 				document.body.append(banner);
 			});
-			if (name === 'detail') await page.eval(() => document.querySelector('.shelf-row').click());
+			if (name === 'detail')
+				await page.eval(() => document.querySelectorAll('.shelf-row')[1].click());
 			if (name === 'diary') {
 				// The third tab of Play log; its label is translated, its position is not.
 				await page.eval(() => document.querySelectorAll('.toolbar .segmented .control')[2].click());
